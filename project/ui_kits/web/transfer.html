@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Faire un virement</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .wizard { display: grid; grid-template-columns: 240px 1fr; gap: 32px; }
+    .stepper { display: flex; flex-direction: column; gap: 4px; padding-top: 4px; }
+    .step { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; }
+    .step .num { width: 24px; height: 24px; border-radius: 999px; background: var(--bg-inset); color: var(--fg-muted); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step.active .num { background: var(--brand); color: white; }
+    .step.done .num { background: var(--success); color: white; }
+    .step .lbl { font-size: 14px; font-weight: 500; }
+    .step .sub { font-size: 12px; color: var(--fg-muted); }
+    .step.active .lbl { font-weight: 600; }
+
+    .form-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; padding: 32px; box-shadow: var(--shadow-xs); }
+    .form-section + .form-section { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .section-head { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .section-head h3 { font-size: 18px; }
+    .section-head .badge { margin-left: auto; }
+
+    .from-account {
+      display: flex; gap: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: 14px;
+      align-items: center; cursor: pointer;
+    }
+    .from-account:hover { border-color: var(--brand); }
+    .from-account .av { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 100%); }
+    .from-account .info { flex: 1; }
+    .from-account .info .name { font-weight: 600; font-size: 15px; }
+    .from-account .info .iban { font-family: var(--font-mono); font-size: 12px; color: var(--fg-muted); }
+    .from-account .bal { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 18px; letter-spacing: -0.01em; }
+
+    .benef-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+    .benef {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 14px 8px; border: 1px solid var(--border); border-radius: 14px;
+      cursor: pointer; transition: all 140ms var(--ease-out);
+    }
+    .benef:hover { border-color: var(--brand); background: var(--brand-50); }
+    .benef.selected { border-color: var(--brand); background: var(--brand-50); border-width: 2px; padding: 13px 7px; }
+    .benef-av { width: 44px; height: 44px; border-radius: 999px; background: var(--bg-inset); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: var(--fg-muted); }
+    .benef.selected .benef-av { background: var(--brand); color: white; }
+    .benef .name { font-size: 13px; font-weight: 600; text-align: center; }
+    .benef .iban { font-size: 11px; color: var(--fg-muted); font-family: var(--font-mono); }
+    .benef.add { background: var(--bg-sunken); border-style: dashed; }
+    .benef.add .benef-av { background: transparent; color: var(--brand); }
+
+    .amount-input {
+      display: flex; align-items: center; justify-content: center;
+      padding: 32px 0; border-radius: 16px; background: var(--bg-sunken); margin: 16px 0;
+    }
+    .amount-input input {
+      width: 100%; max-width: 380px; text-align: center;
+      font-family: var(--font-display); font-weight: 700; font-size: 56px; letter-spacing: -0.025em;
+      background: transparent; border: 0; outline: 0; color: var(--fg); font-variant-numeric: tabular-nums;
+    }
+    .amount-input .euro { font-family: var(--font-display); font-weight: 700; font-size: 40px; color: var(--fg-muted); margin-left: 8px; }
+    .max-link { text-align: center; font-size: 13px; color: var(--fg-muted); margin-top: -8px; }
+    .max-link b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+    .schedule-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .schedule {
+      padding: 14px; border-radius: 12px; border: 1px solid var(--border-strong);
+      cursor: pointer; transition: all 140ms var(--ease-out);
+    }
+    .schedule:hover { border-color: var(--brand); }
+    .schedule.selected { border-color: var(--brand); background: var(--brand-50); border-width: 2px; padding: 13px; }
+    .schedule .lbl { font-weight: 600; font-size: 14px; }
+    .schedule .sub { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+
+    .summary-strip {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 24px; background: var(--neutral-900); color: white;
+      border-radius: 16px; margin-top: 24px;
+    }
+    .summary-strip .what { font-size: 13px; opacity: 0.85; }
+    .summary-strip .amt { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body data-screen-label="03 Transfer">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link active" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+
+    <div class="page" style="max-width:1100px;">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Faire un virement</h1>
+          <div class="sub">En quelques secondes, vers tes bénéficiaires habituels ou un nouveau compte.</div>
+        </div>
+        <button class="btn btn-secondary"><i data-lucide="x"></i>Annuler</button>
+      </div>
+
+      <div class="wizard">
+        <div class="stepper">
+          <div class="step done"><div class="num"><i data-lucide="check" style="width:14px;height:14px;"></i></div><div><div class="lbl">Compte source</div><div class="sub">Compte courant</div></div></div>
+          <div class="step active"><div class="num">2</div><div><div class="lbl">Détails</div><div class="sub">Bénéficiaire & montant</div></div></div>
+          <div class="step"><div class="num">3</div><div><div class="lbl">Confirmer</div><div class="sub">Code SMS</div></div></div>
+        </div>
+
+        <div class="form-card">
+          <div class="form-section">
+            <div class="section-head"><h3>Depuis</h3><span class="badge brand">Modifier</span></div>
+            <div class="from-account">
+              <div class="av"></div>
+              <div class="info">
+                <div class="name">Compte courant — Sophie Martin</div>
+                <div class="iban">FR76 1234 5678 9012 3456 7892</div>
+              </div>
+              <div class="bal">12 480,57 €</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head"><h3>Vers</h3></div>
+            <div class="benef-grid">
+              <div class="benef selected">
+                <div class="benef-av">MD</div>
+                <div class="name">Marie Dubois</div>
+                <div class="iban">****4892</div>
+              </div>
+              <div class="benef">
+                <div class="benef-av">LB</div>
+                <div class="name">Lucas B.</div>
+                <div class="iban">****1147</div>
+              </div>
+              <div class="benef">
+                <div class="benef-av">EDF</div>
+                <div class="name">EDF</div>
+                <div class="iban">****0001</div>
+              </div>
+              <div class="benef add">
+                <div class="benef-av"><i data-lucide="plus" style="width:22px;height:22px;"></i></div>
+                <div class="name">Nouveau</div>
+                <div class="iban">IBAN…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head"><h3>Montant</h3></div>
+            <div class="amount-input">
+              <input value="1 250,00"><span class="euro">€</span>
+            </div>
+            <div class="max-link">Disponible · <b>12 480,57 €</b> · <a href="#" class="brand-fg" style="font-weight:600; text-decoration:none;">Tout virer</a></div>
+
+            <div class="field" style="margin-top:18px;">
+              <label>Référence pour Marie</label>
+              <input value="Loyer mai 2026" />
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head"><h3>Quand</h3></div>
+            <div class="schedule-grid">
+              <div class="schedule selected">
+                <div class="lbl">Instantané</div>
+                <div class="sub">Reçu en moins de 10 s · gratuit</div>
+              </div>
+              <div class="schedule">
+                <div class="lbl">Standard</div>
+                <div class="sub">Demain ouvré</div>
+              </div>
+              <div class="schedule">
+                <div class="lbl">Programmé</div>
+                <div class="sub">Date au choix · récurrent</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-strip">
+            <div>
+              <div class="what">Marie Dubois · Virement instantané · « Loyer mai 2026 »</div>
+              <div style="font-size:12px; opacity:0.7; margin-top:2px;">Reçu aujourd'hui · 14:36</div>
+            </div>
+            <div class="amt">1 250,00 €</div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px;">
+            <button class="btn btn-ghost">Retour</button>
+            <button class="btn btn-primary">Continuer<i data-lucide="arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body></html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Nous contacter</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .hero { background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white; border-radius: 24px; padding: 36px 40px; margin-bottom: 32px; }
+    .hero h1 { font-size: 40px; letter-spacing: -0.025em; max-width: 18ch; }
+    .hero p { font-size: 17px; opacity: 0.9; max-width: 50ch; margin-top: 8px; }
+
+    .channels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 32px; }
+    .channel {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 18px; padding: 22px;
+      cursor: pointer; transition: all 220ms var(--ease-out);
+    }
+    .channel:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: transparent; }
+    .channel .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+    .channel .icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
+    .channel h4 { font-size: 18px; margin: 14px 0 4px; }
+    .channel .desc { font-size: 14px; color: var(--fg-muted); }
+    .channel .meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--success-700); margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-weight: 600; }
+    .channel .meta::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--success); }
+    .channel.featured { background: linear-gradient(180deg, var(--brand-50), var(--bg-elev)); border-color: var(--brand-200); }
+
+    .row-2col { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+    .form-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; padding: 28px; }
+    .form-card h3 { font-size: 20px; margin-bottom: 6px; }
+    .form-card .sub { color: var(--fg-muted); font-size: 14px; margin-bottom: 18px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; }
+
+    .booking-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
+    .booking-card h3 { font-size: 18px; margin-bottom: 16px; }
+    .advisor { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--bg-sunken); border-radius: 14px; margin-bottom: 18px; }
+    .advisor .av { width: 52px; height: 52px; border-radius: 999px; background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .advisor .name { font-weight: 600; }
+    .advisor .role { font-size: 12px; color: var(--fg-muted); }
+
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calendar .dow { font-size: 11px; color: var(--fg-faint); text-align: center; padding: 6px 0; font-weight: 600; }
+    .day { aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .day:hover:not(.empty):not(.disabled) { background: var(--bg-sunken); }
+    .day.empty { visibility: hidden; }
+    .day.disabled { color: var(--fg-faint); cursor: not-allowed; }
+    .day.selected { background: var(--brand); color: white; font-weight: 700; }
+    .day.has-slot::after { content: ""; width: 4px; height: 4px; border-radius: 999px; background: var(--brand); position: absolute; transform: translate(0, 12px); }
+    .day { position: relative; }
+
+    .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 18px; }
+    .slot { padding: 10px; text-align: center; border: 1px solid var(--border-strong); border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; }
+    .slot:hover { border-color: var(--brand); color: var(--brand-700); }
+    .slot.selected { background: var(--brand); color: white; border-color: var(--brand); }
+
+    .branch { display: flex; gap: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; margin-top: 14px; align-items: flex-start; }
+    .branch .pin { width: 36px; height: 36px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  </style>
+</head>
+<body data-screen-label="08 Contact">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link active" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+    <div class="page">
+      <div class="hero">
+        <h1>Comment peut-on t'aider, Sophie&nbsp;?</h1>
+        <p>Pose ta question à notre IA, ouvre un chat avec ton conseiller, prends rendez-vous ou trouve l'agence la plus proche.</p>
+      </div>
+
+      <div class="channels">
+        <div class="channel featured">
+          <div class="icon"><i data-lucide="message-circle"></i></div>
+          <h4>Chat avec un conseiller</h4>
+          <div class="desc">Camille Lefebvre te répond en moins de 2 min en moyenne.</div>
+          <div class="meta">Disponible maintenant · 1 nouveau message</div>
+        </div>
+        <div class="channel">
+          <div class="icon"><i data-lucide="phone"></i></div>
+          <h4>Appel téléphonique</h4>
+          <div class="desc">Du lundi au samedi · 8h–20h · 3262 (gratuit).</div>
+          <div class="meta">Temps d'attente · 2 min</div>
+        </div>
+        <div class="channel">
+          <div class="icon"><i data-lucide="video"></i></div>
+          <h4>Visio avec ton conseiller</h4>
+          <div class="desc">Pour un projet immo, un crédit, une succession.</div>
+          <div class="meta">Sur rendez-vous</div>
+        </div>
+      </div>
+
+      <div class="row-2col">
+        <div class="form-card">
+          <h3>Nous laisser un message</h3>
+          <p class="sub">On te répond sous 24 h ouvrées. Pour une opération urgente, préfère le chat.</p>
+          <div class="form-row">
+            <div class="field"><label>Sujet</label><select><option>Demande d'attestation</option><option>Question sur une opération</option><option>Carte perdue ou volée</option><option>Crédit & financement</option><option>Réclamation</option></select></div>
+            <div class="field"><label>Compte concerné</label><select><option>Compte courant — ****6892</option><option>Livret A — ****2210</option><option>Aucun</option></select></div>
+          </div>
+          <div class="field" style="margin-bottom: 14px;">
+            <label>Ton message</label>
+            <textarea placeholder="Décris-nous ta demande en quelques phrases…">Bonjour, j'aurais besoin d'une attestation de domiciliation pour un dossier de location. Merci d'avance !</textarea>
+          </div>
+          <div style="display:flex; gap: 10px; align-items: center; padding: 12px 14px; background: var(--info-50); color: var(--info-700); border-radius: 10px; font-size: 13px; margin-bottom: 14px;">
+            <i data-lucide="paperclip" style="width:16px; height:16px;"></i>
+            Tu peux joindre jusqu'à 3 fichiers (PDF, image, max 10 Mo).
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button class="btn btn-secondary">Brouillon</button>
+            <button class="btn btn-primary"><i data-lucide="send"></i>Envoyer</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="booking-card">
+            <h3>Prendre rendez-vous</h3>
+            <div class="advisor">
+              <div class="av">CL</div>
+              <div>
+                <div class="name">Camille Lefebvre</div>
+                <div class="role">Ta conseillère · Agence Paris 11</div>
+              </div>
+            </div>
+            <div class="calendar">
+              <div class="dow">L</div><div class="dow">M</div><div class="dow">M</div><div class="dow">J</div><div class="dow">V</div><div class="dow">S</div><div class="dow">D</div>
+              <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day disabled">4</div><div class="day disabled">5</div>
+              <div class="day">6</div><div class="day has-slot">7</div><div class="day has-slot">8</div><div class="day has-slot">9</div><div class="day">10</div><div class="day disabled">11</div><div class="day disabled">12</div>
+              <div class="day has-slot">13</div><div class="day selected">14</div><div class="day has-slot">15</div><div class="day">16</div><div class="day has-slot">17</div><div class="day disabled">18</div><div class="day disabled">19</div>
+              <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day disabled">25</div><div class="day disabled">26</div>
+              <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div><div class="day empty"></div><div class="day empty"></div>
+            </div>
+            <div class="slots">
+              <div class="slot">09:00</div>
+              <div class="slot">10:30</div>
+              <div class="slot selected">14:00</div>
+              <div class="slot">15:30</div>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top: 14px;">Confirmer le 14 mai · 14:00</button>
+          </div>
+
+          <div class="branch">
+            <div class="pin"><i data-lucide="map-pin"></i></div>
+            <div>
+              <div style="font-weight:600;">Agence Paris 11 — Voltaire</div>
+              <div style="font-size:13px; color:var(--fg-muted); margin-top:2px;">42 bd Voltaire · 75011 Paris</div>
+              <div style="font-size:13px; color:var(--success-700); margin-top:6px; font-weight:600;">Ouverte · ferme à 19:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+  <script>lucide.createIcons();</script>
+</body></html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.card-visa {
+  width: 280px; height: 176px;
+  border-radius: 18px;
+  padding: 18px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.card-classic   { background: linear-gradient(135deg, #1c1d22, #0d0e12); }
+.card-gold      { background: linear-gradient(135deg, #d4a55a, #6b4a18); }
+.card-platinum  { background: linear-gradient(135deg, #c8cdd6, #5b6675); color:#0d0e12; }
+.card-brand     { background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); }
+.card-tier { font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; opacity:0.85; }
+.card-num { font-family: var(--font-mono); font-size:14px; letter-spacing:0.08em; }
+.card-foot { display:flex; justify-content:space-between; align-items:flex-end; }
+.card-foot small { display:block; font-size:9px; letter-spacing:0.1em; opacity:0.7; text-transform:uppercase; }
+.card-foot .name { font-weight:600; font-size:13px; letter-spacing:0.02em; text-transform:uppercase; }
+</style>
+</head>
+<body>
+<div class="frame" style="background:var(--bg-sunken);">
+  <div class="row" style="gap:14px;">
+    <div class="card-visa card-classic">
+      <div style="display:flex; justify-content:space-between; align-items:center;"><div class="card-tier">Visa Classic</div><img src="../assets/visa-white.svg" height="22" style="opacity:0.95"></div>
+      <div class="card-num">5436 •••• •••• 6892</div>
+      <div class="card-foot"><div><small>Titulaire</small><span class="name">Sophie Martin</span></div><div><small>Expire</small><span class="name">12/29</span></div></div>
+    </div>
+    <div class="card-visa card-brand">
+      <div style="display:flex; justify-content:space-between; align-items:center;"><div class="card-tier">Visa Premier</div><img src="../assets/visa-white.svg" height="22" style="opacity:0.95"></div>
+      <div class="card-num">5436 •••• •••• 4421</div>
+      <div class="card-foot"><div><small>Titulaire</small><span class="name">Sophie Martin</span></div><div><small>Expire</small><span class="name">04/30</span></div></div>
+    </div>
+  </div>
+  <div class="row" style="gap:14px; margin-top:14px;">
+    <div class="card-visa card-gold">
+      <div style="display:flex; justify-content:space-between; align-items:center;"><div class="card-tier">Visa Gold</div><img src="../assets/visa-white.svg" height="22" style="opacity:0.95"></div>
+      <div class="card-num">5436 •••• •••• 7710</div>
+      <div class="card-foot"><div><small>Titulaire</small><span class="name">Sophie Martin</span></div><div><small>Expire</small><span class="name">11/28</span></div></div>
+    </div>
+    <div class="card-visa card-platinum">
+      <div style="display:flex; justify-content:space-between; align-items:center;"><div class="card-tier" style="color:#0d0e12;">Visa Platinum</div><img src="../assets/visa.svg" height="22"></div>
+      <div class="card-num" style="color:#0d0e12;">5436 •••• •••• 0099</div>
+      <div class="card-foot"><div><small style="color:#494a52;">Titulaire</small><span class="name" style="color:#0d0e12;">Sophie Martin</span></div><div><small style="color:#494a52;">Expire</small><span class="name" style="color:#0d0e12;">07/31</span></div></div>
+    </div>
+  </div>
+</div>
+</body></html>

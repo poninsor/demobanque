@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+  font-family: var(--font-body); letter-spacing: -0.005em;
+}
+.b-success { background: var(--success-50); color: var(--success-700); }
+.b-warning { background: var(--warning-50); color: var(--warning-700); }
+.b-danger  { background: var(--danger-50);  color: var(--danger-700);  }
+.b-info    { background: var(--info-50);    color: var(--info-700);    }
+.b-neutral { background: var(--bg-inset);   color: var(--fg-muted);    }
+.b-brand   { background: var(--brand-50);   color: var(--brand-700);   }
+.b-solid   { background: var(--brand);      color: white; }
+.b-dot::before { content:""; width:6px; height:6px; border-radius:999px; background:currentColor; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="row" style="gap:8px;">
+    <span class="badge b-success b-dot">Reçu</span>
+    <span class="badge b-warning b-dot">En attente</span>
+    <span class="badge b-danger b-dot">Refusé</span>
+    <span class="badge b-info">Programmé</span>
+    <span class="badge b-neutral">Brouillon</span>
+    <span class="badge b-brand">Nouveau</span>
+    <span class="badge b-solid">PRO</span>
+  </div>
+  <div class="row" style="gap:8px; margin-top:12px;">
+    <span class="badge b-neutral">Compte courant</span>
+    <span class="badge b-neutral">Livret A</span>
+    <span class="badge b-neutral">PEL</span>
+    <span class="badge b-brand">Visa Premier</span>
+    <span class="badge b-success">Crédit auto · 3,2%</span>
+  </div>
+</div>
+</body></html>

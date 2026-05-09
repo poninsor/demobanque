@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Paramètres</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .settings-grid { display: grid; grid-template-columns: 240px 1fr; gap: 32px; }
+    .settings-nav { display: flex; flex-direction: column; gap: 4px; }
+    .settings-nav a { display: flex; gap: 12px; padding: 9px 12px; border-radius: 10px; font-size: 14px; color: var(--fg); text-decoration: none; }
+    .settings-nav a:hover { background: var(--bg-sunken); }
+    .settings-nav a.active { background: var(--brand-50); color: var(--brand-700); font-weight: 600; }
+
+    .panel { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; }
+    .panel + .panel { margin-top: 16px; }
+    .panel-head { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+    .panel-head h3 { font-size: 18px; }
+    .panel-head .sub { font-size: 13px; color: var(--fg-muted); margin-top: 4px; }
+    .panel-body { padding: 24px; }
+
+    .row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; }
+    .row + .row { border-top: 1px solid var(--border); }
+
+    .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .swatch-pick {
+      width: 44px; height: 44px; border-radius: 12px; cursor: pointer;
+      position: relative;
+      box-shadow: inset 0 0 0 0 transparent;
+    }
+    .swatch-pick.selected::after { content:""; position: absolute; inset: -4px; border-radius: 16px; border: 2px solid var(--fg); }
+
+    .upload {
+      border: 1.5px dashed var(--border-strong); border-radius: 14px; padding: 24px;
+      display: flex; gap: 14px; align-items: center;
+    }
+    .upload .preview { width: 56px; height: 56px; border-radius: 12px; background: var(--bg-inset); display: flex; align-items: center; justify-content: center; }
+    .upload .preview img { height: 32px; }
+
+    .toggle { width: 40px; height: 24px; border-radius: 999px; background: var(--brand); position: relative; cursor: pointer; }
+    .toggle::after { content:""; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 999px; background: white; transition: all 140ms var(--ease-out); }
+    .toggle.off { background: var(--neutral-200); }
+    .toggle.off::after { right: auto; left: 2px; }
+
+    .product-row { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; }
+    .product-row + .product-row { border-top: 1px solid var(--border); }
+    .product-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+
+    .preview-card {
+      margin-top: 12px;
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white;
+      border-radius: 18px; padding: 20px; display: flex; gap: 16px; align-items: center;
+    }
+    .preview-card .av { width: 44px; height: 44px; border-radius: 999px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .preview-card .greet { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+    .preview-card .sub { font-size: 13px; opacity: 0.85; }
+  </style>
+</head>
+<body data-screen-label="09 Settings">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link active" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Paramètres de démo</h1>
+          <div class="sub">White-label · personnalise la marque, le client et les produits affichés pour cette démo Genesys.</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-secondary"><i data-lucide="rotate-ccw"></i>Réinitialiser</button>
+          <button class="btn btn-primary"><i data-lucide="check"></i>Enregistrer</button>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <nav class="settings-nav">
+          <a class="active" href="#brand"><i data-lucide="palette" style="width:16px;height:16px;"></i>Marque</a>
+          <a href="#persona"><i data-lucide="user" style="width:16px;height:16px;"></i>Persona</a>
+          <a href="#balances"><i data-lucide="wallet" style="width:16px;height:16px;"></i>Soldes</a>
+          <a href="#products"><i data-lucide="grid" style="width:16px;height:16px;"></i>Produits</a>
+          <a href="#language"><i data-lucide="globe" style="width:16px;height:16px;"></i>Langue</a>
+          <div class="nav-section" style="font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--fg-faint); padding:14px 12px 6px;">Intégration</div>
+          <a href="#genesys"><i data-lucide="cloud" style="width:16px;height:16px;"></i>Genesys Cloud</a>
+        </nav>
+
+        <div>
+          <div class="panel" id="brand">
+            <div class="panel-head"><h3>Marque & logo</h3><div class="sub">Affecte instantanément l'ensemble des écrans.</div></div>
+            <div class="panel-body">
+              <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="field"><label>Nom de marque</label><input value="Démo banque"></div>
+                <div class="field"><label>Slogan (optionnel)</label><input value="Ta banque, en plus simple."></div>
+              </div>
+              <div style="margin-top:14px;">
+                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Logo</label>
+                <div class="upload">
+                  <div class="preview"><img src="../../assets/logo-mark.svg" alt=""></div>
+                  <div style="flex:1;">
+                    <div style="font-weight:600;">logo-démo-banque.svg</div>
+                    <div style="font-size:12px; color:var(--fg-muted);">SVG · 1,2 ko · format recommandé : SVG ou PNG transparent</div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm"><i data-lucide="upload"></i>Remplacer</button>
+                </div>
+              </div>
+
+              <div style="margin-top:20px;">
+                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:10px;">Couleur primaire</label>
+                <div class="swatch-row">
+                  <div class="swatch-pick selected" style="background:#FF4515;" title="Genesys Orange"></div>
+                  <div class="swatch-pick" style="background:#E5097F;" title="Magenta"></div>
+                  <div class="swatch-pick" style="background:#0066B3;" title="Bleu"></div>
+                  <div class="swatch-pick" style="background:#0A2540;" title="Marine"></div>
+                  <div class="swatch-pick" style="background:#00B388;" title="Émeraude"></div>
+                  <div class="swatch-pick" style="background:#5B2C91;" title="Violet"></div>
+                  <div class="swatch-pick" style="background:#1A1A1A;" title="Noir"></div>
+                  <div class="swatch-pick" style="background: conic-gradient(from 0deg, #ff5e5e, #ffce5e, #5eff8a, #5edcff, #c45eff, #ff5e5e); display:flex; align-items:center; justify-content:center; color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i></div>
+                </div>
+
+                <div class="preview-card">
+                  <div class="av">SM</div>
+                  <div>
+                    <div class="greet">Bonjour Sophie 👋</div>
+                    <div class="sub">Aperçu de la marque sur le tableau de bord</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="persona">
+            <div class="panel-head"><h3>Persona client</h3><div class="sub">Personnalise le client affiché pendant la démo.</div></div>
+            <div class="panel-body">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="field"><label>Prénom</label><input value="Sophie"></div>
+                <div class="field"><label>Nom</label><input value="Martin"></div>
+                <div class="field"><label>Email</label><input value="sophie.martin@example.fr"></div>
+                <div class="field"><label>Téléphone</label><input value="06 12 34 56 78"></div>
+                <div class="field"><label>Profil type</label><select><option>Particulier — salariée cadre</option><option>Jeune actif — freelance</option><option>Famille — comptes joints</option><option>Premium — patrimonial</option></select></div>
+                <div class="field"><label>Conseiller</label><select><option>Camille Lefebvre — Paris 11</option><option>Thomas Garnier — Lyon Bellecour</option></select></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="balances">
+            <div class="panel-head"><h3>Soldes des comptes</h3><div class="sub">Visibles dans les démos et le dashboard.</div></div>
+            <div class="panel-body">
+              <div class="row"><div><div style="font-weight:600;">Compte courant</div><div style="font-size:12px; color:var(--fg-muted);">****6892</div></div><div class="field" style="width:200px;"><input value="12 480,57 €"></div></div>
+              <div class="row"><div><div style="font-weight:600;">Livret A</div><div style="font-size:12px; color:var(--fg-muted);">****2210</div></div><div class="field" style="width:200px;"><input value="22 950,00 €"></div></div>
+              <div class="row"><div><div style="font-weight:600;">PEL</div><div style="font-size:12px; color:var(--fg-muted);">****0418</div></div><div class="field" style="width:200px;"><input value="0,00 €"></div></div>
+            </div>
+          </div>
+
+          <div class="panel" id="products">
+            <div class="panel-head"><h3>Produits souscrits</h3><div class="sub">Active uniquement les produits utiles pour ton scénario démo.</div></div>
+            <div class="panel-body">
+              <div class="product-row">
+                <div class="product-icon"><i data-lucide="credit-card"></i></div>
+                <div><div style="font-weight:600;">Visa Premier</div><div style="font-size:12px; color:var(--fg-muted);">Carte premium · plafond 3 000 €</div></div>
+                <div class="toggle"></div>
+              </div>
+              <div class="product-row">
+                <div class="product-icon"><i data-lucide="credit-card"></i></div>
+                <div><div style="font-weight:600;">Visa Classic</div><div style="font-size:12px; color:var(--fg-muted);">Carte standard · plafond 1 500 €</div></div>
+                <div class="toggle"></div>
+              </div>
+              <div class="product-row">
+                <div class="product-icon"><i data-lucide="banknote"></i></div>
+                <div><div style="font-weight:600;">Prêt auto</div><div style="font-size:12px; color:var(--fg-muted);">Capital restant 8 420,12 € · 3,2 % TAEG</div></div>
+                <div class="toggle"></div>
+              </div>
+              <div class="product-row">
+                <div class="product-icon"><i data-lucide="trending-up"></i></div>
+                <div><div style="font-weight:600;">Assurance-vie</div><div style="font-size:12px; color:var(--fg-muted);">Inactif pour cette démo</div></div>
+                <div class="toggle off"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="genesys">
+            <div class="panel-head" style="display:flex; align-items:flex-start; gap:14px;">
+              <div style="width:40px; height:40px; border-radius:10px; background:#fff2ec; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:6px;"><img src="../../assets/genesys.png" alt="" style="width:100%; height:100%; object-fit:contain;"></div>
+              <div style="flex:1;"><h3>Intégration Genesys Cloud</h3><div class="sub">Connecte cette démo à ton org Genesys Cloud pour activer chat, web messaging et co-browse en direct.</div></div>
+              <span class="badge" style="background:#e7faf0; color:#00723f; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:6px;"><span style="width:6px; height:6px; border-radius:999px; background:#00a35a;"></span>Connecté</span>
+            </div>
+            <div class="panel-body">
+              <div class="field" style="margin-bottom:14px;">
+                <label>Région AWS d'hébergement</label>
+                <select>
+                  <option value="https://login.mypurecloud.com">us-east-1 (Virginia) — https://login.mypurecloud.com</option>
+                  <option value="https://login.usw2.pure.cloud">us-west-2 (Oregon) — https://login.usw2.pure.cloud</option>
+                  <option value="https://login.use2.us-gov-pure.cloud">us-east-2 (Ohio, FedRAMP) — https://login.use2.us-gov-pure.cloud</option>
+                  <option value="https://login.cac1.pure.cloud">ca-central-1 (Canada) — https://login.cac1.pure.cloud</option>
+                  <option value="https://login.sae1.pure.cloud">sa-east-1 (São Paulo) — https://login.sae1.pure.cloud</option>
+                  <option value="https://login.mypurecloud.ie" selected>eu-west-1 (Ireland) — https://login.mypurecloud.ie</option>
+                  <option value="https://login.euw2.pure.cloud">eu-west-2 (London) — https://login.euw2.pure.cloud</option>
+                  <option value="https://login.mypurecloud.de">eu-central-1 (Frankfurt) — https://login.mypurecloud.de</option>
+                  <option value="https://login.euc2.pure.cloud">eu-central-2 (Zurich) — https://login.euc2.pure.cloud</option>
+                  <option value="https://login.mec1.pure.cloud">me-central-1 (UAE) — https://login.mec1.pure.cloud</option>
+                  <option value="https://login.aps1.pure.cloud">ap-south-1 (Mumbai) — https://login.aps1.pure.cloud</option>
+                  <option value="https://login.apne2.pure.cloud">ap-northeast-2 (Seoul) — https://login.apne2.pure.cloud</option>
+                  <option value="https://login.mypurecloud.jp">ap-northeast-1 (Tokyo) — https://login.mypurecloud.jp</option>
+                  <option value="https://login.mypurecloud.com.au">ap-southeast-2 (Sydney) — https://login.mypurecloud.com.au</option>
+                </select>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:6px;">L'URL de login Genesys Cloud sera utilisée pour l'OAuth implicit grant.</div>
+              </div>
+
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="field"><label>Deployment ID</label><input value="3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10" style="font-family:var(--font-mono); font-size:13px;"></div>
+                <div class="field"><label>Client ID</label><input value="a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1" style="font-family:var(--font-mono); font-size:13px;"></div>
+                <div class="field" style="grid-column: span 2;">
+                  <label>Client Secret</label>
+                  <div style="position:relative;">
+                    <input type="password" value="k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0" style="font-family:var(--font-mono); font-size:13px; padding-right:80px;">
+                    <button type="button" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:0; color:var(--fg-muted); font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px;"><i data-lucide="eye" style="width:14px;height:14px;"></i>Afficher</button>
+                  </div>
+                  <div style="font-size:12px; color:var(--fg-muted); margin-top:6px;">Stocké chiffré. Révoque depuis l'admin Genesys Cloud si le secret est compromis.</div>
+                </div>
+              </div>
+
+              <div style="margin-top:18px; padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
+                <i data-lucide="shield-check" style="width:18px;height:18px; color:var(--success-700); flex-shrink:0;"></i>
+                <span style="flex:1;">Dernière connexion OAuth réussie il y a 4 minutes · token valide jusqu'au 09 mai 2026 à 18:42.</span>
+                <button class="btn btn-secondary btn-sm"><i data-lucide="refresh-cw"></i>Tester</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" id="language">
+            <div class="panel-head"><h3>Langue & ton</h3></div>
+            <div class="panel-body">
+              <div class="row"><div><div style="font-weight:600;">Langue par défaut</div><div style="font-size:12px; color:var(--fg-muted);">Bilingue · le client peut basculer FR/EN</div></div><div style="display:flex; gap:8px;"><span class="badge brand">FR</span><span class="badge neutral">EN</span></div></div>
+              <div class="row"><div><div style="font-weight:600;">Tutoiement</div><div style="font-size:12px; color:var(--fg-muted);">Active le ton décontracté de la marque</div></div><div class="toggle"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+  <script>lucide.createIcons();</script>
+</body></html>

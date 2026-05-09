@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Design system</title>
+  <link rel="stylesheet" href="colors_and_type.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { padding: 48px 32px 80px; max-width: 1200px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+    header img { height: 40px; }
+    header .meta { margin-left: auto; font-size: 13px; color: var(--fg-muted); display: flex; gap: 8px; align-items: center; }
+    header .meta img { height: 16px; }
+
+    h1 { font-size: 56px; letter-spacing: -0.025em; margin-top: 24px; max-width: 16ch; }
+    .lede { font-size: 18px; color: var(--fg-muted); max-width: 60ch; margin-top: 12px; line-height: 1.5; }
+
+    .row-section { margin-top: 56px; }
+    .row-section h2 { font-size: 24px; letter-spacing: -0.01em; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .row-section h2 .num { font-family: var(--font-mono); font-weight: 400; font-size: 14px; color: var(--fg-faint); border: 1px solid var(--border); padding: 2px 8px; border-radius: 999px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .tile {
+      background: var(--bg-elev); border: 1px solid var(--border); border-radius: 18px;
+      padding: 22px; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 8px;
+      transition: all 220ms var(--ease-out);
+      position: relative; overflow: hidden;
+    }
+    .tile:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: transparent; }
+    .tile .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+    .tile .ic svg { width: 20px; height: 20px; stroke-width: 1.75; }
+    .tile h3 { font-size: 17px; letter-spacing: -0.01em; margin-top: 8px; }
+    .tile p { font-size: 13px; color: var(--fg-muted); }
+    .tile .tag { position: absolute; top: 14px; right: 14px; }
+
+    .tile.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%);
+      color: white; border-color: transparent;
+    }
+    .tile.featured .ic { background: rgba(255,255,255,0.15); color: white; }
+    .tile.featured p { color: rgba(255,255,255,0.85); }
+    .tile.featured h3 { font-size: 22px; }
+
+    footer.gen {
+      margin-top: 80px; padding: 20px; text-align: center;
+      font-size: 11px; color: var(--fg-faint); border-top: 1px solid var(--border);
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    footer.gen img { height: 14px; opacity: 0.7; }
+    @media (max-width: 700px) {
+      .tile.featured { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="assets/logo.svg" alt="Démo banque">
+    <span class="badge" style="background:var(--brand-50); color:var(--brand-700); padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600;">Design system</span>
+    <span class="meta"><img src="assets/genesys.png" alt=""><span>v1.0 · FR/EN · white-label</span></span>
+  </header>
+
+  <h1>Une banque <span style="color:var(--brand);">audacieuse</span>, prête pour la démo.</h1>
+  <p class="lede">Système de design white-label inspiré des néobanques françaises (Boursorama, Fortuneo, Revolut, N26) — pensé comme socle pour les démos Genesys Cloud. Personnalise marque, persona, produits et soldes en quelques clics.</p>
+
+  <section class="row-section">
+    <h2>Web — espace client <span class="num">10 écrans</span></h2>
+    <div class="grid">
+      <a class="tile featured" href="ui_kits/web/dashboard.html">
+        <div class="ic"><i data-lucide="home"></i></div>
+        <h3>Tableau de bord</h3>
+        <p>Hero patrimoine total, comptes, dernières opérations, dépenses, accès cartes — la vitrine du système.</p>
+      </a>
+      <a class="tile" href="ui_kits/web/login.html"><div class="ic"><i data-lucide="lock"></i></div><h3>Connexion</h3><p>Split-screen brand + Touch ID.</p></a>
+      <a class="tile" href="ui_kits/web/account.html"><div class="ic"><i data-lucide="wallet"></i></div><h3>Détail compte</h3><p>Opérations groupées par jour, filtres, summary.</p></a>
+      <a class="tile" href="ui_kits/web/transfer.html"><div class="ic"><i data-lucide="arrow-right-left"></i></div><h3>Faire un virement</h3><p>Wizard 3 étapes — instantané, programmé, récurrent.</p></a>
+      <a class="tile" href="ui_kits/web/cards.html"><div class="ic"><i data-lucide="credit-card"></i></div><h3>Cartes</h3><p>Visa Premier hero, plafonds, sécurité, avantages.</p></a>
+      <a class="tile" href="ui_kits/web/beneficiaries.html"><div class="ic"><i data-lucide="users"></i></div><h3>Bénéficiaires</h3><p>Favoris + organismes, IBAN, mandats SEPA.</p></a>
+      <a class="tile" href="ui_kits/web/credits.html"><div class="ic"><i data-lucide="banknote"></i></div><h3>Crédits</h3><p>Prêt en cours + offres pré-acceptées.</p></a>
+      <a class="tile" href="ui_kits/web/messages.html"><div class="ic"><i data-lucide="message-circle"></i></div><h3>Messagerie sécurisée</h3><p>Threads, composer, quick replies, attachments.</p></a>
+      <a class="tile" href="ui_kits/web/contact.html"><div class="ic"><i data-lucide="phone"></i></div><h3>Contactez-nous</h3><p>Chat, appel, visio, RDV avec calendrier.</p></a>
+      <a class="tile" href="ui_kits/web/settings.html"><div class="ic"><i data-lucide="settings"></i></div><h3>Paramètres white-label</h3><p>Marque, persona, soldes, produits — tweakable.</p></a>
+    </div>
+  </section>
+
+  <section class="row-section">
+    <h2>Mobile — application <span class="num">5 écrans</span></h2>
+    <div class="grid">
+      <a class="tile featured" href="ui_kits/mobile/mobile-kit.html">
+        <div class="ic"><i data-lucide="smartphone"></i></div>
+        <h3>Mobile UI kit complet</h3>
+        <p>Login, Dashboard, Carte Visa, Virement, Aide & Contact — affichés ensemble dans des bezels iPhone, prêts à présenter.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="row-section">
+    <h2>Fondations <span class="num">tokens & marque</span></h2>
+    <div class="grid">
+      <a class="tile" href="README.md"><div class="ic"><i data-lucide="book-open"></i></div><h3>README</h3><p>Voice, casing, casing, palette, motion, iconographie, content fundamentals.</p></a>
+      <a class="tile" href="colors_and_type.css"><div class="ic"><i data-lucide="palette"></i></div><h3>Tokens CSS</h3><p>Toutes les variables — couleurs, type, spacing, radii, shadows, motion.</p></a>
+      <a class="tile" href="preview/colors-brand.html"><div class="ic"><i data-lucide="droplet"></i></div><h3>Palettes</h3><p>Brand, neutrals, semantic — cards de revue.</p></a>
+      <a class="tile" href="preview/brand-cards.html"><div class="ic"><i data-lucide="credit-card"></i></div><h3>Cartes Visa</h3><p>4 tiers : Classic, Premier, Gold, Platinum.</p></a>
+      <a class="tile" href="preview/brand-icons.html"><div class="ic"><i data-lucide="grid"></i></div><h3>Iconographie</h3><p>Lucide · stroke 1.75 · 20 icônes bancaires.</p></a>
+      <a class="tile" href="preview/brand-voice.html"><div class="ic"><i data-lucide="message-square"></i></div><h3>Voix & microcopy</h3><p>Toasts, alertes, empty states — tutoiement fintech.</p></a>
+    </div>
+  </section>
+
+  <footer class="gen">
+    <span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt="Genesys Cloud">
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body></html>

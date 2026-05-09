@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.icon-cell { display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px; border-radius:10px; }
+.icon-cell:hover { background: var(--bg-sunken); }
+.icon-cell svg { stroke-width: 1.75; color: var(--fg); }
+.icon-cell .lbl { font-family:var(--font-mono); font-size:10px; color: var(--fg-muted); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div style="display:grid; grid-template-columns: repeat(10, 1fr); gap:6px;">
+    <div class="icon-cell"><i data-lucide="home" width="22" height="22"></i><span class="lbl">home</span></div>
+    <div class="icon-cell"><i data-lucide="wallet" width="22" height="22"></i><span class="lbl">wallet</span></div>
+    <div class="icon-cell"><i data-lucide="credit-card" width="22" height="22"></i><span class="lbl">card</span></div>
+    <div class="icon-cell"><i data-lucide="arrow-right-left" width="22" height="22"></i><span class="lbl">transfer</span></div>
+    <div class="icon-cell"><i data-lucide="users" width="22" height="22"></i><span class="lbl">benefs</span></div>
+    <div class="icon-cell"><i data-lucide="banknote" width="22" height="22"></i><span class="lbl">credit</span></div>
+    <div class="icon-cell"><i data-lucide="message-circle" width="22" height="22"></i><span class="lbl">msg</span></div>
+    <div class="icon-cell"><i data-lucide="bell" width="22" height="22"></i><span class="lbl">bell</span></div>
+    <div class="icon-cell"><i data-lucide="settings" width="22" height="22"></i><span class="lbl">settings</span></div>
+    <div class="icon-cell"><i data-lucide="shield-check" width="22" height="22"></i><span class="lbl">secure</span></div>
+    <div class="icon-cell"><i data-lucide="trending-up" width="22" height="22"></i><span class="lbl">trend</span></div>
+    <div class="icon-cell"><i data-lucide="pie-chart" width="22" height="22"></i><span class="lbl">chart</span></div>
+    <div class="icon-cell"><i data-lucide="search" width="22" height="22"></i><span class="lbl">search</span></div>
+    <div class="icon-cell"><i data-lucide="plus" width="22" height="22"></i><span class="lbl">plus</span></div>
+    <div class="icon-cell"><i data-lucide="check" width="22" height="22"></i><span class="lbl">check</span></div>
+    <div class="icon-cell"><i data-lucide="x" width="22" height="22"></i><span class="lbl">x</span></div>
+    <div class="icon-cell"><i data-lucide="chevron-right" width="22" height="22"></i><span class="lbl">chev</span></div>
+    <div class="icon-cell"><i data-lucide="eye" width="22" height="22"></i><span class="lbl">eye</span></div>
+    <div class="icon-cell"><i data-lucide="lock" width="22" height="22"></i><span class="lbl">lock</span></div>
+    <div class="icon-cell"><i data-lucide="phone" width="22" height="22"></i><span class="lbl">phone</span></div>
+  </div>
+  <div style="margin-top:10px; font-size:12px; color:var(--fg-muted); font-family:var(--font-mono);">Lucide · stroke 1.75 · 22px · currentColor</div>
+  <script>lucide.createIcons();</script>
+</div>
+</body></html>

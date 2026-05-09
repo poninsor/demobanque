@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Crédits</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .row-2col { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+    .credit-card-h {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white;
+      border-radius: 24px; padding: 28px;
+    }
+    .credit-card-h .lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+    .credit-card-h h2 { font-size: 22px; margin-top: 4px; }
+    .credit-card-h .amt { font-family: var(--font-display); font-weight: 700; font-size: 44px; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; line-height: 1; margin-top: 14px; }
+    .credit-card-h .delta { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+    .credit-card-h .progress { display: flex; gap: 8px; margin-top: 22px; align-items: center; }
+    .credit-card-h .bar { flex: 1; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.2); overflow: hidden; }
+    .credit-card-h .bar > div { height: 100%; background: white; border-radius: 999px; }
+
+    .panel { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+    .panel h3 { font-size: 16px; margin-bottom: 12px; }
+    .kv { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; font-size: 14px; }
+    .kv .k { color: var(--fg-muted); }
+    .kv .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    .offer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+    .offer { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 18px; padding: 22px; cursor: pointer; transition: all 220ms var(--ease-out); }
+    .offer:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .offer .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+    .offer .icon svg { width: 22px; height: 22px; stroke-width: 1.75; }
+    .offer h4 { font-size: 18px; margin: 12px 0 4px; }
+    .offer .desc { font-size: 13px; color: var(--fg-muted); }
+    .offer .rate { display: flex; align-items: baseline; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .offer .rate .v { font-family: var(--font-display); font-weight: 700; font-size: 24px; letter-spacing: -0.01em; }
+    .offer .rate .u { font-size: 12px; color: var(--fg-muted); }
+    .offer.featured { border: 0; background: linear-gradient(180deg, var(--brand-50), var(--bg-elev)); position: relative; }
+    .offer.featured::before {
+      content: ""; position: absolute; inset: 0; border-radius: 18px;
+      padding: 1.5px; background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .timeline { display: flex; flex-direction: column; gap: 0; padding: 0; margin: 0; list-style: none; }
+    .timeline li { display: grid; grid-template-columns: 110px 1fr; padding: 12px 0; border-top: 1px solid var(--border); align-items: center; font-size: 14px; }
+    .timeline li:first-child { border-top: 0; }
+    .timeline .date { color: var(--fg-muted); font-size: 13px; }
+    .timeline .pill { display: inline-flex; gap: 6px; align-items: center; }
+  </style>
+</head>
+<body data-screen-label="06 Credits">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link active" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Tes crédits</h1>
+          <div class="sub">1 prêt en cours · 3 nouvelles offres pré-acceptées pour toi.</div>
+        </div>
+      </div>
+
+      <div class="row-2col">
+        <div class="credit-card-h">
+          <div class="lbl">Prêt auto · contrat 2024-AC-66711</div>
+          <h2>Capital restant dû</h2>
+          <div class="amt">8&nbsp;420,12&nbsp;€</div>
+          <div class="delta">sur 14 800 € · 17 mensualités payées sur 36</div>
+          <div class="progress">
+            <div class="bar"><div style="width:43%"></div></div>
+            <span style="font-family:var(--font-mono); font-size:12px;">43&nbsp;%</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Détails du prêt</h3>
+          <div class="kv">
+            <span class="k">Mensualité</span><span class="v">387,42 €</span>
+            <span class="k">Prochaine échéance</span><span class="v">5 juin 2026</span>
+            <span class="k">Taux fixe</span><span class="v">3,20 % TAEG</span>
+            <span class="k">Coût total du crédit</span><span class="v">1 147,12 €</span>
+            <span class="k">Fin de remboursement</span><span class="v">novembre 2027</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 16px;"><i data-lucide="file-text"></i>Tableau d'amortissement</button>
+        </div>
+      </div>
+
+      <h2 style="font-size:24px; letter-spacing:-0.02em; margin: 32px 0 8px;">Offres pré-acceptées</h2>
+      <p style="color: var(--fg-muted); font-size:14px; margin-bottom: 16px;">Souscription en 100&nbsp;% en ligne, signature électronique, fonds sous 48 h.</p>
+
+      <div class="offer-grid">
+        <div class="offer">
+          <div class="icon"><i data-lucide="car"></i></div>
+          <h4>Crédit auto</h4>
+          <div class="desc">Jusqu'à 30 000 € · 12 à 84 mois.</div>
+          <div class="rate"><span class="v">3,20&nbsp;%</span><span class="u">TAEG fixe à partir de</span></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;">Simuler</button>
+        </div>
+        <div class="offer featured">
+          <span class="badge brand" style="position:absolute; top:14px; right:14px;">Recommandé</span>
+          <div class="icon"><i data-lucide="home"></i></div>
+          <h4>Prêt travaux</h4>
+          <div class="desc">Pour ta cuisine, ta toiture, ta rénovation énergétique.</div>
+          <div class="rate"><span class="v">2,90&nbsp;%</span><span class="u">TAEG fixe à partir de</span></div>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px; width:100%;">Continuer</button>
+        </div>
+        <div class="offer">
+          <div class="icon"><i data-lucide="plane"></i></div>
+          <h4>Crédit projet</h4>
+          <div class="desc">Voyage, mariage, équipement… 1 000 € à 75 000 €.</div>
+          <div class="rate"><span class="v">3,90&nbsp;%</span><span class="u">TAEG fixe à partir de</span></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;">Simuler</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:32px;">
+        <h3>Prochaines mensualités</h3>
+        <ul class="timeline">
+          <li><span class="date">5 juin 2026</span><span class="pill"><span class="badge info"><i data-lucide="calendar" style="width:12px;height:12px;"></i>Programmée</span> — 387,42 € · Prêt auto</span></li>
+          <li><span class="date">5 juillet 2026</span><span class="pill"><span class="badge neutral">À venir</span> — 387,42 € · Prêt auto</span></li>
+          <li><span class="date">5 août 2026</span><span class="pill"><span class="badge neutral">À venir</span> — 387,42 € · Prêt auto</span></li>
+        </ul>
+      </div>
+    </div>
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+  <script>lucide.createIcons();</script>
+</body></html>

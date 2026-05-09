@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Démo banque">
+  <defs>
+    <linearGradient id="dbm" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ff7a4a"></stop>
+      <stop offset="1" stop-color="#ff4515"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="48" height="48" rx="12" fill="url(#dbm)"></rect>
+  <text x="24" y="34" text-anchor="middle" font-family="Geist, Inter, system-ui, sans-serif" font-weight="800" font-size="32" fill="#fff" letter-spacing="-0.04em">G</text>
+</svg>

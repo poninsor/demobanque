@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.field { display:flex; flex-direction:column; gap:6px; }
+.field label { font-size:13px; font-weight:600; color:var(--fg); }
+.field input, .field select {
+  font-family: var(--font-body);
+  font-size: 15px;
+  height: 44px;
+  padding: 0 14px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--fg);
+  transition: all 140ms var(--ease-out);
+}
+.field input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); outline: 0; }
+.field .help { font-size:12px; color: var(--fg-muted); }
+.field.error input { border-color: var(--danger); }
+.field.error .help { color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+    <div class="field">
+      <label>Montant</label>
+      <input value="1 250,00 €" />
+      <span class="help">Maximum disponible : 12 480,57 €</span>
+    </div>
+    <div class="field">
+      <label>Bénéficiaire</label>
+      <select><option>Marie Dubois — FR76 2004 1010 …</option></select>
+      <span class="help">Ajouté le 12 mars</span>
+    </div>
+    <div class="field">
+      <label>Référence (optionnel)</label>
+      <input placeholder="Loyer mai 2026" />
+    </div>
+    <div class="field error">
+      <label>IBAN</label>
+      <input value="FR76 1234" />
+      <span class="help">Le RIB ne semble pas valide. Vérifie les chiffres.</span>
+    </div>
+  </div>
+</div>
+</body></html>

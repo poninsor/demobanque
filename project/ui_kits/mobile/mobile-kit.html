@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Mobile UI kit</title>
+  <link rel="stylesheet" href="../../colors_and_type.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { background: var(--bg-sunken); padding: 32px 24px 80px; }
+    .stage-head { max-width: 1400px; margin: 0 auto 24px; }
+    .stage-head h1 { font-size: 32px; letter-spacing: -0.02em; }
+    .stage-head .sub { color: var(--fg-muted); margin-top: 4px; font-size: 14px; }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 32px 16px; max-width: 1400px; margin: 0 auto;
+    }
+    .frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .frame-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--fg-faint);
+    }
+
+    /* Lightweight iPhone bezel */
+    .iphone {
+      width: 300px; height: 612px;
+      background: #0d0e12; border-radius: 44px;
+      padding: 8px; box-shadow: 0 30px 60px -20px rgba(13,14,18,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .iphone::after {
+      content: ""; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+      width: 120px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.4);
+    }
+    .screen {
+      width: 100%; height: 100%; border-radius: 36px; overflow: hidden;
+      background: #fff; position: relative;
+      display: flex; flex-direction: column;
+      font-size: 13px;
+    }
+    .screen .status {
+      height: 40px; padding: 12px 22px 0;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; font-weight: 600; flex-shrink: 0;
+      color: var(--fg);
+    }
+    .screen .status.dark-text { color: #fff; }
+    .screen .status .right { display: flex; gap: 4px; align-items: center; font-size: 11px; }
+    .screen .notch {
+      position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+      width: 88px; height: 26px; background: #0d0e12; border-radius: 999px;
+      z-index: 10;
+    }
+    .scroll { flex: 1; overflow: hidden; }
+
+    .tabbar {
+      height: 64px; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      flex-shrink: 0;
+    }
+    .tabbar a {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; font-size: 9px; font-weight: 600; color: var(--fg-faint); text-decoration: none;
+    }
+    .tabbar a svg { width: 22px; height: 22px; stroke-width: 1.75; }
+    .tabbar a.active { color: var(--brand); }
+
+    /* ===== LOGIN ===== */
+    .login-screen {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%);
+      color: #fff; padding: 0 24px 32px;
+    }
+    .login-screen .logo { margin: 30px 0 0; }
+    .login-screen .logo img { height: 28px; }
+    .login-screen .greet {
+      margin-top: auto; font-family: var(--font-display);
+      font-weight: 800; font-size: 36px; letter-spacing: -0.03em; line-height: 1.05;
+    }
+    .login-screen .greet em { color: #ffb6dd; font-style: normal; }
+    .login-screen .lead { font-size: 13px; opacity: 0.9; margin-top: 8px; }
+    .login-screen .form { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+    .login-screen input {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px; padding: 0 16px; height: 48px; color: #fff;
+      font-family: inherit; font-size: 15px;
+      backdrop-filter: blur(8px);
+    }
+    .login-screen input::placeholder { color: rgba(255,255,255,0.6); }
+    .login-screen button {
+      height: 50px; border-radius: 14px; background: #fff; color: var(--brand-700);
+      border: 0; font-family: inherit; font-weight: 700; font-size: 15px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 6px;
+    }
+    .login-screen .alt {
+      text-align: center; font-size: 13px; opacity: 0.85; margin-top: 14px;
+      display: flex; justify-content: center; gap: 6px; align-items: center;
+    }
+
+    /* ===== DASHBOARD ===== */
+    .dash { padding: 0 16px 16px; height: 100%; overflow: auto; }
+    .dash-greet { display: flex; gap: 12px; align-items: center; padding: 8px 4px 14px; }
+    .dash-greet .av { width: 40px; height: 40px; border-radius: 999px; background: linear-gradient(135deg, var(--brand-300), var(--brand-600)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+    .dash-greet .nm { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; line-height: 1.1; }
+    .dash-greet .sb { font-size: 11px; color: var(--fg-muted); }
+    .dash-hero {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%);
+      color: #fff; border-radius: 22px; padding: 18px;
+    }
+    .dash-hero .lbl { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+    .dash-hero .amt {
+      font-family: var(--font-display); font-weight: 700; font-size: 32px;
+      letter-spacing: -0.02em; line-height: 1; margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .dash-hero .delta { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+    .dash-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px; }
+    .dash-actions .a {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 4px; background: var(--bg-sunken); border-radius: 12px;
+      font-size: 9px; font-weight: 600; color: var(--fg);
+    }
+    .dash-actions .a svg { width: 18px; height: 18px; color: var(--brand); stroke-width: 1.75; }
+    .section-head {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin: 18px 4px 8px;
+    }
+    .section-head h3 { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+    .section-head a { font-size: 11px; color: var(--brand); text-decoration: none; font-weight: 600; }
+    .acct-mini {
+      background: #fff; border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .acct-mini + .acct-mini { margin-top: 6px; }
+    .acct-mini .nm { font-weight: 600; font-size: 13px; }
+    .acct-mini .ib { font-size: 10px; color: var(--fg-muted); margin-top: 2px; font-family: var(--font-mono); }
+    .acct-mini .v { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+
+    .tx-mini { display: grid; grid-template-columns: 32px 1fr auto; gap: 10px; padding: 10px 0; align-items: center; }
+    .tx-mini + .tx-mini { border-top: 1px solid var(--border); }
+    .tx-mini .av { width: 32px; height: 32px; border-radius: 999px; background: var(--bg-inset); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--fg-muted); }
+    .tx-mini .av.s { background: var(--success-50); color: var(--success-700); }
+    .tx-mini .nm { font-size: 12px; font-weight: 600; }
+    .tx-mini .meta { font-size: 10px; color: var(--fg-muted); margin-top: 1px; }
+    .tx-mini .v { font-family: var(--font-display); font-weight: 600; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .tx-mini .v.p { color: var(--success-700); }
+
+    /* ===== CARD DETAIL ===== */
+    .card-screen { padding: 0 16px 16px; height: 100%; overflow: auto; }
+    .top-back { display: flex; gap: 12px; align-items: center; padding: 8px 4px 14px; }
+    .top-back .bk { width: 32px; height: 32px; border-radius: 999px; background: var(--bg-sunken); display: flex; align-items: center; justify-content: center; }
+    .top-back h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+    .visa-mob {
+      width: 100%; aspect-ratio: 1.586/1; border-radius: 18px; padding: 16px; color: #fff;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: 0 16px 30px -10px rgba(255,69,21,0.4);
+    }
+    .visa-mob .top { display: flex; justify-content: space-between; align-items: center; }
+    .visa-mob .tier { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.9; }
+    .visa-mob .num { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.08em; }
+    .visa-mob .foot { display: flex; justify-content: space-between; font-size: 9px; }
+    .visa-mob .foot small { display: block; opacity: 0.7; letter-spacing: 0.1em; text-transform: uppercase; }
+    .visa-mob .foot .v { font-weight: 600; font-size: 11px; text-transform: uppercase; margin-top: 2px; }
+
+    .quick-actions {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px;
+    }
+    .quick-actions .qa {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 4px; background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; font-size: 9px; font-weight: 600;
+    }
+    .quick-actions .qa svg { width: 16px; height: 16px; color: var(--brand); stroke-width: 1.75; }
+
+    .panel-mob { background: #fff; border: 1px solid var(--border); border-radius: 14px; margin-top: 12px; overflow: hidden; }
+    .panel-mob .h { padding: 12px 14px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted); border-bottom: 1px solid var(--border); }
+    .panel-mob .row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; font-size: 12px;
+    }
+    .panel-mob .row + .row { border-top: 1px solid var(--border); }
+    .panel-mob .row .lbl { font-weight: 500; }
+    .panel-mob .row .sub { font-size: 10px; color: var(--fg-muted); margin-top: 1px; }
+    .toggle-mob { width: 34px; height: 20px; border-radius: 999px; background: var(--brand); position: relative; }
+    .toggle-mob::after { content: ""; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; }
+    .toggle-mob.off { background: var(--neutral-200); }
+    .toggle-mob.off::after { right: auto; left: 2px; }
+
+    /* ===== TRANSFER ===== */
+    .tr-screen { padding: 0 16px 16px; height: 100%; overflow: auto; }
+    .tr-amount {
+      padding: 30px 0 18px; text-align: center; background: var(--bg-sunken); border-radius: 18px; margin-top: 8px;
+    }
+    .tr-amount .lbl { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); }
+    .tr-amount .v {
+      font-family: var(--font-display); font-weight: 700; font-size: 44px; letter-spacing: -0.025em;
+      font-variant-numeric: tabular-nums; line-height: 1; margin-top: 6px;
+    }
+    .tr-amount .v .e { color: var(--fg-muted); font-size: 28px; }
+    .tr-amount .max { font-size: 11px; color: var(--fg-muted); margin-top: 6px; }
+    .tr-amount .max b { color: var(--fg); font-variant-numeric: tabular-nums; }
+
+    .benef-row {
+      display: grid; grid-template-columns: 38px 1fr auto;
+      gap: 10px; padding: 12px 12px;
+      background: #fff; border: 1px solid var(--border); border-radius: 12px;
+      align-items: center; margin-top: 10px;
+    }
+    .benef-row .av { width: 38px; height: 38px; border-radius: 999px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); }
+    .benef-row .nm { font-weight: 600; font-size: 13px; }
+    .benef-row .ib { font-size: 10px; color: var(--fg-muted); font-family: var(--font-mono); margin-top: 1px; }
+
+    .schedule-mob { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+    .schedule-mob .s {
+      padding: 10px; border-radius: 12px; border: 1px solid var(--border-strong);
+      background: #fff; text-align: center;
+    }
+    .schedule-mob .s.sel { border-color: var(--brand); background: var(--brand-50); border-width: 2px; padding: 9px; }
+    .schedule-mob .s .l { font-size: 12px; font-weight: 600; }
+    .schedule-mob .s .sb { font-size: 10px; color: var(--fg-muted); margin-top: 2px; }
+
+    .cta-fixed {
+      position: sticky; bottom: 0; padding: 10px 0 4px;
+      background: linear-gradient(180deg, transparent, #fff 30%);
+    }
+    .cta-fixed button {
+      width: 100%; height: 48px; border-radius: 14px; background: var(--brand);
+      color: #fff; border: 0; font-family: inherit; font-weight: 700; font-size: 14px;
+    }
+
+    /* ===== CONTACT ===== */
+    .ct-screen { padding: 0 16px 16px; height: 100%; overflow: auto; background: var(--bg-sunken); }
+    .ct-hero {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: #fff;
+      border-radius: 18px; padding: 18px;
+    }
+    .ct-hero h2 { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; line-height: 1.1; }
+    .ct-hero p { font-size: 12px; opacity: 0.9; margin-top: 4px; max-width: 26ch; }
+    .ct-channel {
+      background: #fff; border-radius: 14px; padding: 14px;
+      display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
+      margin-top: 10px;
+    }
+    .ct-channel .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+    .ct-channel .nm { font-size: 13px; font-weight: 700; }
+    .ct-channel .sb { font-size: 11px; color: var(--fg-muted); margin-top: 2px; }
+    .ct-channel .ar { color: var(--fg-faint); }
+    .live { font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 999px; background: var(--success-50); color: var(--success-700); display: inline-flex; gap: 4px; align-items: center; }
+    .live::before { content: ""; width: 5px; height: 5px; border-radius: 999px; background: var(--success); }
+
+    .genesys-mini { text-align: center; font-size: 10px; color: #fff; opacity: 0.7; margin-top: 18px; display: flex; justify-content: center; gap: 6px; align-items: center; }
+    .genesys-mini img { height: 12px; }
+  </style>
+</head>
+<body data-screen-label="Mobile UI kit">
+  <header class="stage-head">
+    <h1>Mobile UI kit</h1>
+    <div class="sub">5 écrans clés en iPhone, prêts à être démos en clientèle ou intégrés dans Genesys.</div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LOGIN ============================================================== -->
+    <div class="frame-wrap">
+      <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="status dark-text"><span>9:41</span><span class="right">5G · 92 %</span></div>
+          <div class="login-screen scroll" style="display:flex; flex-direction:column;">
+            <div class="logo"><img src="../../assets/logo-light.svg" alt=""></div>
+            <div style="flex:1;"></div>
+            <div class="greet">Bonjour <em>👋</em><br>connecte-toi.</div>
+            <p class="lead">Ton espace, sécurisé bout-en-bout.</p>
+            <div class="form">
+              <input placeholder="Identifiant" value="sophie.martin@example.fr">
+              <input type="password" placeholder="Mot de passe" value="••••••••">
+              <button>Se connecter <i data-lucide="arrow-right" style="width:16px;height:16px;"></i></button>
+            </div>
+            <div class="alt"><i data-lucide="fingerprint" style="width:14px;height:14px;"></i>Touch ID · Mot de passe oublié&nbsp;?</div>
+            <div class="genesys-mini"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">01 · Login</div>
+    </div>
+
+    <!-- DASHBOARD ========================================================== -->
+    <div class="frame-wrap">
+      <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="status"><span>9:41</span><span class="right">5G · 92 %</span></div>
+          <div class="scroll dash">
+            <div class="dash-greet">
+              <div class="av">SM</div>
+              <div><div class="nm">Bonjour Sophie</div><div class="sb">Compte particulier</div></div>
+              <div style="margin-left:auto;"><i data-lucide="bell" style="width:18px;height:18px;color:var(--fg-muted);"></i></div>
+            </div>
+            <div class="dash-hero">
+              <div class="lbl">Patrimoine total</div>
+              <div class="amt">35 430,57 €</div>
+              <div class="delta">+ 1 280,12 € ce mois-ci</div>
+              <div class="dash-actions">
+                <div class="a"><i data-lucide="arrow-right-left"></i>Virer</div>
+                <div class="a"><i data-lucide="users"></i>Bénéfs</div>
+                <div class="a"><i data-lucide="download"></i>RIB</div>
+                <div class="a"><i data-lucide="more-horizontal"></i>Plus</div>
+              </div>
+            </div>
+            <div class="section-head"><h3>Comptes</h3><a>Voir tout</a></div>
+            <div class="acct-mini"><div><div class="nm">Compte courant</div><div class="ib">****6892</div></div><div class="v">12 480,57 €</div></div>
+            <div class="acct-mini"><div><div class="nm">Livret A</div><div class="ib">****2210</div></div><div class="v">22 950,00 €</div></div>
+
+            <div class="section-head"><h3>Récents</h3><a>Voir tout</a></div>
+            <div class="acct-mini" style="display:block; padding: 4px 12px;">
+              <div class="tx-mini">
+                <div class="av s">↓</div>
+                <div><div class="nm">Salaire — Acme</div><div class="meta">Aujourd'hui · 09:14</div></div>
+                <div class="v p">+ 2 450,00 €</div>
+              </div>
+              <div class="tx-mini">
+                <div class="av">N</div>
+                <div><div class="nm">Netflix</div><div class="meta">Hier · Carte</div></div>
+                <div class="v">− 13,49 €</div>
+              </div>
+              <div class="tx-mini">
+                <div class="av">M</div>
+                <div><div class="nm">Monoprix</div><div class="meta">12 mai</div></div>
+                <div class="v">− 49,90 €</div>
+              </div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <a class="active"><i data-lucide="home"></i>Accueil</a>
+            <a><i data-lucide="wallet"></i>Comptes</a>
+            <a><i data-lucide="arrow-right-left"></i>Virer</a>
+            <a><i data-lucide="credit-card"></i>Cartes</a>
+            <a><i data-lucide="message-circle"></i>Aide</a>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">02 · Dashboard</div>
+    </div>
+
+    <!-- CARD DETAIL ======================================================== -->
+    <div class="frame-wrap">
+      <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="status"><span>9:41</span><span class="right">5G · 92 %</span></div>
+          <div class="scroll card-screen">
+            <div class="top-back">
+              <div class="bk"><i data-lucide="chevron-left" style="width:18px;height:18px;"></i></div>
+              <h2>Visa Premier</h2>
+              <div style="margin-left:auto;"><i data-lucide="more-horizontal" style="width:18px;height:18px;color:var(--fg-muted);"></i></div>
+            </div>
+            <div class="visa-mob">
+              <div class="top"><span class="tier">Visa Premier</span><img src="../../assets/visa-white.svg" height="18"></div>
+              <div class="num">5436 •••• •••• 4421</div>
+              <div class="foot"><div><small>Titulaire</small><span class="v">Sophie Martin</span></div><div><small>Expire</small><span class="v">04/30</span></div></div>
+            </div>
+            <div class="quick-actions">
+              <div class="qa"><i data-lucide="eye"></i>PIN</div>
+              <div class="qa"><i data-lucide="snowflake"></i>Geler</div>
+              <div class="qa"><i data-lucide="settings-2"></i>Plafonds</div>
+              <div class="qa"><i data-lucide="alert-triangle"></i>Opposer</div>
+            </div>
+            <div class="panel-mob">
+              <div class="h">Sécurité</div>
+              <div class="row"><div><div class="lbl">Paiements en ligne</div><div class="sub">Tous les sites</div></div><div class="toggle-mob"></div></div>
+              <div class="row"><div><div class="lbl">À l'étranger</div><div class="sub">Hors zone €</div></div><div class="toggle-mob"></div></div>
+              <div class="row"><div><div class="lbl">Sans contact</div><div class="sub">≤ 50 €</div></div><div class="toggle-mob"></div></div>
+            </div>
+            <div class="panel-mob">
+              <div class="h">Plafonds · 30 j</div>
+              <div class="row"><div class="lbl">Paiements</div><div style="font-family:var(--font-display); font-weight:600; font-variant-numeric:tabular-nums;">1 860 / 3 000 €</div></div>
+              <div class="row"><div class="lbl">Retraits</div><div style="font-family:var(--font-display); font-weight:600; font-variant-numeric:tabular-nums;">90 / 500 €</div></div>
+            </div>
+          </div>
+          <div class="tabbar">
+            <a><i data-lucide="home"></i>Accueil</a>
+            <a><i data-lucide="wallet"></i>Comptes</a>
+            <a><i data-lucide="arrow-right-left"></i>Virer</a>
+            <a class="active"><i data-lucide="credit-card"></i>Cartes</a>
+            <a><i data-lucide="message-circle"></i>Aide</a>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">03 · Carte</div>
+    </div>
+
+    <!-- TRANSFER =========================================================== -->
+    <div class="frame-wrap">
+      <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="status"><span>9:41</span><span class="right">5G · 92 %</span></div>
+          <div class="scroll tr-screen" style="display:flex; flex-direction:column;">
+            <div class="top-back">
+              <div class="bk"><i data-lucide="chevron-left" style="width:18px;height:18px;"></i></div>
+              <h2>Faire un virement</h2>
+            </div>
+
+            <div class="tr-amount">
+              <div class="lbl">Montant</div>
+              <div class="v">1 250,00<span class="e"> €</span></div>
+              <div class="max">Disponible · <b>12 480,57 €</b></div>
+            </div>
+
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-muted); margin: 14px 4px 4px;">Vers</div>
+            <div class="benef-row">
+              <div class="av">MD</div>
+              <div><div class="nm">Marie Dubois</div><div class="ib">FR76 ••• 4892</div></div>
+              <i data-lucide="check" style="color:var(--brand); width:18px; height:18px;"></i>
+            </div>
+
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-muted); margin: 14px 4px 4px;">Référence</div>
+            <input style="background:#fff; border:1px solid var(--border-strong); border-radius:12px; padding:0 14px; height:42px; font-family:inherit; font-size:13px;" value="Loyer mai 2026" />
+
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--fg-muted); margin: 14px 4px 4px;">Quand</div>
+            <div class="schedule-mob">
+              <div class="s sel"><div class="l">Instantané</div><div class="sb">&lt; 10 s · gratuit</div></div>
+              <div class="s"><div class="l">Programmé</div><div class="sb">Choisis la date</div></div>
+            </div>
+
+            <div style="flex:1;"></div>
+            <div class="cta-fixed"><button>Continuer · 1 250,00 €</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">04 · Virement</div>
+    </div>
+
+    <!-- CONTACT ============================================================ -->
+    <div class="frame-wrap">
+      <div class="iphone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="status"><span>9:41</span><span class="right">5G · 92 %</span></div>
+          <div class="scroll ct-screen">
+            <div class="top-back" style="padding-top: 4px;">
+              <h2>Aide & contact</h2>
+              <div style="margin-left:auto;"><i data-lucide="search" style="width:18px;height:18px;color:var(--fg-muted);"></i></div>
+            </div>
+
+            <div class="ct-hero">
+              <h2>On t'aide,<br>Sophie&nbsp;?</h2>
+              <p>Chat, appel, RDV ou agence — tout est à portée de main.</p>
+            </div>
+
+            <div class="ct-channel">
+              <div class="ic"><i data-lucide="message-circle"></i></div>
+              <div><div class="nm">Chat conseiller</div><div class="sb">Camille te répond <span class="live">En ligne</span></div></div>
+              <i class="ar" data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="ct-channel">
+              <div class="ic"><i data-lucide="phone"></i></div>
+              <div><div class="nm">Appel téléphonique</div><div class="sb">3262 · attente 2 min</div></div>
+              <i class="ar" data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="ct-channel">
+              <div class="ic"><i data-lucide="video"></i></div>
+              <div><div class="nm">Visio avec Camille</div><div class="sb">Sur RDV</div></div>
+              <i class="ar" data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="ct-channel">
+              <div class="ic"><i data-lucide="map-pin"></i></div>
+              <div><div class="nm">Trouver une agence</div><div class="sb">Paris 11 · ouverte</div></div>
+              <i class="ar" data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="ct-channel">
+              <div class="ic"><i data-lucide="help-circle"></i></div>
+              <div><div class="nm">FAQ & guides</div><div class="sb">120+ articles</div></div>
+              <i class="ar" data-lucide="chevron-right" style="width:18px;height:18px;"></i>
+            </div>
+          </div>
+          <div class="tabbar">
+            <a><i data-lucide="home"></i>Accueil</a>
+            <a><i data-lucide="wallet"></i>Comptes</a>
+            <a><i data-lucide="arrow-right-left"></i>Virer</a>
+            <a><i data-lucide="credit-card"></i>Cartes</a>
+            <a class="active"><i data-lucide="message-circle"></i>Aide</a>
+          </div>
+        </div>
+      </div>
+      <div class="frame-label">05 · Aide & contact</div>
+    </div>
+
+  </div>
+
+  <script>lucide.createIcons();</script>
+</body></html>

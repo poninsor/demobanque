@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.row-tx {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  gap: 14px; align-items: center;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+.row-tx + .row-tx { border-top: 1px solid var(--border); border-radius: 0; }
+.row-tx:hover { background: var(--bg-sunken); }
+.av { width:40px; height:40px; border-radius:999px; background:var(--bg-inset); display:flex; align-items:center; justify-content:center; color:var(--fg-muted); font-weight:600; font-size:14px; }
+.av.brand { background: var(--brand-50); color: var(--brand-700); }
+.av.success { background: var(--success-50); color: var(--success-700); }
+.tx-name { font-weight:600; font-size:15px; letter-spacing:-0.01em; }
+.tx-meta { font-size:12px; color:var(--fg-muted); margin-top:2px; }
+.tx-amt { font-family: var(--font-display); font-weight:600; font-variant-numeric:tabular-nums; font-size:15px; letter-spacing:-0.01em; }
+.tx-amt.pos { color: var(--success-700); }
+</style>
+</head>
+<body>
+<div class="frame" style="padding:16px;">
+  <div style="background:var(--bg-elev); border:1px solid var(--border); border-radius:16px; overflow:hidden;">
+    <div class="row-tx">
+      <div class="av success">↓</div>
+      <div><div class="tx-name">Salaire — Acme SAS</div><div class="tx-meta">Aujourd'hui · 09:14 · Virement</div></div>
+      <span class="badge" style="background:var(--success-50); color:var(--success-700); font-size:11px; font-weight:600; padding:3px 8px; border-radius:999px;">Reçu</span>
+      <div class="tx-amt pos">+ 2 450,00 €</div>
+    </div>
+    <div class="row-tx">
+      <div class="av brand">N</div>
+      <div><div class="tx-name">Netflix</div><div class="tx-meta">Hier · Abonnement</div></div>
+      <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
+      <div class="tx-amt">− 13,49 €</div>
+    </div>
+    <div class="row-tx">
+      <div class="av">M</div>
+      <div><div class="tx-name">Monoprix</div><div class="tx-meta">12 mai · Courses</div></div>
+      <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
+      <div class="tx-amt">− 49,90 €</div>
+    </div>
+  </div>
+</div>
+</body></html>

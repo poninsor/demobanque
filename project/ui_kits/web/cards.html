@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Cartes</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .cards-row { display: grid; grid-template-columns: 360px 1fr; gap: 24px; align-items: flex-start; }
+
+    .visa {
+      width: 100%; aspect-ratio: 1.586 / 1;
+      border-radius: 22px; padding: 22px; color: white;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
+    }
+    .visa.brand { background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); }
+    .visa.classic { background: linear-gradient(135deg, #1c1d22, #0d0e12); }
+    .visa.gold { background: linear-gradient(135deg, #d4a55a, #6b4a18); }
+    .visa.platinum { background: linear-gradient(135deg, #c8cdd6, #5b6675); color: #0d0e12; }
+    .visa::after { content:""; position:absolute; right:-30px; top:-30px; width:160px; height:160px; border-radius:999px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%); }
+    .visa .top { display: flex; justify-content: space-between; align-items: center; }
+    .visa .tier { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.9; }
+    .visa .num { font-family: var(--font-mono); font-size: 18px; letter-spacing: 0.1em; }
+    .visa .foot { display: flex; justify-content: space-between; align-items: flex-end; font-size: 10px; }
+    .visa .foot small { display: block; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; }
+    .visa .foot .v { font-weight: 600; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 2px; }
+
+    .card-thumb-row { display: flex; gap: 8px; margin-top: 14px; }
+    .card-thumb {
+      flex: 1; height: 80px; border-radius: 12px; padding: 10px; color: white;
+      cursor: pointer; opacity: 0.6; transition: all 140ms var(--ease-out);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .card-thumb.classic { background: linear-gradient(135deg, #1c1d22, #0d0e12); }
+    .card-thumb.gold { background: linear-gradient(135deg, #d4a55a, #6b4a18); }
+    .card-thumb.platinum { background: linear-gradient(135deg, #c8cdd6, #5b6675); color: #0d0e12; }
+    .card-thumb.active { opacity: 1; outline: 2px solid var(--brand); outline-offset: 3px; }
+    .card-thumb .t { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; opacity: 0.85; }
+    .card-thumb .l { font-family: var(--font-mono); font-size: 10px; opacity: 0.85; }
+
+    .actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+    .a-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--bg-elev); cursor: pointer;
+      font-size: 12px; font-weight: 600; color: var(--fg);
+      transition: all 140ms var(--ease-out);
+    }
+    .a-btn:hover { background: var(--bg-sunken); border-color: var(--border-strong); }
+    .a-btn svg { width: 20px; height: 20px; color: var(--brand); stroke-width: 1.75; }
+
+    .panel { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; }
+    .panel + .panel { margin-top: 16px; }
+    .panel h3 { padding: 16px 20px; font-size: 16px; border-bottom: 1px solid var(--border); }
+    .row { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; }
+    .row + .row { border-top: 1px solid var(--border); }
+    .row .lbl { font-size: 14px; font-weight: 500; }
+    .row .sub { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+    .row .v { font-family: var(--font-display); font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
+    .toggle { width: 40px; height: 24px; border-radius: 999px; background: var(--brand); position: relative; }
+    .toggle::after { content:""; position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 999px; background: white; }
+    .toggle.off { background: var(--neutral-200); }
+    .toggle.off::after { right: auto; left: 2px; }
+
+    .progress-bar { height: 8px; border-radius: 999px; background: var(--bg-inset); overflow: hidden; flex: 1; max-width: 280px; }
+    .progress-bar > div { height: 100%; background: var(--brand); border-radius: 999px; }
+  </style>
+</head>
+<body data-screen-label="04 Cards">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link active" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Tes cartes</h1>
+          <div class="sub">2 cartes actives · gère tes plafonds, oppose ou commande une nouvelle carte.</div>
+        </div>
+        <button class="btn btn-primary"><i data-lucide="plus"></i>Commander une carte</button>
+      </div>
+
+      <div class="cards-row">
+        <div>
+          <div class="visa brand">
+            <div class="top"><span class="tier">Visa Premier</span><img src="../../assets/visa-white.svg" height="24"></div>
+            <div class="num">5436 4421 8821 4421</div>
+            <div class="foot">
+              <div><small>Titulaire</small><span class="v">Sophie Martin</span></div>
+              <div><small>Expire</small><span class="v">04/30</span></div>
+              <div><small>CVV</small><span class="v">•••</span></div>
+            </div>
+          </div>
+
+          <div class="card-thumb-row">
+            <div class="card-thumb active" style="background: linear-gradient(135deg, var(--brand-400), var(--brand-700));">
+              <div class="t">Visa Premier</div><div class="l">**** 4421</div>
+            </div>
+            <div class="card-thumb classic">
+              <div class="t">Visa Classic</div><div class="l">**** 6892</div>
+            </div>
+          </div>
+
+          <div class="actions-grid">
+            <div class="a-btn"><i data-lucide="eye"></i>Voir le PIN</div>
+            <div class="a-btn"><i data-lucide="snowflake"></i>Geler</div>
+            <div class="a-btn"><i data-lucide="settings-2"></i>Plafonds</div>
+            <div class="a-btn"><i data-lucide="alert-triangle"></i>Opposer</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <h3>Plafonds</h3>
+            <div class="row">
+              <div>
+                <div class="lbl">Paiements</div>
+                <div class="sub">Sur 30 jours glissants</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="progress-bar"><div style="width:62%"></div></div>
+                <div class="v" style="min-width: 140px; text-align: right;">1 860 / 3 000 €</div>
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <div class="lbl">Retraits DAB</div>
+                <div class="sub">Sur 7 jours</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div class="progress-bar"><div style="width:18%"></div></div>
+                <div class="v" style="min-width: 140px; text-align: right;">90 / 500 €</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Sécurité</h3>
+            <div class="row">
+              <div><div class="lbl">Paiements en ligne</div><div class="sub">Activé sur tous les sites</div></div>
+              <div class="toggle"></div>
+            </div>
+            <div class="row">
+              <div><div class="lbl">Paiements à l'étranger</div><div class="sub">Hors zone euro</div></div>
+              <div class="toggle"></div>
+            </div>
+            <div class="row">
+              <div><div class="lbl">Paiement sans contact</div><div class="sub">Jusqu'à 50 € par opération</div></div>
+              <div class="toggle"></div>
+            </div>
+            <div class="row">
+              <div><div class="lbl">Notifications de paiement</div><div class="sub">Push instantané</div></div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Avantages Visa Premier</h3>
+            <div class="row" style="display:grid; grid-template-columns: 24px 1fr auto; align-items:flex-start; gap:14px;">
+              <i data-lucide="plane" style="color:var(--brand); width:20px; height:20px; margin-top:2px;"></i>
+              <div><div class="lbl">Assurance voyage</div><div class="sub">Bagages, annulation, médical · jusqu'à 310 000 €</div></div>
+              <span class="badge success">Actif</span>
+            </div>
+            <div class="row" style="display:grid; grid-template-columns: 24px 1fr auto; align-items:flex-start; gap:14px;">
+              <i data-lucide="car" style="color:var(--brand); width:20px; height:20px; margin-top:2px;"></i>
+              <div><div class="lbl">Assistance véhicule</div><div class="sub">Dépannage 24/7 en France métropolitaine</div></div>
+              <span class="badge success">Actif</span>
+            </div>
+            <div class="row" style="display:grid; grid-template-columns: 24px 1fr auto; align-items:flex-start; gap:14px;">
+              <i data-lucide="ticket" style="color:var(--brand); width:20px; height:20px; margin-top:2px;"></i>
+              <div><div class="lbl">Privilèges & invitations</div><div class="sub">Concerts, expos, accès VIP</div></div>
+              <span class="badge brand">3 nouveaux</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body></html>

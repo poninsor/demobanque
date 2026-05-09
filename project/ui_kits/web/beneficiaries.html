@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Bénéficiaires</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .toolbar { display:flex; gap:12px; align-items:center; margin-bottom:16px; }
+    .toolbar .search-input {
+      flex: 1; max-width: 360px; display:flex; align-items:center; gap:10px;
+      background: var(--bg-elev); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 0 14px; height: 44px; font-size: 14px;
+    }
+    .toolbar .search-input input { border:0; outline:0; flex:1; background:transparent; font-family:inherit; font-size:14px; }
+    .group-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-faint); padding: 18px 4px 8px; }
+    .b-row {
+      display: grid; grid-template-columns: 48px 1.5fr 2fr auto auto;
+      gap: 16px; align-items: center; padding: 14px 20px;
+      background: var(--bg-elev);
+    }
+    .b-row + .b-row { border-top: 1px solid var(--border); }
+    .b-row:hover { background: var(--bg-sunken); }
+    .b-list { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .b-av { width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; color: white; }
+    .name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+    .meta { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+    .iban { font-family: var(--font-mono); font-size: 13px; color: var(--fg); }
+    .iban .b { font-size: 11px; color: var(--fg-muted); margin-top: 2px; display: block; }
+    .actions { display: flex; gap: 6px; }
+  </style>
+</head>
+<body data-screen-label="05 Beneficiaries">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link active" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card"><div class="av">SM</div><div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+    </div>
+    <div class="page">
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Bénéficiaires</h1>
+          <div class="sub">7 personnes & organismes enregistrés.</div>
+        </div>
+        <button class="btn btn-primary"><i data-lucide="plus"></i>Ajouter</button>
+      </div>
+      <div class="toolbar">
+        <div class="search-input"><i data-lucide="search" style="width:16px;height:16px;color:var(--fg-muted);"></i><input placeholder="Rechercher un bénéficiaire ou un IBAN…"></div>
+        <button class="btn btn-secondary btn-sm"><i data-lucide="filter"></i>Tous</button>
+        <button class="btn btn-secondary btn-sm"><i data-lucide="upload"></i>Importer</button>
+      </div>
+
+      <div class="group-label">Favoris</div>
+      <div class="b-list">
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #ff7a4a, #b62800);">MD</div>
+          <div><div class="name">Marie Dubois</div><div class="meta">Loyer · ajouté le 12 mars 2024</div></div>
+          <div class="iban">FR76 2004 1010 0500 1234 4892<span class="b">CRLY · BNP Paribas</span></div>
+          <span class="badge brand">Récent</span>
+          <div class="actions">
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="arrow-right-left"></i></button>
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button>
+          </div>
+        </div>
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #6366f1, #4338ca);">LB</div>
+          <div><div class="name">Lucas Bernard</div><div class="meta">Frère · ajouté le 5 fév 2023</div></div>
+          <div class="iban">FR14 3000 4001 0010 0011 1147<span class="b">CRLY · BNP Paribas</span></div>
+          <span class="badge neutral">Particulier</span>
+          <div class="actions">
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="arrow-right-left"></i></button>
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button>
+          </div>
+        </div>
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #00a35a, #00723f);">JM</div>
+          <div><div class="name">Julie Moreau</div><div class="meta">Coloc · ajouté le 1 jan 2025</div></div>
+          <div class="iban">FR11 1382 5002 0010 1010 7720<span class="b">SOGE · Société Générale</span></div>
+          <span class="badge neutral">Particulier</span>
+          <div class="actions">
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="arrow-right-left"></i></button>
+            <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="group-label">Organismes</div>
+      <div class="b-list">
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #0066b3, #00427a); font-size:11px;">EDF</div>
+          <div><div class="name">EDF — Direct Énergie</div><div class="meta">Énergie · prélèvement mensuel</div></div>
+          <div class="iban">FR76 3000 1004 0100 0001 0001<span class="b">EDFOFR · Domiciliation Lyon</span></div>
+          <span class="badge info">Mandat actif</span>
+          <div class="actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
+        </div>
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #f59e0b, #b45309); font-size:11px;">CAF</div>
+          <div><div class="name">CAF Hauts-de-Seine</div><div class="meta">Allocations · virements entrants</div></div>
+          <div class="iban">FR23 3000 1004 0100 0099 0099<span class="b">Trésor public</span></div>
+          <span class="badge success">Reçu mensuel</span>
+          <div class="actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
+        </div>
+        <div class="b-row">
+          <div class="b-av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12); font-size:11px;">DGFiP</div>
+          <div><div class="name">Trésor Public — Impôts</div><div class="meta">Impôt sur le revenu</div></div>
+          <div class="iban">FR99 3000 1000 6400 0099 9999<span class="b">CCP Trésor</span></div>
+          <span class="badge info">Mandat actif</span>
+          <div class="actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
+        </div>
+      </div>
+    </div>
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt=""></footer>
+  </main>
+  <script>lucide.createIcons();</script>
+</body></html>

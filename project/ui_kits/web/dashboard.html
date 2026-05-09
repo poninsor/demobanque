@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <title>Démo banque · Tableau de bord</title>
+  <link rel="stylesheet" href="_shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .hero {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%);
+      color: white; border-radius: 28px; padding: 32px;
+      display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: end;
+      box-shadow: var(--shadow-lg);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content:""; position:absolute; right:-40px; top:-40px;
+      width:280px; height:280px; border-radius:999px;
+      background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    }
+    .hero .greeting { font-size: 14px; opacity:0.85; margin-bottom: 4px; }
+    .hero .name { font-family: var(--font-display); font-weight: 800; font-size: 44px; letter-spacing: -0.03em; line-height: 1; }
+    .hero .total-label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+    .hero .total { font-family: var(--font-display); font-weight: 700; font-size: 56px; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .hero .delta { font-size: 13px; opacity:0.85; margin-top: 8px; }
+    .hero .actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .hero .actions .btn { background: rgba(255,255,255,0.12); color: white; backdrop-filter: blur(8px); }
+    .hero .actions .btn:hover { background: rgba(255,255,255,0.22); }
+    .hero .actions .btn.primary-on-hero { background: white; color: var(--brand-700); }
+
+    .accounts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+    .acct {
+      background: var(--bg-elev); border-radius: 16px; padding: 20px;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: all 220ms var(--ease-out);
+      text-decoration: none; color: inherit;
+    }
+    .acct:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .acct .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .acct .name { font-weight: 600; font-size: 14px; }
+    .acct .iban { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+    .acct .amt { font-family: var(--font-display); font-weight: 600; font-size: 28px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+    .acct .meta { font-size: 12px; color: var(--fg-muted); margin-top: 6px; }
+
+    .row-2col { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; margin-top: 24px; }
+
+    .tx { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .tx-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .tx-header h3 { font-size: 16px; }
+    .tx-row {
+      display: grid; grid-template-columns: 36px 1fr auto auto; gap: 14px; align-items: center;
+      padding: 12px 20px;
+    }
+    .tx-row + .tx-row { border-top: 1px solid var(--border); }
+    .tx-row:hover { background: var(--bg-sunken); }
+    .av { width: 36px; height: 36px; border-radius: 999px; background: var(--bg-inset); display: flex; align-items: center; justify-content: center; color: var(--fg-muted); font-weight: 600; font-size: 14px; }
+    .av.success { background: var(--success-50); color: var(--success-700); }
+    .av.brand { background: var(--brand-50); color: var(--brand-700); }
+    .tx-name { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+    .tx-meta { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+    .tx-amt { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 15px; letter-spacing: -0.01em; }
+    .tx-amt.pos { color: var(--success-700); }
+
+    .insights .card-pad { display: flex; flex-direction: column; gap: 16px; }
+    .ring {
+      --p: 64;
+      width: 132px; height: 132px;
+      border-radius: 999px;
+      background:
+        conic-gradient(var(--brand) calc(var(--p) * 1%), var(--bg-inset) 0);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto;
+    }
+    .ring::after { content: ""; width: 100px; height: 100px; border-radius: 999px; background: var(--bg-elev); }
+    .ring-label { position: absolute; text-align: center; }
+    .insight-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; }
+    .insight-row .lbl { display: flex; gap: 8px; align-items: center; color: var(--fg-muted); }
+    .insight-row .lbl::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--clr, var(--brand)); }
+    .insight-row .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .cards-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px; }
+    .visa-mini {
+      border-radius: 16px; padding: 16px; color: white; height: 110px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      background: linear-gradient(135deg, #1c1d22, #0d0e12);
+    }
+    .visa-mini.brand { background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); }
+    .visa-mini .top { display: flex; justify-content: space-between; align-items: center; }
+    .visa-mini .tier { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.85; }
+    .visa-mini .num { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; }
+  </style>
+</head>
+<body data-screen-label="01 Dashboard">
+  <aside class="sidebar">
+    <div class="logo"><img src="../../assets/logo.svg" alt="Démo banque"></div>
+    <a class="nav-link active" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+
+    <div class="spacer"></div>
+    <div class="profile-card">
+      <div class="av">SM</div>
+      <div class="info"><span class="name">Sophie Martin</span><span class="role">Compte particulier</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher une opération, un bénéficiaire…</span></div>
+      <div class="topbar-actions">
+        <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <button class="icon-btn"><i data-lucide="message-circle"></i></button>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="hero">
+        <div>
+          <div class="greeting">Bonjour</div>
+          <div class="name">Sophie</div>
+          <div class="total-label" style="margin-top:24px;">Patrimoine total</div>
+          <div class="total">35&nbsp;430,57&nbsp;€</div>
+          <div class="delta">+ 1 280,12 € ce mois-ci · sur 4 comptes</div>
+          <div class="actions">
+            <a class="btn primary-on-hero" href="transfer.html"><i data-lucide="arrow-right-left"></i>Faire un virement</a>
+            <button class="btn"><i data-lucide="plus"></i>Ajouter un bénéficiaire</button>
+            <button class="btn"><i data-lucide="download"></i>Télécharger un RIB</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="accounts">
+        <a class="acct" href="account.html">
+          <div class="top"><span class="name">Compte courant</span><span class="iban">****6892</span></div>
+          <div class="amt">12&nbsp;480,57&nbsp;€</div>
+          <div class="meta">+ 240,00 € ce mois-ci</div>
+        </a>
+        <a class="acct" href="#">
+          <div class="top"><span class="name">Livret A</span><span class="iban">****2210</span></div>
+          <div class="amt">22&nbsp;950,00&nbsp;€</div>
+          <div class="meta">Taux 3,00 % · plafond atteint</div>
+        </a>
+        <a class="acct" href="#">
+          <div class="top"><span class="name">PEL</span><span class="iban">****0418</span></div>
+          <div class="amt">0,00&nbsp;€</div>
+          <div class="meta">Inactif</div>
+        </a>
+      </div>
+
+      <div class="row-2col">
+        <div class="tx">
+          <div class="tx-header">
+            <h3>Dernières opérations</h3>
+            <a class="badge brand" href="account.html" style="text-decoration:none;">Voir tout</a>
+          </div>
+          <div class="tx-row">
+            <div class="av success"><i data-lucide="arrow-down-left" style="width:16px;height:16px;"></i></div>
+            <div><div class="tx-name">Salaire — Acme SAS</div><div class="tx-meta">Aujourd'hui · 09:14 · Virement</div></div>
+            <span class="badge success">Reçu</span>
+            <div class="tx-amt pos">+ 2 450,00 €</div>
+          </div>
+          <div class="tx-row">
+            <div class="av brand">N</div>
+            <div><div class="tx-name">Netflix</div><div class="tx-meta">Hier · Abonnement</div></div>
+            <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
+            <div class="tx-amt">− 13,49 €</div>
+          </div>
+          <div class="tx-row">
+            <div class="av">M</div>
+            <div><div class="tx-name">Monoprix</div><div class="tx-meta">12 mai · Courses</div></div>
+            <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
+            <div class="tx-amt">− 49,90 €</div>
+          </div>
+          <div class="tx-row">
+            <div class="av">U</div>
+            <div><div class="tx-name">Uber</div><div class="tx-meta">11 mai · Transport</div></div>
+            <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
+            <div class="tx-amt">− 16,80 €</div>
+          </div>
+          <div class="tx-row">
+            <div class="av">L</div>
+            <div><div class="tx-name">Loyer — Marie Dubois</div><div class="tx-meta">5 mai · Virement programmé</div></div>
+            <span class="badge info">Programmé</span>
+            <div class="tx-amt">− 950,00 €</div>
+          </div>
+        </div>
+
+        <div class="card insights">
+          <div class="card-pad">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="font-size:16px;">Tes dépenses</h3>
+              <span class="badge neutral">Mai</span>
+            </div>
+            <div style="position:relative; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+              <div class="ring" style="--p:64;"></div>
+              <div style="position:absolute; text-align:center;">
+                <div class="t-meta">Dépensé</div>
+                <div style="font-family:var(--font-display); font-weight:700; font-size:22px; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1 612 €</div>
+                <div class="t-meta">sur 2 500 €</div>
+              </div>
+            </div>
+            <div>
+              <div class="insight-row" style="--clr:var(--brand);"><span class="lbl">Logement</span><span class="val">950,00 €</span></div>
+              <div class="insight-row" style="--clr:#7e22ce;"><span class="lbl">Courses</span><span class="val">312,40 €</span></div>
+              <div class="insight-row" style="--clr:#0066b3;"><span class="lbl">Transport</span><span class="val">198,80 €</span></div>
+              <div class="insight-row" style="--clr:#00a35a;"><span class="lbl">Loisirs</span><span class="val">151,29 €</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-strip">
+        <a class="visa-mini brand" href="cards.html" style="text-decoration:none;">
+          <div class="top"><span class="tier">Visa Premier</span><img src="../../assets/visa-white.svg" height="18"></div>
+          <div class="num">5436 •••• •••• 4421</div>
+        </a>
+        <a class="visa-mini" href="cards.html" style="text-decoration:none;">
+          <div class="top"><span class="tier">Visa Classic</span><img src="../../assets/visa-white.svg" height="18"></div>
+          <div class="num">5436 •••• •••• 6892</div>
+        </a>
+      </div>
+    </div>
+
+    <footer class="genesys-footer">
+      <span>Powered by Genesys Cloud</span><img src="../../assets/genesys.png" alt="Genesys Cloud">
+    </footer>
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body></html>

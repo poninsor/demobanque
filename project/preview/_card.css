@@ -1,0 +1,63 @@
+/* Preview card frame — used by every /preview/*.html */
+@import url("../colors_and_type.css");
+
+html, body {
+  margin: 0;
+  background: var(--bg-elev);
+  color: var(--fg);
+}
+.frame {
+  padding: 24px 28px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.grid {
+  display: grid;
+  gap: 12px;
+}
+.swatch {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elev);
+}
+.swatch .chip {
+  height: 56px;
+  width: 100%;
+}
+.swatch .meta {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.swatch .name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.swatch .hex {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+.dot {
+  width: 14px; height: 14px; border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
