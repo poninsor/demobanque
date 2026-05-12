@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Démo banque · Compte courant</title>
+  <link rel="stylesheet" href="shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .acct-header {
+      background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%);
+      color: white; border-radius: 24px; padding: 28px 32px;
+      display: grid; grid-template-columns: 1fr auto; align-items: center;
+      box-shadow: var(--shadow-md);
+    }
+    .acct-header .lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin-bottom: 6px; }
+    .acct-header h1 { font-size: 24px; font-weight: 600; }
+    .acct-header .iban { font-family: var(--font-mono); font-size: 13px; opacity: 0.85; margin-top: 4px; letter-spacing: 0.04em; }
+    .acct-header .balance { text-align: right; }
+    .acct-header .balance .lbl { text-align: right; }
+    .acct-header .amt { font-family: var(--font-display); font-weight: 700; font-size: 52px; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; line-height: 1; }
+    .acct-header .delta { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+    .actions-bar { display: flex; gap: 8px; margin: 18px 0 24px; flex-wrap: wrap; }
+    .filters { display: flex; gap: 8px; padding: 12px 20px; border-bottom: 1px solid var(--border); align-items: center; flex-wrap: wrap; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--bg-elev); cursor: pointer; }
+    .chip.active { background: var(--neutral-900); color: white; border-color: var(--neutral-900); }
+    .chip svg { width: 14px; height: 14px; }
+    .day-label { padding: 16px 20px 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-faint); display: flex; justify-content: space-between; }
+    .day-label .total { font-family: var(--font-display); letter-spacing: -0.01em; text-transform: none; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+    .tx-row { display: grid; grid-template-columns: 40px 1fr auto auto; gap: 14px; align-items: center; padding: 14px 20px; }
+    .tx-row + .tx-row { border-top: 1px solid var(--border); }
+    .tx-row:hover { background: var(--bg-sunken); cursor: pointer; }
+    .av { width: 40px; height: 40px; border-radius: 999px; background: var(--bg-inset); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: var(--fg-muted); }
+    .av.success { background: var(--success-50); color: var(--success-700); }
+    .av.brand { background: var(--brand-50); color: var(--brand-700); }
+    .tx-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+    .tx-meta { font-size: 13px; color: var(--fg-muted); margin-top: 2px; }
+    .tx-amt { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 16px; letter-spacing: -0.01em; }
+    .tx-amt.pos { color: var(--success-700); }
+    .tx-cat { font-size: 12px; color: var(--fg-muted); }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+    .summary-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+    .summary-card .lbl { font-size: 12px; color: var(--fg-muted); }
+    .summary-card .val { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; margin-top: 4px; }
+    .summary-card .val.pos { color: var(--success-700); }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
+    <a class="nav-link active" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
+    <div class="nav-section">Aide</div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <div class="spacer"></div>
+    <div class="profile-card" id="profile-card">
+      <div class="av" data-persona-initials>SM</div>
+      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role">Compte particulier</span></div>
+      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i>Se déconnecter</button></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search"><i data-lucide="search"></i><span>Rechercher une opération…</span></div>
+      <div class="topbar-actions">
+        <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+        <button class="icon-btn" onclick="window.location.href='messages.html'"><i data-lucide="message-circle"></i></button>
+      </div>
+    </div>
+    <div class="page">
+      <div class="acct-header">
+        <div>
+          <div class="lbl" id="acct-header-label">Compte courant · Sophie Martin</div>
+          <h1>Compte principal</h1>
+          <div class="iban">FR76 1234 5678 9012 3456 7892</div>
+        </div>
+        <div class="balance">
+          <div class="lbl">Solde disponible</div>
+          <div class="amt" data-balance-checking>12&nbsp;480,57&nbsp;€</div>
+          <div class="delta">+ 240,00 € ce mois-ci</div>
+        </div>
+      </div>
+      <div class="actions-bar">
+        <a class="btn btn-primary" href="transfer.html"><i data-lucide="arrow-right-left"></i>Faire un virement</a>
+        <button class="btn btn-secondary"><i data-lucide="download"></i>Télécharger un RIB</button>
+        <button class="btn btn-secondary"><i data-lucide="file-text"></i>Relevés</button>
+        <button class="btn btn-ghost"><i data-lucide="more-horizontal"></i></button>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-card"><div class="lbl">Entrées · mai</div><div class="val pos">+ 2 690,00 €</div></div>
+        <div class="summary-card"><div class="lbl">Sorties · mai</div><div class="val">− 1 612,49 €</div></div>
+        <div class="summary-card"><div class="lbl">Solde projeté · 31 mai</div><div class="val" id="projected-balance">13 558,08 €</div></div>
+      </div>
+      <div class="card">
+        <div class="filters">
+          <span class="chip active">Toutes</span>
+          <span class="chip"><i data-lucide="arrow-down-left"></i>Crédits</span>
+          <span class="chip"><i data-lucide="arrow-up-right"></i>Débits</span>
+          <span class="chip"><i data-lucide="clock"></i>Programmées</span>
+          <span style="margin-left:auto; display:flex; gap:8px;">
+            <span class="chip"><i data-lucide="calendar"></i>Mai 2026</span>
+            <span class="chip"><i data-lucide="download"></i>Exporter</span>
+          </span>
+        </div>
+        <div class="day-label"><span>Aujourd'hui · 14 mai</span><span class="total">+ 2 436,51 €</span></div>
+        <div class="tx-row"><div class="av success"><i data-lucide="arrow-down-left" style="width:18px;height:18px;"></i></div><div><div class="tx-name">Salaire — Acme SAS</div><div class="tx-meta">Virement entrant · 09:14</div></div><span class="tx-cat">Salaire</span><div class="tx-amt pos">+ 2 450,00 €</div></div>
+        <div class="tx-row"><div class="av">B</div><div><div class="tx-name">Boulangerie Maison Plisson</div><div class="tx-meta">Carte ****6892 · 08:42</div></div><span class="tx-cat">Restauration</span><div class="tx-amt">− 13,49 €</div></div>
+        <div class="day-label"><span>Hier · 13 mai</span><span class="total">− 30,29 €</span></div>
+        <div class="tx-row"><div class="av brand">N</div><div><div class="tx-name">Netflix</div><div class="tx-meta">Prélèvement · Abonnement</div></div><span class="tx-cat">Loisirs</span><div class="tx-amt">− 13,49 €</div></div>
+        <div class="tx-row"><div class="av">U</div><div><div class="tx-name">Uber</div><div class="tx-meta">Carte ****6892 · 19:24</div></div><span class="tx-cat">Transport</span><div class="tx-amt">− 16,80 €</div></div>
+        <div class="day-label"><span>12 mai</span><span class="total">− 49,90 €</span></div>
+        <div class="tx-row"><div class="av">M</div><div><div class="tx-name">Monoprix</div><div class="tx-meta">Carte ****6892 · 18:11</div></div><span class="tx-cat">Courses</span><div class="tx-amt">− 49,90 €</div></div>
+        <div class="day-label"><span>5 mai</span><span class="total">− 950,00 €</span></div>
+        <div class="tx-row"><div class="av">L</div><div><div class="tx-name">Loyer — Marie Dubois</div><div class="tx-meta">Virement programmé · récurrent mensuel</div></div><span class="tx-cat">Logement</span><div class="tx-amt">− 950,00 €</div></div>
+        <div class="day-label"><span>3 mai</span><span class="total">+ 240,00 €</span></div>
+        <div class="tx-row"><div class="av success"><i data-lucide="arrow-down-left" style="width:18px;height:18px;"></i></div><div><div class="tx-name">Remboursement — Lucas Bernard</div><div class="tx-meta">Virement Instantané · « Restau »</div></div><span class="tx-cat">Remboursement</span><div class="tx-amt pos">+ 240,00 €</div></div>
+      </div>
+    </div>
+    <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script>
+    if (!DemoConfig.requireAuth()) throw '';
+    document.addEventListener('DOMContentLoaded', () => {
+      DemoConfig.applyBranding();
+      lucide.createIcons();
+      const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
+      document.getElementById('acct-header-label').textContent = `Compte courant · ${p.persona.firstName} ${p.persona.lastName}`;
+      const parse = s => parseFloat(String(s).replace(/\s/g,'').replace(',','.')) || 0;
+      const bal = parse(p.balances.checking);
+      const proj = bal + 240 - 387.42;
+      document.getElementById('projected-balance').textContent = proj.toLocaleString('fr-FR', {minimumFractionDigits:2}) + ' €';
+      const card = document.getElementById('profile-card');
+      card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
+      document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });
+    });
+  </script>
+</body></html>

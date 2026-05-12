@@ -1,0 +1,292 @@
+/* =============================================================================
+   Démo banque — Design tokens
+   White-label fintech (style Revolut/N26 + accent Boursorama-pink)
+   Tweakable via Settings panel + CSS custom props.
+   ============================================================================= */
+
+/* --- Type --------------------------------------------------------------- */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ---- BRAND (tweakable via Settings) ----
+     Genesys-aligned orange palette. Primary = #FF4515 (Genesys Orange).
+     Secondary surfaces lean on the navy/charcoal tones from genesys.com. */
+  --brand-50:  #fff2ec;
+  --brand-100: #ffddcd;
+  --brand-200: #ffb89a;
+  --brand-300: #ff8a5a;
+  --brand-400: #ff6535;
+  --brand-500: #ff4515;   /* primary — Genesys Orange */
+  --brand-600: #e23200;
+  --brand-700: #b62800;
+  --brand-800: #8a1e00;
+  --brand-900: #571500;
+
+  /* Genesys secondary — used for hero / dark surfaces */
+  --ink-900:   #11192b;   /* Genesys deep navy */
+  --ink-800:   #1a2238;
+
+  --brand:        var(--brand-500);
+  --brand-fg:     #ffffff;       /* foreground on brand */
+  --brand-soft:   var(--brand-50);
+  --brand-border: var(--brand-100);
+
+  /* ---- NEUTRALS (warm-tinted for fintech feel) ---- */
+  --neutral-0:   #ffffff;
+  --neutral-25:  #fafafa;
+  --neutral-50:  #f5f5f6;
+  --neutral-100: #ececef;
+  --neutral-200: #dcdce1;
+  --neutral-300: #b9bac3;
+  --neutral-400: #8a8b97;
+  --neutral-500: #65666f;
+  --neutral-600: #494a52;
+  --neutral-700: #2f3037;
+  --neutral-800: #1c1d22;
+  --neutral-900: #0d0e12;
+  --neutral-950: #06060a;
+
+  /* ---- SEMANTIC FOREGROUND / BACKGROUND ---- */
+  --bg:        var(--neutral-25);
+  --bg-elev:   #ffffff;            /* cards, sheets */
+  --bg-sunken: var(--neutral-50);
+  --bg-inset:  var(--neutral-100);
+
+  --fg:        var(--neutral-900);
+  --fg-muted:  var(--neutral-500);
+  --fg-faint:  var(--neutral-400);
+  --fg-onDark: #ffffff;
+
+  --border:        var(--neutral-100);
+  --border-strong: var(--neutral-200);
+
+  /* ---- SEMANTIC STATUS ---- */
+  --success-50:  #e7faf0;
+  --success-500: #00a35a;
+  --success-700: #00723f;
+  --success:     var(--success-500);
+
+  --warning-50:  #fff5e0;
+  --warning-500: #f59e0b;
+  --warning-700: #b45309;
+  --warning:     var(--warning-500);
+
+  --danger-50:   #fde8ea;
+  --danger-500:  #e11d48;
+  --danger-700:  #9f1239;
+  --danger:      var(--danger-500);
+
+  --info-50:     #e6f1ff;
+  --info-500:    #0066b3;
+  --info-700:    #00427a;
+  --info:        var(--info-500);
+
+  /* ---- TYPE FAMILIES ---- */
+  --font-display: "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "Geist", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, SFMono-Regular, "JetBrains Mono", monospace;
+
+  /* ---- TYPE SCALE ---- */
+  --fs-12: 0.75rem;     /* 12 — captions, helper */
+  --fs-13: 0.8125rem;   /* 13 — small labels */
+  --fs-14: 0.875rem;    /* 14 — meta */
+  --fs-15: 0.9375rem;   /* 15 — body small */
+  --fs-16: 1rem;        /* 16 — body */
+  --fs-18: 1.125rem;    /* 18 — body large / lead */
+  --fs-20: 1.25rem;     /* 20 — h5 */
+  --fs-24: 1.5rem;      /* 24 — h4 */
+  --fs-30: 1.875rem;    /* 30 — h3 */
+  --fs-36: 2.25rem;     /* 36 — h2 */
+  --fs-48: 3rem;        /* 48 — h1 */
+  --fs-60: 3.75rem;     /* 60 — display */
+
+  --lh-tight: 1.1;
+  --lh-snug:  1.25;
+  --lh-base:  1.5;
+  --lh-loose: 1.7;
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-black:    800;
+
+  --tracking-tight:   -0.02em;
+  --tracking-snug:    -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-allcaps: 0.08em;
+
+  /* ---- SPACING (4-pt grid) ---- */
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:   12px;
+  --sp-4:   16px;
+  --sp-5:   20px;
+  --sp-6:   24px;
+  --sp-8:   32px;
+  --sp-10:  40px;
+  --sp-12:  48px;
+  --sp-16:  64px;
+  --sp-20:  80px;
+  --sp-24:  96px;
+
+  /* ---- RADII ---- */
+  --r-xs:  4px;     /* badges, pills tight */
+  --r-sm:  8px;     /* inputs, small buttons */
+  --r-md:  12px;    /* buttons, chips */
+  --r-lg:  16px;    /* cards */
+  --r-xl:  20px;    /* big cards, sheets */
+  --r-2xl: 28px;    /* hero cards, account tiles */
+  --r-pill: 999px;
+
+  /* ---- SHADOWS (soft, layered, fintech) ---- */
+  --shadow-xs:    0 1px 2px rgba(13,14,18,0.04);
+  --shadow-sm:    0 1px 2px rgba(13,14,18,0.05), 0 1px 3px rgba(13,14,18,0.06);
+  --shadow-md:    0 4px 8px -2px rgba(13,14,18,0.06), 0 2px 4px -2px rgba(13,14,18,0.04);
+  --shadow-lg:    0 12px 16px -4px rgba(13,14,18,0.06), 0 4px 6px -2px rgba(13,14,18,0.04);
+  --shadow-xl:    0 20px 24px -4px rgba(13,14,18,0.08), 0 8px 8px -4px rgba(13,14,18,0.04);
+  --shadow-brand: 0 8px 24px -8px color-mix(in oklab, var(--brand) 50%, transparent);
+  --shadow-inset: inset 0 0 0 1px var(--border);
+
+  /* ---- MOTION ---- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-instant: 80ms;
+  --dur-fast:    140ms;
+  --dur-base:    220ms;
+  --dur-slow:    360ms;
+
+  /* ---- LAYOUT ---- */
+  --container-sm:  640px;
+  --container-md:  960px;
+  --container-lg:  1200px;
+  --container-xl:  1440px;
+  --sidebar-w:     264px;
+  --header-h:      64px;
+}
+
+/* --- DARK MODE -------------------------------------------------------- */
+[data-theme="dark"] {
+  --bg:        #0d0e12;
+  --bg-elev:   #15161c;
+  --bg-sunken: #0a0b0f;
+  --bg-inset:  #1c1d22;
+
+  --fg:        #f5f5f6;
+  --fg-muted:  #b9bac3;
+  --fg-faint:  #65666f;
+
+  --border:        #2f3037;
+  --border-strong: #494a52;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 8px -2px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 16px -4px rgba(0,0,0,0.5);
+  --shadow-xl: 0 20px 24px -4px rgba(0,0,0,0.6);
+}
+
+/* --- BASE -------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-16);
+  line-height: var(--lh-base);
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --- SEMANTIC TYPOGRAPHY ---------------------------------------------- */
+.t-display {
+  font-family: var(--font-display);
+  font-size: var(--fs-60);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.t-h1, h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-48);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+.t-h2, h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-36);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  margin: 0;
+}
+.t-h3, h3 {
+  font-family: var(--font-display);
+  font-size: var(--fs-24);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  margin: 0;
+}
+.t-h4, h4 {
+  font-family: var(--font-display);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+.t-h5, h5 {
+  font-family: var(--font-display);
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+.t-body, p {
+  font-size: var(--fs-16);
+  line-height: var(--lh-base);
+  margin: 0;
+}
+.t-body-sm { font-size: var(--fs-14); line-height: var(--lh-base); }
+.t-meta {
+  font-size: var(--fs-13);
+  color: var(--fg-muted);
+  letter-spacing: var(--tracking-normal);
+}
+.t-overline {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-allcaps);
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.t-amount {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-snug);
+}
+.t-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- UTILITIES -------------------------------------------------------- */
+.tnum { font-variant-numeric: tabular-nums; }
+.muted { color: var(--fg-muted); }
+.faint { color: var(--fg-faint); }
+.brand-fg { color: var(--brand); }
+.success-fg { color: var(--success-700); }
+.danger-fg  { color: var(--danger-500); }
+
+/* --- FOCUS RING ------------------------------------------------------- */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
