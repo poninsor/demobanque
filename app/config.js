@@ -32,7 +32,7 @@ const DemoConfig = (() => {
       firstName: 'Sophie',
       lastName: 'Martin',
       email: 'sophie.martin@example.fr',
-      phone: '06 12 34 56 78',
+      phone: '+33612345678',
       profileType: 'Particulier — salariée cadre',
       advisor: 'Camille Lefebvre — Paris 11'
     },
@@ -40,8 +40,8 @@ const DemoConfig = (() => {
     products: { visaPremier: true, visaClassic: true, autoLoan: true, assuranceVie: false },
     genesys: {
       region: 'mypurecloud.ie',
-      deploymentId: '3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10',
-      clientId: 'a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1',
+      deploymentId: '',
+      clientId: '',
       queueId: '',
       scriptId: '',
       callNumber: '3262'
@@ -79,12 +79,12 @@ const DemoConfig = (() => {
       const p = 2 * l - q;
       const hue2rgb = (p, q, t) => {
         if (t < 0) t += 1; if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
       };
-      r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3);
+      r = hue2rgb(p, q, h + 1 / 3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1 / 3);
     }
     return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
   }
@@ -94,7 +94,7 @@ const DemoConfig = (() => {
     const [h, s, l] = hexToHsl(hex);
     const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
     return {
-      50:  hslToHex(h, clamp(s * 0.25, 5, 30), 97),
+      50: hslToHex(h, clamp(s * 0.25, 5, 30), 97),
       100: hslToHex(h, clamp(s * 0.45, 8, 55), 93),
       200: hslToHex(h, clamp(s * 0.65, 12, 75), 86),
       300: hslToHex(h, clamp(s * 0.82, 15, 90), 76),

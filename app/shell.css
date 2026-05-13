@@ -284,6 +284,8 @@ html[lang="en"] .lang-btn[data-lang="en"] {
 .sheet-item.active,
 .sheet-item:hover { background: var(--brand-50); color: var(--brand-700); }
 .sheet-item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+.sheet-item-logout { color: var(--danger-600, #dc2626); }
+.sheet-item-logout:hover { background: var(--danger-50, #fff1f2); color: var(--danger-700, #b91c1c); }
 
 /* --- Responsive ----------------------------------------------------------- */
 @media (max-width: 1024px) {
