@@ -69,52 +69,56 @@
 <body>
   <aside class="sidebar">
     <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
-    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
-    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
-    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
-    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
-    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
-    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
-    <div class="nav-section">Aide</div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
-    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
-    <a class="nav-link active" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de bord</span><span class="i18n-en">Dashboard</span></span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
+    <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
+    <a class="nav-link active" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="fr" onclick="DemoConfig.setLanguage('fr')">FR</button>
+      <button class="lang-btn" data-lang="en" onclick="DemoConfig.setLanguage('en')">EN</button>
+    </div>
     <div class="spacer"></div>
     <div class="profile-card" id="profile-card">
       <div class="av" data-persona-initials>SM</div>
-      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role">Compte particulier</span></div>
-      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i>Se déconnecter</button></div>
+      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role"><span class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span></div>
+      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button></div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher…</span><span class="i18n-en">Search…</span></span></div>
       <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
     </div>
     <div class="page">
       <div class="page-header">
         <div class="page-title">
-          <h1>Paramètres de démo</h1>
-          <div class="sub">White-label · personnalise la marque, le client et les produits affichés pour cette démo Genesys.</div>
+          <h1><span class="i18n-fr">Paramètres de démo</span><span class="i18n-en">Demo settings</span></h1>
+          <div class="sub"><span class="i18n-fr">White-label · personnalise la marque, le client et les produits affichés pour cette démo Genesys.</span><span class="i18n-en">White-label · customise the brand, persona and products for this Genesys demo.</span></div>
         </div>
         <div style="display:flex; gap:10px;">
-          <button class="btn btn-secondary" id="reset-btn"><i data-lucide="rotate-ccw"></i>Réinitialiser</button>
-          <button class="btn btn-primary" id="save-btn"><i data-lucide="check"></i>Enregistrer</button>
+          <button class="btn btn-secondary" id="reset-btn"><i data-lucide="rotate-ccw"></i><span class="i18n-fr">Réinitialiser</span><span class="i18n-en">Reset</span></button>
+          <button class="btn btn-primary" id="save-btn"><i data-lucide="check"></i><span class="i18n-fr">Enregistrer</span><span class="i18n-en">Save</span></button>
         </div>
       </div>
 
       <div class="settings-grid">
         <nav class="settings-nav">
-          <a class="active" href="#brand"><i data-lucide="palette"></i>Marque</a>
-          <a href="#persona"><i data-lucide="user"></i>Persona</a>
-          <a href="#balances"><i data-lucide="wallet"></i>Soldes</a>
-          <a href="#products"><i data-lucide="grid"></i>Produits</a>
-          <a href="#language"><i data-lucide="globe"></i>Langue</a>
-          <div class="nav-sect">Intégration</div>
+          <a class="active" href="#brand"><i data-lucide="palette"></i><span class="i18n-fr">Marque</span><span class="i18n-en">Brand</span></a>
+          <a href="#persona"><i data-lucide="user"></i><span class="i18n-fr">Persona</span><span class="i18n-en">Persona</span></a>
+          <a href="#balances"><i data-lucide="wallet"></i><span class="i18n-fr">Soldes</span><span class="i18n-en">Balances</span></a>
+          <a href="#products"><i data-lucide="grid"></i><span class="i18n-fr">Produits</span><span class="i18n-en">Products</span></a>
+          <a href="#language"><i data-lucide="globe"></i><span class="i18n-fr">Langue</span><span class="i18n-en">Language</span></a>
+          <div class="nav-sect"><span class="i18n-fr">Intégration</span><span class="i18n-en">Integration</span></div>
           <a href="#genesys"><i data-lucide="cloud"></i>Genesys Cloud</a>
-          <div class="nav-sect">Sécurité</div>
-          <a href="#security"><i data-lucide="lock"></i>Code secret</a>
+          <div class="nav-sect"><span class="i18n-fr">Sécurité</span><span class="i18n-en">Security</span></div>
+          <a href="#security"><i data-lucide="lock"></i><span class="i18n-fr">Code secret</span><span class="i18n-en">Passcode</span></a>
         </nav>
 
         <div id="panels-container">
@@ -123,32 +127,32 @@
           <div class="panel" id="brand">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="palette"></i></div>
-              <div class="panel-head-text"><h3>Marque & logo</h3><div class="sub">Affecte instantanément l'ensemble des écrans.</div></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Marque & logo</span><span class="i18n-en">Brand & logo</span></h3><div class="sub"><span class="i18n-fr">Affecte instantanément l'ensemble des écrans.</span><span class="i18n-en">Instantly applies to all screens.</span></div></div>
             </div>
             <div class="panel-body">
               <div class="form-2col">
-                <div class="field"><label>Nom de marque</label><input id="brand-name" value="Démo banque"></div>
-                <div class="field"><label>Slogan (optionnel)</label><input id="brand-slogan" value="Ta banque, en plus simple."></div>
+                <div class="field"><label><span class="i18n-fr">Nom de marque</span><span class="i18n-en">Brand name</span></label><input id="brand-name" value="Démo banque"></div>
+                <div class="field"><label><span class="i18n-fr">Slogan (optionnel)</span><span class="i18n-en">Tagline (optional)</span></label><input id="brand-slogan" value="Ta banque, en plus simple."></div>
               </div>
 
               <div>
-                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Logo</label>
+                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;"><span class="i18n-fr">Logo</span><span class="i18n-en">Logo</span></label>
                 <div class="upload" id="logo-upload" onclick="document.getElementById('logo-file-input').click()">
                   <div class="preview" id="logo-preview">
                     <img src="assets/logo-mark.svg" alt="" id="logo-preview-img">
                   </div>
                   <div style="flex:1;">
                     <div style="font-weight:600;" id="logo-filename">logo-démo-banque.svg</div>
-                    <div style="font-size:12px; color:var(--fg-muted);">SVG ou PNG transparent recommandé</div>
+                    <div style="font-size:12px; color:var(--fg-muted);"><span class="i18n-fr">SVG ou PNG transparent recommandé</span><span class="i18n-en">Transparent SVG or PNG recommended</span></div>
                   </div>
-                  <button class="btn btn-secondary btn-sm" type="button" onclick="event.stopPropagation(); document.getElementById('logo-file-input').click()"><i data-lucide="upload"></i>Remplacer</button>
+                  <button class="btn btn-secondary btn-sm" type="button" onclick="event.stopPropagation(); document.getElementById('logo-file-input').click()"><i data-lucide="upload"></i><span class="i18n-fr">Remplacer</span><span class="i18n-en">Replace</span></button>
                 </div>
                 <input type="file" id="logo-file-input" accept="image/*,.svg" style="display:none;">
-                <button type="button" id="logo-reset-btn" class="btn btn-ghost btn-sm" style="margin-top:6px; display:none; color:var(--danger);"><i data-lucide="trash-2"></i>Supprimer le logo custom</button>
+                <button type="button" id="logo-reset-btn" class="btn btn-ghost btn-sm" style="margin-top:6px; display:none; color:var(--danger);"><i data-lucide="trash-2"></i><span class="i18n-fr">Supprimer le logo custom</span><span class="i18n-en">Remove custom logo</span></button>
               </div>
 
               <div>
-                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:10px;">Couleur primaire</label>
+                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:10px;"><span class="i18n-fr">Couleur primaire</span><span class="i18n-en">Primary colour</span></label>
                 <div class="swatch-row" id="swatch-row">
                   <div class="swatch-pick selected" data-color="#FF4515" style="background:#FF4515;" title="Genesys Orange"></div>
                   <div class="swatch-pick" data-color="#E5097F" style="background:#E5097F;" title="Magenta Boursorama"></div>
@@ -166,7 +170,7 @@
                   <div class="av" id="preview-initials">SM</div>
                   <div>
                     <div class="greet" id="preview-greeting">Bonjour Sophie 👋</div>
-                    <div class="sub-text">Aperçu de la marque sur le tableau de bord</div>
+                    <div class="sub-text"><span class="i18n-fr">Aperçu de la marque sur le tableau de bord</span><span class="i18n-en">Brand preview on the dashboard</span></div>
                   </div>
                 </div>
               </div>
@@ -177,23 +181,23 @@
           <div class="panel" id="persona">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="user"></i></div>
-              <div class="panel-head-text"><h3>Persona client</h3><div class="sub">Personnalise le client affiché pendant la démo.</div></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Persona client</span><span class="i18n-en">Customer persona</span></h3><div class="sub"><span class="i18n-fr">Personnalise le client affiché pendant la démo.</span><span class="i18n-en">Customise the customer displayed during the demo.</span></div></div>
             </div>
             <div class="panel-body">
               <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
-                <div class="field"><label>Prénom</label><input id="p-first" value="Sophie"></div>
-                <div class="field"><label>Nom</label><input id="p-last" value="Martin"></div>
+                <div class="field"><label><span class="i18n-fr">Prénom</span><span class="i18n-en">First name</span></label><input id="p-first" value="Sophie"></div>
+                <div class="field"><label><span class="i18n-fr">Nom</span><span class="i18n-en">Last name</span></label><input id="p-last" value="Martin"></div>
                 <div class="field"><label>Email</label><input id="p-email" value="sophie.martin@example.fr" type="email"></div>
-                <div class="field"><label>Téléphone</label><input id="p-phone" value="06 12 34 56 78"></div>
-                <div class="field"><label>Profil type</label>
+                <div class="field"><label><span class="i18n-fr">Téléphone</span><span class="i18n-en">Phone</span></label><input id="p-phone" value="06 12 34 56 78"></div>
+                <div class="field"><label><span class="i18n-fr">Profil type</span><span class="i18n-en">Profile type</span></label>
                   <select id="p-type">
-                    <option value="Particulier — salariée cadre">Particulier — salariée cadre</option>
-                    <option value="Jeune actif — freelance">Jeune actif — freelance</option>
-                    <option value="Famille — comptes joints">Famille — comptes joints</option>
-                    <option value="Premium — patrimonial">Premium — patrimonial</option>
+                    <option value="Particulier — salariée cadre"><span class="i18n-fr">Particulier — salariée cadre</span><span class="i18n-en">Individual — salaried executive</span></option>
+                    <option value="Jeune actif — freelance"><span class="i18n-fr">Jeune actif — freelance</span><span class="i18n-en">Young professional — freelance</span></option>
+                    <option value="Famille — comptes joints"><span class="i18n-fr">Famille — comptes joints</span><span class="i18n-en">Family — joint accounts</span></option>
+                    <option value="Premium — patrimonial"><span class="i18n-fr">Premium — patrimonial</span><span class="i18n-en">Premium — wealth management</span></option>
                   </select>
                 </div>
-                <div class="field"><label>Conseiller(ère)</label>
+                <div class="field"><label><span class="i18n-fr">Conseiller(ère)</span><span class="i18n-en">Advisor</span></label>
                   <select id="p-advisor">
                     <option value="Camille Lefebvre — Paris 11">Camille Lefebvre — Paris 11</option>
                     <option value="Thomas Garnier — Lyon Bellecour">Thomas Garnier — Lyon Bellecour</option>
@@ -209,15 +213,15 @@
           <div class="panel" id="balances">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="wallet"></i></div>
-              <div class="panel-head-text"><h3>Soldes des comptes</h3><div class="sub">Visibles dans les démos et le dashboard.</div></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Soldes des comptes</span><span class="i18n-en">Account balances</span></h3><div class="sub"><span class="i18n-fr">Visibles dans les démos et le dashboard.</span><span class="i18n-en">Visible in demos and on the dashboard.</span></div></div>
             </div>
             <div class="panel-body">
               <div class="row-setting">
-                <div><div style="font-weight:600;">Compte courant</div><div style="font-size:12px; color:var(--fg-muted);">****6892</div></div>
+                <div><div style="font-weight:600;"><span class="i18n-fr">Compte courant</span><span class="i18n-en">Current account</span></div><div style="font-size:12px; color:var(--fg-muted);">****6892</div></div>
                 <div class="field" style="width:200px; margin:0;"><input id="b-checking" value="12 480,57" placeholder="0,00"></div>
               </div>
               <div class="row-setting">
-                <div><div style="font-weight:600;">Livret A</div><div style="font-size:12px; color:var(--fg-muted);">****2210</div></div>
+                <div><div style="font-weight:600;"><span class="i18n-fr">Livret A</span><span class="i18n-en">Savings account</span></div><div style="font-size:12px; color:var(--fg-muted);">****2210</div></div>
                 <div class="field" style="width:200px; margin:0;"><input id="b-savings" value="22 950,00" placeholder="0,00"></div>
               </div>
               <div class="row-setting">
@@ -231,13 +235,13 @@
           <div class="panel" id="products">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="grid"></i></div>
-              <div class="panel-head-text"><h3>Produits souscrits</h3><div class="sub">Active uniquement les produits utiles pour ton scénario démo.</div></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Produits souscrits</span><span class="i18n-en">Subscribed products</span></h3><div class="sub"><span class="i18n-fr">Active uniquement les produits utiles pour ton scénario démo.</span><span class="i18n-en">Enable only the products relevant to your demo scenario.</span></div></div>
             </div>
             <div class="panel-body">
-              <div class="product-row"><div class="product-icon"><i data-lucide="credit-card"></i></div><div><div style="font-weight:600;">Visa Premier</div><div style="font-size:12px;color:var(--fg-muted);">Carte premium · plafond 3 000 €</div></div><button class="toggle" id="prod-visaPremier"></button></div>
-              <div class="product-row"><div class="product-icon"><i data-lucide="credit-card"></i></div><div><div style="font-weight:600;">Visa Classic</div><div style="font-size:12px;color:var(--fg-muted);">Carte standard · plafond 1 500 €</div></div><button class="toggle" id="prod-visaClassic"></button></div>
-              <div class="product-row"><div class="product-icon"><i data-lucide="banknote"></i></div><div><div style="font-weight:600;">Prêt auto</div><div style="font-size:12px;color:var(--fg-muted);">Capital restant 8 420,12 € · 3,2 % TAEG</div></div><button class="toggle" id="prod-autoLoan"></button></div>
-              <div class="product-row"><div class="product-icon"><i data-lucide="trending-up"></i></div><div><div style="font-weight:600;">Assurance-vie</div><div style="font-size:12px;color:var(--fg-muted);">Inactif pour cette démo</div></div><button class="toggle" id="prod-assuranceVie"></button></div>
+              <div class="product-row"><div class="product-icon"><i data-lucide="credit-card"></i></div><div><div style="font-weight:600;">Visa Premier</div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Carte premium · plafond 3 000 €</span><span class="i18n-en">Premium card · €3,000 limit</span></div></div><button class="toggle" id="prod-visaPremier"></button></div>
+              <div class="product-row"><div class="product-icon"><i data-lucide="credit-card"></i></div><div><div style="font-weight:600;">Visa Classic</div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Carte standard · plafond 1 500 €</span><span class="i18n-en">Standard card · €1,500 limit</span></div></div><button class="toggle" id="prod-visaClassic"></button></div>
+              <div class="product-row"><div class="product-icon"><i data-lucide="banknote"></i></div><div><div style="font-weight:600;">Prêt auto</div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Capital restant 8 420,12 € · 3,2 % TAEG</span><span class="i18n-en">Outstanding €8,420.12 · 3.2% APR</span></div></div><button class="toggle" id="prod-autoLoan"></button></div>
+              <div class="product-row"><div class="product-icon"><i data-lucide="trending-up"></i></div><div><div style="font-weight:600;">Assurance-vie</div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Inactif pour cette démo</span><span class="i18n-en">Inactive for this demo</span></div></div><button class="toggle" id="prod-assuranceVie"></button></div>
             </div>
           </div>
 
@@ -245,11 +249,11 @@
           <div class="panel" id="language">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="globe"></i></div>
-              <div class="panel-head-text"><h3>Langue & ton</h3></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Langue & ton</span><span class="i18n-en">Language & tone</span></h3></div>
             </div>
             <div class="panel-body">
-              <div class="row-setting"><div><div style="font-weight:600;">Langue par défaut</div><div style="font-size:12px;color:var(--fg-muted);">Bilingue · le client peut basculer FR/EN</div></div><div style="display:flex;gap:8px;"><span class="badge brand">FR</span><span class="badge neutral">EN</span></div></div>
-              <div class="row-setting"><div><div style="font-weight:600;">Tutoiement</div><div style="font-size:12px;color:var(--fg-muted);">Active le ton décontracté de la marque</div></div><button class="toggle" id="toggle-tutoiement"></button></div>
+              <div class="row-setting"><div><div style="font-weight:600;"><span class="i18n-fr">Langue par défaut</span><span class="i18n-en">Default language</span></div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Bilingue · le client peut basculer FR/EN</span><span class="i18n-en">Bilingual · customer can switch FR/EN</span></div></div><div style="display:flex;gap:8px;"><span id="lang-btn-fr" class="badge brand" style="cursor:pointer;" onclick="selectLang('fr')">FR</span><span id="lang-btn-en" class="badge neutral" style="cursor:pointer;" onclick="selectLang('en')">EN</span></div></div>
+              <div class="row-setting"><div><div style="font-weight:600;"><span class="i18n-fr">Tutoiement</span><span class="i18n-en">Informal tone</span></div><div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Active le ton décontracté de la marque</span><span class="i18n-en">Enables the brand's informal voice</span></div></div><button class="toggle" id="toggle-tutoiement"></button></div>
             </div>
           </div>
 
@@ -257,12 +261,12 @@
           <div class="panel" id="genesys">
             <div class="panel-head">
               <div class="panel-head-icon"><img src="assets/genesys.png" alt="Genesys"></div>
-              <div class="panel-head-text"><h3>Intégration Genesys Cloud</h3><div class="sub">Connecte cette démo à ton org Genesys Cloud pour activer chat, web messaging et co-browse en direct.</div></div>
-              <span class="badge-connected">Connecté</span>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Intégration Genesys Cloud</span><span class="i18n-en">Genesys Cloud Integration</span></h3><div class="sub"><span class="i18n-fr">Connecte cette démo à ton org Genesys Cloud pour activer chat, web messaging et co-browse en direct.</span><span class="i18n-en">Connect this demo to your Genesys Cloud org to enable live chat, web messaging and co-browse.</span></div></div>
+              <span class="badge-connected"><span class="i18n-fr">Connecté</span><span class="i18n-en">Connected</span></span>
             </div>
             <div class="panel-body">
               <div class="field">
-                <label>Région AWS d'hébergement</label>
+                <label><span class="i18n-fr">Région AWS d'hébergement</span><span class="i18n-en">AWS hosting region</span></label>
                 <select id="gc-region">
                   <option value="https://login.mypurecloud.com">us-east-1 (Virginia) — https://login.mypurecloud.com</option>
                   <option value="https://login.usw2.pure.cloud">us-west-2 (Oregon) — https://login.usw2.pure.cloud</option>
@@ -279,7 +283,7 @@
                   <option value="https://login.mypurecloud.jp">ap-northeast-1 (Tokyo) — https://login.mypurecloud.jp</option>
                   <option value="https://login.mypurecloud.com.au">ap-southeast-2 (Sydney) — https://login.mypurecloud.com.au</option>
                 </select>
-                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;">L'URL de login Genesys Cloud sera utilisée pour l'OAuth implicit grant.</div>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">L'URL de login Genesys Cloud sera utilisée pour l'OAuth implicit grant.</span><span class="i18n-en">The Genesys Cloud login URL will be used for the OAuth implicit grant.</span></div>
               </div>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
                 <div class="field"><label>Deployment ID</label><input id="gc-deployment" style="font-family:var(--font-mono); font-size:13px;" value="3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
@@ -288,22 +292,22 @@
                   <label>Client Secret</label>
                   <div class="secret-wrap">
                     <input type="password" id="gc-secret" style="font-family:var(--font-mono); font-size:13px;" value="k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0">
-                    <button type="button" class="reveal-btn" id="secret-reveal"><i data-lucide="eye"></i>Afficher</button>
+                    <button type="button" class="reveal-btn" id="secret-reveal"><i data-lucide="eye"></i><span class="i18n-fr">Afficher</span><span class="i18n-en">Show</span></button>
                   </div>
-                  <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;">Stocké chiffré. Révoque depuis l'admin Genesys Cloud si compromis.</div>
+                  <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;"><span class="i18n-fr">Stocké chiffré. Révoque depuis l'admin Genesys Cloud si compromis.</span><span class="i18n-en">Stored encrypted. Revoke from the Genesys Cloud admin if compromised.</span></div>
                 </div>
               </div>
               <div style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
                 <i data-lucide="shield-check" style="width:18px;height:18px; color:var(--success-700); flex-shrink:0;"></i>
-                <span style="flex:1;">Dernière connexion OAuth réussie il y a 4 minutes · token valide jusqu'au 09 mai 2026 à 18:42.</span>
-                <button class="btn btn-secondary btn-sm" onclick="alert('Test de connexion Genesys Cloud…')"><i data-lucide="refresh-cw"></i>Tester</button>
+                <span style="flex:1;"><span class="i18n-fr">Dernière connexion OAuth réussie il y a 4 minutes · token valide jusqu'au 09 mai 2026 à 18:42.</span><span class="i18n-en">Last successful OAuth login 4 minutes ago · token valid until 09 May 2026 at 18:42.</span></span>
+                <button class="btn btn-secondary btn-sm" onclick="alert(document.documentElement.lang==='en'?'Testing Genesys Cloud connection…':'Test de connexion Genesys Cloud…')"><i data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span class="i18n-en">Test</span></button>
               </div>
 
               <!-- Additional JS field -->
               <div class="field" style="margin-top:8px;">
-                <label>JavaScript additionnel — envoi de message</label>
-                <textarea id="gc-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;" placeholder="// Code exécuté lors de l'envoi d'un message en messagerie">alert("création d'un workitem");</textarea>
-                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;">Ce code est exécuté à chaque envoi de message dans la messagerie. Remplacez l'alert par l'appel Genesys Web Messaging.</div>
+                <label><span class="i18n-fr">JavaScript additionnel — envoi de message</span><span class="i18n-en">Additional JavaScript — on message send</span></label>
+                <textarea id="gc-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;" placeholder="// Code exécuté lors de l'envoi… / Code executed on each message send…">alert("création d'un workitem");</textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Ce code est exécuté à chaque envoi de message dans la messagerie. Remplacez l'alert par l'appel Genesys Web Messaging.</span><span class="i18n-en">This code runs on every message send in the inbox. Replace the alert with your Genesys Web Messaging call.</span></div>
               </div>
             </div>
           </div>
@@ -312,14 +316,14 @@
           <div class="panel" id="security">
             <div class="panel-head">
               <div class="panel-head-icon"><i data-lucide="lock"></i></div>
-              <div class="panel-head-text"><h3>Code secret</h3><div class="sub">Modifie le code d'accès à ce profil de démo.</div></div>
+              <div class="panel-head-text"><h3><span class="i18n-fr">Code secret</span><span class="i18n-en">Passcode</span></h3><div class="sub"><span class="i18n-fr">Modifie le code d'accès à ce profil de démo.</span><span class="i18n-en">Change the access passcode for this demo profile.</span></div></div>
             </div>
             <div class="panel-body">
               <div class="pin-row">
-                <div class="field"><label>Nouveau code (6 chiffres)</label><input id="new-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
-                <div class="field"><label>Confirmer le code</label><input id="confirm-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
+                <div class="field"><label><span class="i18n-fr">Nouveau code (6 chiffres)</span><span class="i18n-en">New passcode (6 digits)</span></label><input id="new-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
+                <div class="field"><label><span class="i18n-fr">Confirmer le code</span><span class="i18n-en">Confirm passcode</span></label><input id="confirm-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
               </div>
-              <div style="font-size:12px; color:var(--fg-muted);">Laisse vide pour conserver le code actuel.</div>
+              <div style="font-size:12px; color:var(--fg-muted);"><span class="i18n-fr">Laisse vide pour conserver le code actuel.</span><span class="i18n-en">Leave blank to keep the current passcode.</span></div>
             </div>
           </div>
 
@@ -330,13 +334,21 @@
   </main>
 
   <!-- Toast notification -->
-  <div class="toast" id="toast"><i data-lucide="check-circle"></i><span id="toast-msg">Paramètres enregistrés</span></div>
+  <div class="toast" id="toast"><i data-lucide="check-circle"></i><span id="toast-msg"><span class="i18n-fr">Paramètres enregistrés</span><span class="i18n-en">Settings saved</span></span></div>
 
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
 
     let currentColor = '#FF4515';
+    let currentLang = 'fr';
+
+    function selectLang(lang) {
+      currentLang = lang;
+      document.getElementById('lang-btn-fr').className = lang === 'fr' ? 'badge brand' : 'badge neutral';
+      document.getElementById('lang-btn-en').className = lang === 'en' ? 'badge brand' : 'badge neutral';
+      document.documentElement.lang = lang;
+    }
 
     function showToast(msg, isError) {
       const t = document.getElementById('toast');
@@ -390,6 +402,7 @@
       setToggle('prod-assuranceVie', !!prod.assuranceVie);
 
       // Language
+      selectLang(p.language || 'fr');
       setToggle('toggle-tutoiement', p.tutoiement !== false);
 
       // Genesys
@@ -443,10 +456,11 @@
     function saveProfile() {
       const newPin = document.getElementById('new-pin').value;
       const confirmPin = document.getElementById('confirm-pin').value;
+      const lang = document.documentElement.lang || 'fr';
 
       if (newPin) {
-        if (!/^\d{6}$/.test(newPin)) { showToast('Le nouveau code doit contenir exactement 6 chiffres.', true); return; }
-        if (newPin !== confirmPin) { showToast('Les deux codes ne correspondent pas.', true); return; }
+        if (!/^\d{6}$/.test(newPin)) { showToast(lang === 'en' ? 'New passcode must be exactly 6 digits.' : 'Le nouveau code doit contenir exactement 6 chiffres.', true); return; }
+        if (newPin !== confirmPin) { showToast(lang === 'en' ? 'Passcodes do not match.' : 'Les deux codes ne correspondent pas.', true); return; }
       }
 
       const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
@@ -483,6 +497,7 @@
         },
         additionalJS: document.getElementById('gc-additional-js').value,
         tutoiement: getToggle('toggle-tutoiement'),
+        language: currentLang,
       };
 
       if (newPin) updates.pin = newPin;
@@ -493,7 +508,7 @@
 
       document.getElementById('new-pin').value = '';
       document.getElementById('confirm-pin').value = '';
-      showToast('✓ Paramètres enregistrés avec succès');
+      showToast(lang === 'en' ? '✓ Settings saved successfully' : '✓ Paramètres enregistrés avec succès');
     }
 
     document.addEventListener('DOMContentLoaded', () => {

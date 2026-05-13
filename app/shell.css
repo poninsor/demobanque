@@ -184,6 +184,27 @@ body {
 .toggle.off { background: var(--neutral-200); }
 .toggle.off::after { right: auto; left: 2px; }
 
+/* --- Bilingual i18n -------------------------------------------------------- */
+html[lang="en"] .i18n-fr { display: none !important; }
+html[lang="fr"] .i18n-en { display: none !important; }
+
+.lang-switcher {
+  display: flex; align-items: center; justify-content: center;
+  gap: 2px; padding: 6px 8px;
+}
+.lang-btn {
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; padding: 4px 9px; border-radius: 8px;
+  border: 1px solid transparent; background: none; cursor: pointer;
+  color: var(--fg-muted); transition: all 120ms var(--ease-out);
+}
+.lang-btn:hover { background: var(--bg-sunken); color: var(--fg); }
+html[lang="fr"] .lang-btn[data-lang="fr"],
+html[lang="en"] .lang-btn[data-lang="en"] {
+  background: var(--brand-50); color: var(--brand-700);
+  border-color: var(--brand-border);
+}
+
 /* --- Responsive ----------------------------------------------------------- */
 @media (max-width: 1024px) {
   body { grid-template-columns: 72px 1fr; }

@@ -3,14 +3,24 @@
    ============================================================================= */
 const DemoConfig = (() => {
   const STORAGE_KEY = 'demobank_v1';
+  const LANG_KEY = 'demobank_lang';
 
-  const DEFAULT_MESSAGES = [
-    { id: 'd1', from: 'them', initials: 'CL', text: "Bonjour Sophie 👋 J'ai bien reçu ta demande pour l'attestation de domiciliation, je m'en occupe ce matin.", time: '10:42' },
-    { id: 'd2', from: 'me', text: "Super merci ! Tu peux me la signer électroniquement ?", time: '11:14' },
-    { id: 'd3', from: 'them', initials: 'CL', text: "Bien sûr. Tu la recevras dans la messagerie sécurisée — pas besoin de te déplacer.", time: '11:16' },
-    { id: 'd4', from: 'them', initials: 'CL', type: 'file', fileName: 'Attestation domiciliation.pdf', fileSize: 'PDF · 124 ko · signé', time: '14:18' },
-    { id: 'd5', from: 'them', initials: 'CL', text: "Voilà, c'est prêt. Tu me dis si tu as besoin d'autre chose pour ton dossier travaux.", time: '14:21' }
-  ];
+  const DEFAULT_MESSAGES = {
+    fr: [
+      { id: 'd1', from: 'them', initials: 'CL', text: "Bonjour Sophie 👋 J'ai bien reçu ta demande pour l'attestation de domiciliation, je m'en occupe ce matin.", time: '10:42' },
+      { id: 'd2', from: 'me', text: "Super merci ! Tu peux me la signer électroniquement ?", time: '11:14' },
+      { id: 'd3', from: 'them', initials: 'CL', text: "Bien sûr. Tu la recevras dans la messagerie sécurisée — pas besoin de te déplacer.", time: '11:16' },
+      { id: 'd4', from: 'them', initials: 'CL', type: 'file', fileName: 'Attestation domiciliation.pdf', fileSize: 'PDF · 124 ko · signé', time: '14:18' },
+      { id: 'd5', from: 'them', initials: 'CL', text: "Voilà, c'est prêt. Tu me dis si tu as besoin d'autre chose pour ton dossier travaux.", time: '14:21' }
+    ],
+    en: [
+      { id: 'd1', from: 'them', initials: 'CL', text: "Hi Sophie 👋 I received your request for the proof of address — I'll take care of it this morning.", time: '10:42' },
+      { id: 'd2', from: 'me', text: "Great, thank you! Can you sign it electronically?", time: '11:14' },
+      { id: 'd3', from: 'them', initials: 'CL', text: "Of course. You'll receive it in your secure inbox — no need to come in.", time: '11:16' },
+      { id: 'd4', from: 'them', initials: 'CL', type: 'file', fileName: 'Proof of address.pdf', fileSize: 'PDF · 124 KB · signed', time: '14:18' },
+      { id: 'd5', from: 'them', initials: 'CL', text: "There you go, all done. Let me know if you need anything else for your home improvement project.", time: '14:21' }
+    ]
+  };
 
   const DEFAULT_PROFILE = {
     pin: '123456',
@@ -26,7 +36,7 @@ const DemoConfig = (() => {
       profileType: 'Particulier — salariée cadre',
       advisor: 'Camille Lefebvre — Paris 11'
     },
-    balances: { checking: '12 480,57', savings: '22 950,00', pel: '0,00' },
+    balances: { checking: '12 480,57', savings: '22 950,00', pel: '0,00' },
     products: { visaPremier: true, visaClassic: true, autoLoan: true, assuranceVie: false },
     genesys: {
       region: 'https://login.mypurecloud.ie',
@@ -35,7 +45,7 @@ const DemoConfig = (() => {
       clientSecret: 'k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0'
     },
     additionalJS: 'alert("création d\'un workitem");',
-    language: 'fr',
+    language: null,
     tutoiement: true,
     messages: null
   };
@@ -102,19 +112,34 @@ const DemoConfig = (() => {
   }
   function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 
+  // ── Global language (pre-login) ─────────────────────────────────────────────
+  function getGlobalLang() {
+    return localStorage.getItem(LANG_KEY) ||
+      (typeof navigator !== 'undefined' && navigator.language && navigator.language.startsWith('fr') ? 'fr' : 'en');
+  }
+
+  function setGlobalLang(lang) {
+    localStorage.setItem(LANG_KEY, lang);
+    if (typeof document !== 'undefined') document.documentElement.lang = lang;
+  }
+
   // ── Auth ────────────────────────────────────────────────────────────────────
   function login(accountId, pin) {
-    if (!/^\d{8}$/.test(accountId)) return { ok: false, msg: 'Le numéro de compte doit contenir 8 chiffres.' };
-    if (!/^\d{6}$/.test(pin)) return { ok: false, msg: 'Le code secret doit contenir 6 chiffres.' };
+    const lang = getGlobalLang();
+    const isEn = lang === 'en';
+    if (!/^\d{8}$/.test(accountId)) return { ok: false, msg: isEn ? 'Account number must be 8 digits.' : 'Le numéro de compte doit contenir 8 chiffres.' };
+    if (!/^\d{6}$/.test(pin)) return { ok: false, msg: isEn ? 'Passcode must be 6 digits.' : 'Le code secret doit contenir 6 chiffres.' };
     const d = getData();
     if (!d.accounts[accountId]) {
-      if (pin !== '123456') return { ok: false, msg: 'Compte inconnu. Utilisez le code 123456 pour créer un nouveau compte.' };
-      d.accounts[accountId] = JSON.parse(JSON.stringify(DEFAULT_PROFILE));
+      if (pin !== '123456') return { ok: false, msg: isEn ? 'Unknown account. Use passcode 123456 to create a new profile.' : 'Compte inconnu. Utilisez le code 123456 pour créer un nouveau compte.' };
+      const profile = JSON.parse(JSON.stringify(DEFAULT_PROFILE));
+      profile.language = lang;
+      d.accounts[accountId] = profile;
       d.current = accountId;
       saveData(d);
       return { ok: true, isNew: true };
     }
-    if (d.accounts[accountId].pin !== pin) return { ok: false, msg: 'Code secret incorrect.' };
+    if (d.accounts[accountId].pin !== pin) return { ok: false, msg: isEn ? 'Incorrect passcode.' : 'Code secret incorrect.' };
     d.current = accountId;
     saveData(d);
     return { ok: true, isNew: false };
@@ -175,29 +200,43 @@ const DemoConfig = (() => {
     document.querySelectorAll('[data-persona-initials]').forEach(el => el.textContent = initials);
 
     const bal = profile.balances || DEFAULT_PROFILE.balances;
-    document.querySelectorAll('[data-balance-checking]').forEach(el => el.textContent = `${bal.checking} €`);
-    document.querySelectorAll('[data-balance-savings]').forEach(el => el.textContent = `${bal.savings} €`);
-    document.querySelectorAll('[data-balance-pel]').forEach(el => el.textContent = `${bal.pel} €`);
+    document.querySelectorAll('[data-balance-checking]').forEach(el => el.textContent = `${bal.checking} €`);
+    document.querySelectorAll('[data-balance-savings]').forEach(el => el.textContent = `${bal.savings} €`);
+    document.querySelectorAll('[data-balance-pel]').forEach(el => el.textContent = `${bal.pel} €`);
 
     if (profile.logoData) {
       document.querySelectorAll('[data-logo]').forEach(el => { el.src = profile.logoData; el.alt = brand; });
     }
 
     document.title = document.title.replace(/^Démo banque/, brand);
+    const lang = profile.language || getGlobalLang();
+    root.lang = lang;
+  }
+
+  // ── Language switcher ───────────────────────────────────────────────────────
+  function setLanguage(lang) {
+    setGlobalLang(lang);
+    const p = getProfile();
+    if (p) deepUpdateProfile('language', lang);
   }
 
   // ── Messages ────────────────────────────────────────────────────────────────
   function getMessages() {
     const p = getProfile();
-    if (!p) return JSON.parse(JSON.stringify(DEFAULT_MESSAGES));
-    return (p.messages && p.messages.length > 0) ? p.messages : JSON.parse(JSON.stringify(DEFAULT_MESSAGES));
+    const lang = (p && p.language) || getGlobalLang();
+    const defaults = DEFAULT_MESSAGES[lang] || DEFAULT_MESSAGES.fr;
+    if (!p) return JSON.parse(JSON.stringify(defaults));
+    return (p.messages && p.messages.length > 0) ? p.messages : JSON.parse(JSON.stringify(defaults));
   }
 
   function addMessage(msg) {
     const d = getData();
     if (!d.current) return;
     const p = d.accounts[d.current];
-    if (!p.messages || p.messages.length === 0) p.messages = JSON.parse(JSON.stringify(DEFAULT_MESSAGES));
+    if (!p.messages || p.messages.length === 0) {
+      const lang = p.language || getGlobalLang();
+      p.messages = JSON.parse(JSON.stringify(DEFAULT_MESSAGES[lang] || DEFAULT_MESSAGES.fr));
+    }
     p.messages.push(msg);
     saveData(d);
   }
@@ -212,9 +251,10 @@ const DemoConfig = (() => {
   return {
     DEFAULT_PROFILE,
     generatePalette,
+    getGlobalLang, setGlobalLang,
     login, logout, requireAuth,
     getProfile, updateProfile, deepUpdateProfile,
-    applyBranding,
+    applyBranding, setLanguage,
     getMessages, addMessage,
     executeAdditionalJS
   };

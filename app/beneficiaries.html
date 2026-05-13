@@ -29,50 +29,54 @@
 <body>
   <aside class="sidebar">
     <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
-    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
-    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
-    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
-    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
-    <a class="nav-link active" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
-    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
-    <div class="nav-section">Aide</div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
-    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
-    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de bord</span><span class="i18n-en">Dashboard</span></span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
+    <a class="nav-link active" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
+    <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="fr" onclick="DemoConfig.setLanguage('fr')">FR</button>
+      <button class="lang-btn" data-lang="en" onclick="DemoConfig.setLanguage('en')">EN</button>
+    </div>
     <div class="spacer"></div>
     <div class="profile-card" id="profile-card">
       <div class="av" data-persona-initials>SM</div>
-      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role">Compte particulier</span></div>
-      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i>Se déconnecter</button></div>
+      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role"><span class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span></div>
+      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button></div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="search"><i data-lucide="search"></i><span>Rechercher…</span></div>
+      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher…</span><span class="i18n-en">Search…</span></span></div>
       <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
     </div>
     <div class="page">
       <div class="page-header">
         <div class="page-title">
-          <h1>Bénéficiaires</h1>
-          <div class="sub">7 personnes & organismes enregistrés.</div>
+          <h1><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></h1>
+          <div class="sub"><span class="i18n-fr">7 personnes & organismes enregistrés.</span><span class="i18n-en">7 individuals & organisations saved.</span></div>
         </div>
-        <button class="btn btn-primary" onclick="alert('Ajout bénéficiaire')"><i data-lucide="plus"></i>Ajouter</button>
+        <button class="btn btn-primary" onclick="alert(document.documentElement.lang==='en'?'Add payee':'Ajout bénéficiaire')"><i data-lucide="plus"></i><span class="i18n-fr">Ajouter</span><span class="i18n-en">Add</span></button>
       </div>
       <div class="toolbar">
-        <div class="search-input"><i data-lucide="search" style="width:16px;height:16px;color:var(--fg-muted);"></i><input placeholder="Rechercher un bénéficiaire ou un IBAN…"></div>
-        <button class="btn btn-secondary btn-sm"><i data-lucide="filter"></i>Tous</button>
-        <button class="btn btn-secondary btn-sm"><i data-lucide="upload"></i>Importer</button>
+        <div class="search-input"><i data-lucide="search" style="width:16px;height:16px;color:var(--fg-muted);"></i><input placeholder="Rechercher un bénéficiaire ou un IBAN… / Search payees or IBAN…"></div>
+        <button class="btn btn-secondary btn-sm"><i data-lucide="filter"></i><span class="i18n-fr">Tous</span><span class="i18n-en">All</span></button>
+        <button class="btn btn-secondary btn-sm"><i data-lucide="upload"></i><span class="i18n-fr">Importer</span><span class="i18n-en">Import</span></button>
       </div>
 
-      <div class="group-label">Favoris</div>
+      <div class="group-label"><span class="i18n-fr">Favoris</span><span class="i18n-en">Favourites</span></div>
       <div class="b-list">
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #ff7a4a, #b62800);">MD</div>
-          <div><div class="b-name">Marie Dubois</div><div class="b-meta">Loyer · ajouté le 12 mars 2024</div></div>
+          <div><div class="b-name">Marie Dubois</div><div class="b-meta"><span class="i18n-fr">Loyer · ajouté le 12 mars 2024</span><span class="i18n-en">Rent · added 12 Mar 2024</span></div></div>
           <div class="iban">FR76 2004 1010 0500 1234 4892<span class="b">CRLY · BNP Paribas</span></div>
-          <span class="badge brand">Récent</span>
+          <span class="badge brand"><span class="i18n-fr">Récent</span><span class="i18n-en">Recent</span></span>
           <div class="b-actions">
             <button class="icon-btn" style="width:36px;height:36px;" onclick="window.location.href='transfer.html'"><i data-lucide="arrow-right-left"></i></button>
             <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button>
@@ -80,9 +84,9 @@
         </div>
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #6366f1, #4338ca);">LB</div>
-          <div><div class="b-name">Lucas Bernard</div><div class="b-meta">Frère · ajouté le 5 fév 2023</div></div>
+          <div><div class="b-name">Lucas Bernard</div><div class="b-meta"><span class="i18n-fr">Frère · ajouté le 5 fév 2023</span><span class="i18n-en">Brother · added 5 Feb 2023</span></div></div>
           <div class="iban">FR14 3000 4001 0010 0011 1147<span class="b">CRLY · BNP Paribas</span></div>
-          <span class="badge neutral">Particulier</span>
+          <span class="badge neutral"><span class="i18n-fr">Particulier</span><span class="i18n-en">Individual</span></span>
           <div class="b-actions">
             <button class="icon-btn" style="width:36px;height:36px;" onclick="window.location.href='transfer.html'"><i data-lucide="arrow-right-left"></i></button>
             <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button>
@@ -90,7 +94,7 @@
         </div>
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #00a35a, #00723f);">JM</div>
-          <div><div class="b-name">Julie Moreau</div><div class="b-meta">Coloc · ajouté le 1 jan 2025</div></div>
+          <div><div class="b-name">Julie Moreau</div><div class="b-meta"><span class="i18n-fr">Coloc · ajouté le 1 jan 2025</span><span class="i18n-en">Flatmate · added 1 Jan 2025</span></div></div>
           <div class="iban">FR11 1382 5002 0010 1010 7720<span class="b">SOGE · Société Générale</span></div>
           <span class="badge neutral">Particulier</span>
           <div class="b-actions">
@@ -100,25 +104,25 @@
         </div>
       </div>
 
-      <div class="group-label">Organismes</div>
+      <div class="group-label"><span class="i18n-fr">Organismes</span><span class="i18n-en">Organisations</span></div>
       <div class="b-list">
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #0066b3, #00427a); font-size:11px;">EDF</div>
-          <div><div class="b-name">EDF — Direct Énergie</div><div class="b-meta">Énergie · prélèvement mensuel</div></div>
+          <div><div class="b-name">EDF — Direct Énergie</div><div class="b-meta"><span class="i18n-fr">Énergie · prélèvement mensuel</span><span class="i18n-en">Energy · monthly direct debit</span></div></div>
           <div class="iban">FR76 3000 1004 0100 0001 0001<span class="b">EDFOFR · Domiciliation Lyon</span></div>
-          <span class="badge info">Mandat actif</span>
+          <span class="badge info"><span class="i18n-fr">Mandat actif</span><span class="i18n-en">Active mandate</span></span>
           <div class="b-actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
         </div>
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #f59e0b, #b45309); font-size:11px;">CAF</div>
-          <div><div class="b-name">CAF Hauts-de-Seine</div><div class="b-meta">Allocations · virements entrants</div></div>
+          <div><div class="b-name">CAF Hauts-de-Seine</div><div class="b-meta"><span class="i18n-fr">Allocations · virements entrants</span><span class="i18n-en">Benefits · incoming transfers</span></div></div>
           <div class="iban">FR23 3000 1004 0100 0099 0099<span class="b">Trésor public</span></div>
-          <span class="badge success">Reçu mensuel</span>
+          <span class="badge success"><span class="i18n-fr">Reçu mensuel</span><span class="i18n-en">Monthly receipt</span></span>
           <div class="b-actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
         </div>
         <div class="b-row">
           <div class="b-av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12); font-size:11px;">DGFiP</div>
-          <div><div class="b-name">Trésor Public — Impôts</div><div class="b-meta">Impôt sur le revenu</div></div>
+          <div><div class="b-name">Trésor Public — Impôts</div><div class="b-meta"><span class="i18n-fr">Impôt sur le revenu</span><span class="i18n-en">Income tax</span></div></div>
           <div class="iban">FR99 3000 1000 6400 0099 9999<span class="b">CCP Trésor</span></div>
           <span class="badge info">Mandat actif</span>
           <div class="b-actions"><button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="more-horizontal"></i></button></div>
