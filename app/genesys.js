@@ -136,28 +136,66 @@ const DemoGenesys = (() => {
 
   // ── Implicit grant token cache ───────────────────────────────────────────────
 
+  const GC_TOKEN_KEY = 'demobank_gc_token';
   let _gcToken = null;
   let _gcTokenExpiry = 0;
 
-  // On page load: detect return from Genesys implicit grant redirect (token in URL hash)
+  function _saveToken() {
+    try {
+      const clientId = ((DemoConfig.getProfile() || {}).genesys || {}).clientId || '';
+      localStorage.setItem(GC_TOKEN_KEY, JSON.stringify({ token: _gcToken, expiry: _gcTokenExpiry, clientId }));
+      console.log('[DemoGenesys] _saveToken: token persisted to localStorage');
+    } catch (e) {
+      console.warn('[DemoGenesys] _saveToken: failed', e);
+    }
+  }
+
+  function _loadToken() {
+    try {
+      const stored = JSON.parse(localStorage.getItem(GC_TOKEN_KEY));
+      if (!stored || !stored.token || !stored.expiry) return;
+      const clientId = ((DemoConfig.getProfile() || {}).genesys || {}).clientId || '';
+      if (stored.clientId !== clientId) { console.log('[DemoGenesys] _loadToken: clientId mismatch, skipping'); return; }
+      if (Date.now() >= stored.expiry) { console.log('[DemoGenesys] _loadToken: token expired'); return; }
+      _gcToken = stored.token;
+      _gcTokenExpiry = stored.expiry;
+      console.log('[DemoGenesys] _loadToken: valid token loaded from localStorage');
+    } catch (e) {
+      console.warn('[DemoGenesys] _loadToken: failed', e);
+    }
+  }
+
+  // On page load: detect return from implicit grant redirect, else restore from localStorage
   (function () {
     const params = new URLSearchParams(window.location.hash.slice(1));
     const token = params.get('access_token');
-    if (!token) return;
-    _gcToken = token;
-    const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
-    _gcTokenExpiry = Date.now() + expiresIn * 1000 - 60000; // 60s safety margin
-    console.log('[DemoGenesys] implicit grant return: token received, expires in', expiresIn, 's');
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-    const pending = sessionStorage.getItem('_gc_pending');
-    if (pending === 'testConnection') {
-      sessionStorage.removeItem('_gc_pending');
-      setTimeout(() => showNotif(
-        t('Connexion Genesys Cloud réussie ✓\nLe token OAuth a été obtenu avec succès.',
-          'Genesys Cloud connection successful ✓\nOAuth token obtained successfully.'),
-        false
-      ), 200);
+    if (token) {
+      _gcToken = token;
+      const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
+      _gcTokenExpiry = Date.now() + expiresIn * 1000 - 60000;
+      console.log('[DemoGenesys] implicit grant return: token received, expires in', expiresIn, 's');
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      _saveToken();
+      // Post-login redirect set by index.html before triggering auth
+      const postLogin = sessionStorage.getItem('_gc_post_login_redirect');
+      if (postLogin) {
+        sessionStorage.removeItem('_gc_post_login_redirect');
+        window.location.href = postLogin;
+        return;
+      }
+      // testConnection pending action set by settings.html
+      const pending = sessionStorage.getItem('_gc_pending');
+      if (pending === 'testConnection') {
+        sessionStorage.removeItem('_gc_pending');
+        setTimeout(() => showNotif(
+          t('Connexion Genesys Cloud réussie ✓\nLe token OAuth a été obtenu avec succès.',
+            'Genesys Cloud connection successful ✓\nOAuth token obtained successfully.'),
+          false
+        ), 200);
+      }
+      return;
     }
+    _loadToken();
   })();
 
   // OAuth implicit grant → Bearer token (no client secret required)
@@ -180,7 +218,7 @@ const DemoGenesys = (() => {
     const authUrl = `https://login.${domain}/oauth/authorize?response_type=token&client_id=${encodeURIComponent(gc.clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
     console.log('[DemoGenesys] fetchToken: redirect → implicit grant', authUrl);
     window.location.href = authUrl;
-    return new Promise(() => {}); // never resolves — page is navigating away
+    return new Promise(() => { }); // never resolves — page is navigating away
   }
 
   // ── Public API ───────────────────────────────────────────────────────────────
@@ -349,7 +387,7 @@ const DemoGenesys = (() => {
       console.log('[DemoGenesys] fetchWaitTime →', mediaType, url);
       let token;
       try {
-        token = await fetchToken(gc, { noRedirect: true });
+        token = await fetchToken(gc, { noRedirect: false });
       } catch (e) {
         if (e.message === 'no_token') {
           console.warn('[DemoGenesys] fetchWaitTime: not authenticated yet, skipping');
@@ -407,6 +445,34 @@ const DemoGenesys = (() => {
       } finally {
         setButtonLoading(btn, false);
       }
+    },
+
+    /** Return the current token status. */
+    getTokenStatus() {
+      if (_gcToken && Date.now() < _gcTokenExpiry) {
+        return { connected: true, expiresAt: new Date(_gcTokenExpiry) };
+      }
+      return { connected: false, expiresAt: null };
+    },
+
+    /** Clear the token from memory and localStorage (e.g. when clientId changes). */
+    clearToken() {
+      _gcToken = null;
+      _gcTokenExpiry = 0;
+      try { localStorage.removeItem(GC_TOKEN_KEY); } catch (e) { }
+      console.log('[DemoGenesys] clearToken: token cleared');
+    },
+
+    /**
+     * Redirect to Genesys implicit grant authorization.
+     * @param {{ region: string, clientId: string }} gc
+     * @param {string} redirectUri  Full URL of the page to return to after auth
+     */
+    redirectForAuth(gc, redirectUri) {
+      const domain = regionDomain(gc.region);
+      const url = `https://login.${domain}/oauth/authorize?response_type=token&client_id=${encodeURIComponent(gc.clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      console.log('[DemoGenesys] redirectForAuth →', url);
+      window.location.href = url;
     },
   };
 })();

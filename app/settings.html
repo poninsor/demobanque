@@ -851,11 +851,8 @@
               </div>
               <div
                 style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
-                <i data-lucide="shield-check"
-                  style="width:18px;height:18px; color:var(--success-700); flex-shrink:0;"></i>
-                <span style="flex:1;"><span class="i18n-fr">Dernière connexion OAuth réussie il y a 4 minutes · token
-                    valide jusqu'au 09 mai 2026 à 18:42.</span><span class="i18n-en">Last successful OAuth login 4
-                    minutes ago · token valid until 09 May 2026 at 18:42.</span></span>
+                <span id="gc-oauth-icon" style="flex-shrink:0; display:flex; align-items:center;"><i data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i></span>
+                <span id="gc-oauth-text" style="flex:1; color:var(--fg-muted);">—</span>
                 <button class="btn btn-secondary btn-sm" id="gc-test-btn" onclick="testGenesysConnection()"><i
                     data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span
                     class="i18n-en">Test</span></button>
@@ -932,12 +929,38 @@
   <script>
     if (!DemoConfig.requireAuth()) throw '';
 
-    function testGenesysConnection() {
+    async function testGenesysConnection() {
       const gc = {
         region: document.getElementById('gc-region').value,
         clientId: document.getElementById('gc-client').value.trim(),
       };
-      DemoGenesys.testConnection(gc, document.getElementById('gc-test-btn'));
+      await DemoGenesys.testConnection(gc, document.getElementById('gc-test-btn'));
+      updateOAuthStatus();
+    }
+
+    function updateOAuthStatus() {
+      const status = DemoGenesys.getTokenStatus();
+      const iconWrap = document.getElementById('gc-oauth-icon');
+      const text = document.getElementById('gc-oauth-text');
+      if (!iconWrap || !text) return;
+      const lang = document.documentElement.lang;
+      if (status.connected) {
+        const expStr = status.expiresAt.toLocaleString(lang === 'en' ? 'en-GB' : 'fr-FR', {
+          day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        iconWrap.innerHTML = `<i data-lucide="shield-check" style="width:18px;height:18px; color:var(--success-700);"></i>`;
+        text.style.color = '';
+        text.textContent = lang === 'en'
+          ? `OAuth token active · valid until ${expStr}.`
+          : `Token OAuth actif · valide jusqu'au ${expStr}.`;
+      } else {
+        iconWrap.innerHTML = `<i data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i>`;
+        text.style.color = 'var(--fg-muted)';
+        text.textContent = lang === 'en'
+          ? 'Not connected · click Test to authenticate with Genesys Cloud.'
+          : 'Non connecté · cliquez sur Tester pour vous authentifier avec Genesys Cloud.';
+      }
+      lucide.createIcons();
     }
 
     let currentColor = '#FF4515';
@@ -1127,8 +1150,15 @@
       DemoConfig.applyBranding();
       lucide.createIcons();
       loadProfile();
+      updateOAuthStatus();
       syncI18nInputs();
-      new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      new MutationObserver(() => { syncI18nInputs(); updateOAuthStatus(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
+      // Clear token when clientId changes (token is scoped to the OAuth client)
+      document.getElementById('gc-client').addEventListener('input', () => {
+        DemoGenesys.clearToken();
+        updateOAuthStatus();
+      });
 
       // Save / Reset buttons
       document.getElementById('save-btn').addEventListener('click', saveProfile);
