@@ -59,39 +59,85 @@
     .send svg { width: 18px; height: 18px; }
 
     .advisor-initials { font-size: 14px; font-weight: 700; }
+
+    /* Bouton retour visible uniquement sur mobile */
+    .mobile-back-btn { display: none !important; }
+
+    @media (max-width: 768px) {
+      body { display: block; height: 100svh; overflow: hidden; }
+      .main {
+        display: flex; flex-direction: column;
+        height: calc(100svh - 60px - env(safe-area-inset-bottom));
+        overflow: hidden;
+      }
+      /* Messenger : conteneur de positionnement pour le slide */
+      .messenger {
+        flex: 1; min-height: 0;
+        position: relative; overflow: hidden;
+        grid-template-columns: 1fr; /* désactive la grille desktop */
+        display: block;
+      }
+      /* Les deux panneaux se superposent et slident */
+      .threads, .conversation {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--bg-elev);
+        overflow: hidden;
+      }
+      /* Par défaut sur mobile : fils visible, conversation hors-champ à droite */
+      .threads { transform: translateX(0); border-right: none; }
+      .conversation { transform: translateX(100%); }
+      /* Avec .show-conversation : conversation visible, fils hors-champ à gauche */
+      .messenger.show-conversation .threads { transform: translateX(-100%); }
+      .messenger.show-conversation .conversation { transform: translateX(0); }
+
+      /* Bouton retour */
+      .mobile-back-btn { display: flex !important; margin-right: 4px; }
+
+      .conv-head { padding: 10px 14px; }
+      .conv-body { padding: 12px 14px; gap: 12px; background: var(--bg-sunken); }
+      .composer { padding: 8px 12px; gap: 8px; }
+      .quick-replies { padding: 6px 12px; }
+      .threads-list { overflow-y: auto; }
+    }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
-    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
-    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
-    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
-    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
-    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
-    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
-    <div class="nav-section">Aide</div>
-    <a class="nav-link active" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
-    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
-    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de bord</span><span class="i18n-en">Dashboard</span></span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
+    <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
+    <a class="nav-link active" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="fr" onclick="DemoConfig.setLanguage('fr')">FR</button>
+      <button class="lang-btn" data-lang="en" onclick="DemoConfig.setLanguage('en')">EN</button>
+    </div>
     <div class="spacer"></div>
     <div class="profile-card" id="profile-card">
       <div class="av" data-persona-initials>SM</div>
-      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role">Compte particulier</span></div>
-      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i>Se déconnecter</button></div>
+      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role"><span class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span></div>
+      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button></div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="search"><i data-lucide="search"></i><span>Rechercher dans les messages…</span></div>
+      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher dans les messages…</span><span class="i18n-en">Search messages…</span></span></div>
       <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
     </div>
 
     <div class="messenger">
       <section class="threads">
         <div class="threads-head">
-          <h2>Messagerie sécurisée</h2>
+          <h2><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></h2>
           <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="edit-3"></i></button>
         </div>
         <div class="threads-list">
@@ -99,23 +145,23 @@
             <div class="av" id="advisor-av" style="background: linear-gradient(135deg, var(--brand-400), var(--brand-700));"><span id="advisor-initials">CL</span></div>
             <div>
               <div class="t-name" id="advisor-name">Camille Lefebvre</div>
-              <div class="t-last" id="thread-preview">D'accord, je prépare l'attestation pour ce soir.</div>
+              <div class="t-last" id="thread-preview"><span class="i18n-fr">D'accord, je prépare l'attestation pour ce soir.</span><span class="i18n-en">Ok, I will prepare the document for this evening.</span></div>
             </div>
             <div style="text-align:right;"><div class="when">14:21</div><div class="unread" id="unread-badge">2</div></div>
           </div>
           <div class="thread">
             <div class="av" style="background: linear-gradient(135deg, #6366f1, #4338ca);">FR</div>
-            <div><div class="t-name">Service crédits</div><div class="t-last">Ton dossier prêt travaux a été validé.</div></div>
+            <div><div class="t-name"><span class="i18n-fr">Service crédits</span><span class="i18n-en">Loans department</span></div><div class="t-last"><span class="i18n-fr">Ton dossier prêt travaux a été validé.</span><span class="i18n-en">Your home improvement loan has been approved.</span></div></div>
             <div style="text-align:right;"><div class="when">Hier</div></div>
           </div>
           <div class="thread">
             <div class="av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12);" data-logo-av><span data-brand>DB</span></div>
-            <div><div class="t-name" data-brand>Démo banque</div><div class="t-last">Ton relevé de mai est disponible.</div></div>
+            <div><div class="t-name" data-brand>Démo banque</div><div class="t-last"><span class="i18n-fr">Ton relevé de mai est disponible.</span><span class="i18n-en">Your May statement is available.</span></div></div>
             <div style="text-align:right;"><div class="when">8 mai</div></div>
           </div>
           <div class="thread">
             <div class="av" style="background: linear-gradient(135deg, #00a35a, #00723f);">SF</div>
-            <div><div class="t-name">Sécurité & Fraude</div><div class="t-last">Une connexion a été détectée à Lyon…</div></div>
+            <div><div class="t-name"><span class="i18n-fr">Sécurité & Fraude</span><span class="i18n-en">Security & Fraud</span></div><div class="t-last"><span class="i18n-fr">Une connexion a été détectée à Lyon…</span><span class="i18n-en">A login was detected in Lyon…</span></div></div>
             <div style="text-align:right;"><div class="when">2 mai</div></div>
           </div>
         </div>
@@ -124,6 +170,7 @@
       <section class="conversation">
         <div class="conv-head">
           <div class="who">
+            <button class="icon-btn mobile-back-btn" id="back-to-threads" title="Retour" aria-label="Retour aux conversations"><i data-lucide="arrow-left"></i></button>
             <div class="av" id="conv-av"><span id="conv-initials">CL</span></div>
             <div>
               <div class="c-name" id="conv-name">Camille Lefebvre</div>
@@ -131,8 +178,8 @@
             </div>
           </div>
           <div style="display:flex; gap:8px;">
-            <button class="icon-btn" title="Appel" onclick="alert('Launch Genesys Cloud web messaging')"><i data-lucide="phone"></i></button>
-            <button class="icon-btn" title="Visio" onclick="alert('démarrage session vidéo')"><i data-lucide="video"></i></button>
+            <button class="icon-btn" title="Appel" onclick="DemoGenesys.call()"><i data-lucide="phone"></i></button>
+            <button class="icon-btn" title="Visio" onclick="DemoGenesys.video()"><i data-lucide="video"></i></button>
             <button class="icon-btn"><i data-lucide="more-horizontal"></i></button>
           </div>
         </div>
@@ -142,10 +189,10 @@
         </div>
 
         <div class="quick-replies" id="quick-replies">
-          <button class="qr" onclick="sendQuickReply(this)">Merci 🙏</button>
-          <button class="qr" onclick="sendQuickReply(this)">J'ai bien reçu</button>
-          <button class="qr" onclick="sendQuickReply(this)">Une dernière question…</button>
-          <button class="qr" onclick="sendQuickReply(this)">On peut s'appeler ?</button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Merci 🙏</span><span class="i18n-en">Thank you 🙏</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">J'ai bien reçu</span><span class="i18n-en">Got it</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Une dernière question…</span><span class="i18n-en">One more question…</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">On peut s'appeler ?</span><span class="i18n-en">Can we talk?</span></button>
         </div>
 
         <div class="composer">
@@ -159,6 +206,29 @@
     <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
   </main>
 
+  <nav class="mobile-nav" aria-label="Navigation">
+    <div class="mobile-nav-inner">
+      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item active" href="messages.html"><i data-lucide="message-circle"></i><span class="i18n-fr">Messages</span><span class="i18n-en">Messages</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+    </div>
+  </nav>
+  <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
+  <div class="mobile-sheet" id="mobile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-grid">
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
+  <script src="genesys.js"></script>
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
@@ -201,7 +271,8 @@
 
     function loadMessages() {
       const body = document.getElementById('conv-body');
-      body.innerHTML = '<div class="day-divider">Aujourd\'hui</div>';
+      const lang = document.documentElement.lang || 'fr';
+      body.innerHTML = '<div class="day-divider">' + (lang === 'en' ? 'Today' : "Aujourd\'hui") + '</div>';
       const msgs = DemoConfig.getMessages();
       msgs.forEach(m => body.appendChild(renderMessage(m)));
       body.scrollTop = body.scrollHeight;
@@ -235,7 +306,9 @@
     }
 
     function sendQuickReply(btn) {
-      sendMessage(btn.textContent.trim());
+      const lang = document.documentElement.lang || 'fr';
+      const span = btn.querySelector(lang === 'en' ? '.i18n-en' : '.i18n-fr');
+      sendMessage((span ? span.textContent : btn.textContent).trim());
     }
 
     // Auto-resize textarea
@@ -243,6 +316,7 @@
       DemoConfig.applyBranding();
 
       const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
+      const lang = document.documentElement.lang || 'fr';
       // Parse advisor name to get initials
       const adv = (p.persona.advisor || 'Camille Lefebvre — Paris 11').split('—')[0].trim();
       advisorName = adv;
@@ -253,10 +327,10 @@
       document.getElementById('advisor-name').textContent = advisorName;
       document.getElementById('conv-initials').textContent = advisorInitials;
       document.getElementById('conv-name').textContent = advisorName;
-      document.getElementById('conv-role').textContent = `En ligne · ta conseillère`;
+      document.getElementById('conv-role').textContent = lang === 'en' ? 'Online · your advisor' : 'En ligne · ta conseillère';
 
       const area = document.getElementById('compose-area');
-      area.placeholder = `Écris ton message à ${adv.split(' ')[0]}…`;
+      area.placeholder = lang === 'en' ? `Write to ${adv.split(' ')[0]}…` : `Écris ton message à ${adv.split(' ')[0]}…`;
       area.addEventListener('input', () => {
         area.style.height = 'auto';
         area.style.height = Math.min(area.scrollHeight, 120) + 'px';
@@ -271,6 +345,28 @@
       const card = document.getElementById('profile-card');
       card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
       document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });
+
+      // Navigation mobile : slide entre liste des fils et conversation
+      const messenger = document.querySelector('.messenger');
+      const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+      function showConversation() {
+        messenger.classList.add('show-conversation');
+      }
+      function showThreadsList() {
+        messenger.classList.remove('show-conversation');
+      }
+
+      document.getElementById('back-to-threads').addEventListener('click', showThreadsList);
+
+      document.querySelectorAll('.thread').forEach(t => {
+        t.addEventListener('click', () => {
+          if (!isMobile()) return;
+          document.querySelectorAll('.thread').forEach(x => x.classList.remove('active'));
+          t.classList.add('active');
+          showConversation();
+        });
+      });
     });
   </script>
 </body></html>

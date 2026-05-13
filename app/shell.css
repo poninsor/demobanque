@@ -184,6 +184,107 @@ body {
 .toggle.off { background: var(--neutral-200); }
 .toggle.off::after { right: auto; left: 2px; }
 
+/* --- Bilingual i18n -------------------------------------------------------- */
+html[lang="en"] .i18n-fr { display: none !important; }
+html[lang="fr"] .i18n-en { display: none !important; }
+
+.lang-switcher {
+  display: flex; align-items: center; justify-content: center;
+  gap: 2px; padding: 6px 8px;
+}
+.lang-btn {
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; padding: 4px 9px; border-radius: 8px;
+  border: 1px solid transparent; background: none; cursor: pointer;
+  color: var(--fg-muted); transition: all 120ms var(--ease-out);
+}
+.lang-btn:hover { background: var(--bg-sunken); color: var(--fg); }
+html[lang="fr"] .lang-btn[data-lang="fr"],
+html[lang="en"] .lang-btn[data-lang="en"] {
+  background: var(--brand-50); color: var(--brand-700);
+  border-color: var(--brand-border);
+}
+
+/* --- Mobile nav bar ------------------------------------------------------- */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.mobile-nav-inner {
+  display: flex;
+  height: 60px;
+}
+.m-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; color: var(--fg-muted); text-decoration: none; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.04em; background: none; border: none; font-family: inherit; cursor: pointer;
+  padding: 0; transition: color 140ms var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.m-nav-item.active { color: var(--brand); }
+.m-nav-item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+
+/* --- Mobile nav sheet (bottom drawer) ------------------------------------- */
+.mobile-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 260ms ease;
+}
+.mobile-sheet-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-elev);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.14);
+  padding: 0 16px calc(env(safe-area-inset-bottom) + 76px);
+  z-index: 101;
+  transform: translateY(100%);
+  transition: transform 320ms cubic-bezier(0.34,1.1,0.64,1);
+}
+.mobile-sheet.open { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  margin: 10px auto 16px;
+}
+.sheet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-bottom: 4px;
+}
+.sheet-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 7px; padding: 14px 8px;
+  border-radius: 14px;
+  background: var(--bg-sunken);
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 140ms, color 140ms;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-item:active { opacity: 0.7; }
+.sheet-item.active,
+.sheet-item:hover { background: var(--brand-50); color: var(--brand-700); }
+.sheet-item svg { width: 22px; height: 22px; stroke-width: 1.75; }
+
 /* --- Responsive ----------------------------------------------------------- */
 @media (max-width: 1024px) {
   body { grid-template-columns: 72px 1fr; }
@@ -195,5 +296,12 @@ body {
 @media (max-width: 768px) {
   body { grid-template-columns: 1fr; }
   .sidebar { display: none; }
-  .page { padding: 20px 16px 60px; }
+  .mobile-nav { display: block; }
+  .page { padding: 20px 16px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .page-title h1 { font-size: 26px; letter-spacing: -0.02em; }
+  .page-header { flex-wrap: wrap; gap: 12px; }
+  .topbar { padding: 0 16px; gap: 8px; }
+  .topbar .search { display: none; }
+  .genesys-footer { display: none; }
+  .card-pad { padding: 16px; }
 }

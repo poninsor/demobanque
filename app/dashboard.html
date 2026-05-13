@@ -86,37 +86,58 @@
     }
     .welcome-banner.show { display: flex; }
     .welcome-banner svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 22px; gap: 16px; }
+      .hero .name { font-size: 32px; }
+      .hero .total { font-size: 36px; }
+      .hero .actions { gap: 8px; }
+      .accounts { grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+      .acct .amt { font-size: 22px; }
+      .row-2col { grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+      .tx-row { grid-template-columns: 36px 1fr auto; gap: 10px; padding: 10px 14px; }
+      .tx-row > span:nth-child(3) { display: none; }
+      .cards-strip { grid-template-columns: 1fr 1fr; margin-top: 16px; }
+    }
+    @media (max-width: 480px) {
+      .accounts { grid-template-columns: 1fr; }
+      .cards-strip { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
   <aside class="sidebar">
     <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
-    <a class="nav-link active" href="dashboard.html"><i data-lucide="home"></i><span>Tableau de bord</span></a>
-    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span>Comptes</span></a>
-    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span>Virements</span></a>
-    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span>Cartes</span></a>
-    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span>Bénéficiaires</span></a>
-    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span>Crédits</span></a>
-    <div class="nav-section">Aide</div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span>Messagerie</span></a>
-    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span>Nous contacter</span></a>
-    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span>Paramètres</span></a>
+    <a class="nav-link active" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de bord</span><span class="i18n-en">Dashboard</span></span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
+    <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
+    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
+    <div class="lang-switcher">
+      <button class="lang-btn" data-lang="fr" onclick="DemoConfig.setLanguage('fr')">FR</button>
+      <button class="lang-btn" data-lang="en" onclick="DemoConfig.setLanguage('en')">EN</button>
+    </div>
     <div class="spacer"></div>
     <div class="profile-card" id="profile-card">
       <div class="av" data-persona-initials>SM</div>
       <div class="info">
         <span class="name" data-persona-full>Sophie Martin</span>
-        <span class="role">Compte particulier</span>
+        <span class="role"><span class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span>
       </div>
       <div class="logout-btn">
-        <button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i>Se déconnecter</button>
+        <button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button>
       </div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="search"><i data-lucide="search"></i><span>Rechercher une opération, un bénéficiaire…</span></div>
+      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher une opération, un bénéficiaire…</span><span class="i18n-en">Search transactions, payees…</span></span></div>
       <div class="topbar-actions">
         <button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
         <button class="icon-btn" onclick="window.location.href='messages.html'"><i data-lucide="message-circle"></i></button>
@@ -126,76 +147,76 @@
     <div class="page">
       <div class="welcome-banner" id="welcome-banner">
         <i data-lucide="party-popper"></i>
-        <span>Bienvenue ! Ton profil est créé. <a href="settings.html" style="color:var(--brand-700); font-weight:700;">Configure ta démo dans les Paramètres →</a></span>
+        <span><span class="i18n-fr">Bienvenue ! Ton profil est créé.</span><span class="i18n-en">Welcome! Your profile is ready.</span> <a href="settings.html" style="color:var(--brand-700); font-weight:700;"><span class="i18n-fr">Configure ta démo dans les Paramètres →</span><span class="i18n-en">Set up your demo in Settings →</span></a></span>
       </div>
 
       <div class="hero">
         <div>
-          <div class="greeting">Bonjour</div>
+          <div class="greeting"><span class="i18n-fr">Bonjour</span><span class="i18n-en">Hello</span></div>
           <div class="name" data-persona-first>Sophie</div>
-          <div class="total-label" style="margin-top:24px;">Patrimoine total</div>
+          <div class="total-label" style="margin-top:24px;"><span class="i18n-fr">Patrimoine total</span><span class="i18n-en">Total net worth</span></div>
           <div class="total" id="hero-total">35&nbsp;430,57&nbsp;€</div>
-          <div class="delta">+ 1 280,12 € ce mois-ci · sur 4 comptes</div>
+          <div class="delta"><span class="i18n-fr">+ 1 280,12 € ce mois-ci · sur 4 comptes</span><span class="i18n-en">+ €1,280.12 this month · across 4 accounts</span></div>
           <div class="actions">
-            <a class="btn primary-on-hero" href="transfer.html"><i data-lucide="arrow-right-left"></i>Faire un virement</a>
-            <button class="btn"><i data-lucide="plus"></i>Ajouter un bénéficiaire</button>
-            <button class="btn"><i data-lucide="download"></i>Télécharger un RIB</button>
+            <a class="btn primary-on-hero" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Faire un virement</span><span class="i18n-en">Make a transfer</span></a>
+            <button class="btn"><i data-lucide="plus"></i><span class="i18n-fr">Ajouter un bénéficiaire</span><span class="i18n-en">Add a payee</span></button>
+            <button class="btn"><i data-lucide="download"></i><span class="i18n-fr">Télécharger un RIB</span><span class="i18n-en">Download RIB</span></button>
           </div>
         </div>
       </div>
 
       <div class="accounts">
         <a class="acct" href="account.html">
-          <div class="top"><span class="name">Compte courant</span><span class="iban">****6892</span></div>
+          <div class="top"><span class="name"><span class="i18n-fr">Compte courant</span><span class="i18n-en">Current account</span></span><span class="iban">****6892</span></div>
           <div class="amt" data-balance-checking>12&nbsp;480,57&nbsp;€</div>
-          <div class="meta">+ 240,00 € ce mois-ci</div>
+          <div class="meta"><span class="i18n-fr">+ 240,00 € ce mois-ci</span><span class="i18n-en">+ €240.00 this month</span></div>
         </a>
         <a class="acct" href="#">
-          <div class="top"><span class="name">Livret A</span><span class="iban">****2210</span></div>
+          <div class="top"><span class="name"><span class="i18n-fr">Livret A</span><span class="i18n-en">Savings account</span></span><span class="iban">****2210</span></div>
           <div class="amt" data-balance-savings>22&nbsp;950,00&nbsp;€</div>
-          <div class="meta">Taux 3,00 % · plafond atteint</div>
+          <div class="meta"><span class="i18n-fr">Taux 3,00 % · plafond atteint</span><span class="i18n-en">Rate 3.00% · cap reached</span></div>
         </a>
         <a class="acct" href="#">
           <div class="top"><span class="name">PEL</span><span class="iban">****0418</span></div>
           <div class="amt" data-balance-pel>0,00&nbsp;€</div>
-          <div class="meta">Inactif</div>
+          <div class="meta"><span class="i18n-fr">Inactif</span><span class="i18n-en">Inactive</span></div>
         </a>
       </div>
 
       <div class="row-2col">
         <div class="tx">
           <div class="tx-header">
-            <h3>Dernières opérations</h3>
-            <a class="badge brand" href="account.html" style="text-decoration:none;">Voir tout</a>
+            <h3><span class="i18n-fr">Dernières opérations</span><span class="i18n-en">Recent transactions</span></h3>
+            <a class="badge brand" href="account.html" style="text-decoration:none;"><span class="i18n-fr">Voir tout</span><span class="i18n-en">View all</span></a>
           </div>
           <div class="tx-row">
             <div class="av success"><i data-lucide="arrow-down-left" style="width:16px;height:16px;"></i></div>
-            <div><div class="tx-name">Salaire — Acme SAS</div><div class="tx-meta">Aujourd'hui · 09:14 · Virement</div></div>
-            <span class="badge success">Reçu</span>
+            <div><div class="tx-name">Salaire — Acme SAS</div><div class="tx-meta"><span class="i18n-fr">Aujourd'hui · 09:14 · Virement</span><span class="i18n-en">Today · 09:14 · Transfer</span></div></div>
+            <span class="badge success"><span class="i18n-fr">Reçu</span><span class="i18n-en">Received</span></span>
             <div class="tx-amt pos">+ 2 450,00 €</div>
           </div>
           <div class="tx-row">
             <div class="av brand">N</div>
-            <div><div class="tx-name">Netflix</div><div class="tx-meta">Hier · Abonnement</div></div>
+            <div><div class="tx-name">Netflix</div><div class="tx-meta"><span class="i18n-fr">Hier · Abonnement</span><span class="i18n-en">Yesterday · Subscription</span></div></div>
             <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
             <div class="tx-amt">− 13,49 €</div>
           </div>
           <div class="tx-row">
             <div class="av">M</div>
-            <div><div class="tx-name">Monoprix</div><div class="tx-meta">12 mai · Courses</div></div>
+            <div><div class="tx-name">Monoprix</div><div class="tx-meta"><span class="i18n-fr">12 mai · Courses</span><span class="i18n-en">12 May · Groceries</span></div></div>
             <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
             <div class="tx-amt">− 49,90 €</div>
           </div>
           <div class="tx-row">
             <div class="av">U</div>
-            <div><div class="tx-name">Uber</div><div class="tx-meta">11 mai · Transport</div></div>
+            <div><div class="tx-name">Uber</div><div class="tx-meta"><span class="i18n-fr">11 mai · Transport</span><span class="i18n-en">11 May · Transport</span></div></div>
             <span style="font-size:12px;color:var(--fg-muted);">Carte ****6892</span>
             <div class="tx-amt">− 16,80 €</div>
           </div>
           <div class="tx-row">
             <div class="av">L</div>
-            <div><div class="tx-name">Loyer — Marie Dubois</div><div class="tx-meta">5 mai · Virement programmé</div></div>
-            <span class="badge info">Programmé</span>
+            <div><div class="tx-name">Loyer — Marie Dubois</div><div class="tx-meta"><span class="i18n-fr">5 mai · Virement programmé</span><span class="i18n-en">5 May · Scheduled transfer</span></div></div>
+            <span class="badge info"><span class="i18n-fr">Programmé</span><span class="i18n-en">Scheduled</span></span>
             <div class="tx-amt">− 950,00 €</div>
           </div>
         </div>
@@ -203,22 +224,22 @@
         <div class="card insights">
           <div class="card-pad">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h3 style="font-size:16px;">Tes dépenses</h3>
-              <span class="badge neutral">Mai</span>
+              <h3 style="font-size:16px;"><span class="i18n-fr">Tes dépenses</span><span class="i18n-en">Your spending</span></h3>
+              <span class="badge neutral"><span class="i18n-fr">Mai</span><span class="i18n-en">May</span></span>
             </div>
             <div style="position:relative; display:flex; align-items:center; justify-content:center; flex-direction:column; margin:16px 0;">
               <div class="ring" style="--p:64;"></div>
               <div style="position:absolute; text-align:center;">
-                <div class="t-meta">Dépensé</div>
+                <div class="t-meta"><span class="i18n-fr">Dépensé</span><span class="i18n-en">Spent</span></div>
                 <div style="font-family:var(--font-display); font-weight:700; font-size:22px; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">1 612 €</div>
-                <div class="t-meta">sur 2 500 €</div>
+                <div class="t-meta"><span class="i18n-fr">sur 2 500 €</span><span class="i18n-en">out of €2,500</span></div>
               </div>
             </div>
             <div>
-              <div class="insight-row" style="--clr:var(--brand);"><span class="lbl">Logement</span><span class="val">950,00 €</span></div>
-              <div class="insight-row" style="--clr:#7e22ce;"><span class="lbl">Courses</span><span class="val">312,40 €</span></div>
-              <div class="insight-row" style="--clr:#0066b3;"><span class="lbl">Transport</span><span class="val">198,80 €</span></div>
-              <div class="insight-row" style="--clr:#00a35a;"><span class="lbl">Loisirs</span><span class="val">151,29 €</span></div>
+              <div class="insight-row" style="--clr:var(--brand);"><span class="lbl"><span class="i18n-fr">Logement</span><span class="i18n-en">Housing</span></span><span class="val">950,00 €</span></div>
+              <div class="insight-row" style="--clr:#7e22ce;"><span class="lbl"><span class="i18n-fr">Courses</span><span class="i18n-en">Groceries</span></span><span class="val">312,40 €</span></div>
+              <div class="insight-row" style="--clr:#0066b3;"><span class="lbl"><span class="i18n-fr">Transport</span><span class="i18n-en">Transport</span></span><span class="val">198,80 €</span></div>
+              <div class="insight-row" style="--clr:#00a35a;"><span class="lbl"><span class="i18n-fr">Loisirs</span><span class="i18n-en">Entertainment</span></span><span class="val">151,29 €</span></div>
             </div>
           </div>
         </div>
@@ -241,6 +262,28 @@
     </footer>
   </main>
 
+  <nav class="mobile-nav" aria-label="Navigation">
+    <div class="mobile-nav-inner">
+      <a class="m-nav-item active" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item" href="messages.html"><i data-lucide="message-circle"></i><span class="i18n-fr">Messages</span><span class="i18n-en">Messages</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+    </div>
+  </nav>
+  <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
+  <div class="mobile-sheet" id="mobile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-grid">
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';

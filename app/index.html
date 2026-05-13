@@ -86,6 +86,13 @@
 
     .genesys { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; font-size: 11px; color: var(--fg-faint); white-space: nowrap; }
     .genesys img { height: 14px; width: 14px; object-fit: contain; opacity: 0.7; }
+    .login-lang { position: fixed; top: 20px; right: 24px; display: flex; gap: 4px; z-index: 10; }
+    .login-lang button { font-family: var(--font-body); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; padding: 5px 11px; border-radius: 8px; border: 1px solid transparent; background: rgba(255,255,255,0.7); cursor: pointer; color: var(--fg-muted); transition: all 120ms; backdrop-filter: blur(8px); }
+    .login-lang button:hover { background: white; color: var(--fg); }
+    html[lang="fr"] .login-lang button[data-lang="fr"],
+    html[lang="en"] .login-lang button[data-lang="en"] { background: var(--brand); color: white; border-color: var(--brand); }
+    html[lang="en"] .i18n-fr { display: none !important; }
+    html[lang="fr"] .i18n-en { display: none !important; }
 
     @media (max-width: 768px) {
       body { grid-template-columns: 1fr; }
@@ -95,25 +102,29 @@
   </style>
 </head>
 <body>
+  <div class="login-lang">
+    <button data-lang="fr" onclick="DemoConfig.setGlobalLang('fr')">FR</button>
+    <button data-lang="en" onclick="DemoConfig.setGlobalLang('en')">EN</button>
+  </div>
   <section class="panel-left">
     <div class="logo"><img src="assets/logo-light.svg" alt="Démo banque" data-logo></div>
     <div style="position:relative; z-index:1;">
-      <h1 class="pitch">Ta banque, en plus <span>simple.</span></h1>
-      <p class="pitch-sub">Suivre tes comptes, faire un virement, joindre ton conseiller — tout est à portée de main.</p>
+      <h1 class="pitch"><span class="i18n-fr">Ta banque, en plus </span><span class="i18n-en">Your bank, made </span><span><span class="i18n-fr">simple.</span><span class="i18n-en">simple.</span></span></h1>
+      <p class="pitch-sub"><span class="i18n-fr">Suivre tes comptes, faire un virement, joindre ton conseiller — tout est à portée de main.</span><span class="i18n-en">Check your balances, make a transfer, reach your advisor — everything at your fingertips.</span></p>
     </div>
     <div class="signal">
       <i data-lucide="shield-check"></i>
       <div>
-        <div style="font-weight:600; font-size:14px;">Connexion sécurisée</div>
-        <div style="font-size:12px; opacity:0.85;">Authentification forte · Chiffrement bout-en-bout</div>
+        <div style="font-weight:600; font-size:14px;"><span class="i18n-fr">Connexion sécurisée</span><span class="i18n-en">Secure login</span></div>
+        <div style="font-size:12px; opacity:0.85;"><span class="i18n-fr">Authentification forte · Chiffrement bout-en-bout</span><span class="i18n-en">Strong authentication · End-to-end encryption</span></div>
       </div>
     </div>
   </section>
 
   <section class="panel-right">
     <div class="login-card">
-      <h1>Bonjour 👋</h1>
-      <p class="sub">Saisis ton numéro de compte et ton code secret pour accéder à ton espace.</p>
+      <h1><span class="i18n-fr">Bonjour 👋</span><span class="i18n-en">Hello 👋</span></h1>
+      <p class="sub"><span class="i18n-fr">Saisis ton numéro de compte et ton code secret pour accéder à ton espace.</span><span class="i18n-en">Enter your account number and passcode to access your account.</span></p>
 
       <div class="error-msg" id="error-msg">
         <i data-lucide="alert-circle"></i>
@@ -121,35 +132,32 @@
       </div>
 
       <div class="field">
-        <label>Numéro de compte</label>
+        <label><span class="i18n-fr">Numéro de compte</span><span class="i18n-en">Account number</span></label>
         <div class="input-wrap">
           <input id="account-id" type="text" inputmode="numeric" maxlength="8" placeholder="12345678" autocomplete="username">
         </div>
       </div>
 
       <div class="field">
-        <label>Code secret</label>
+        <label><span class="i18n-fr">Code secret</span><span class="i18n-en">Passcode</span></label>
         <div class="input-wrap">
           <input id="pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="current-password">
-          <button class="eye" type="button" id="eye-toggle" title="Afficher / masquer">
+          <button class="eye" type="button" id="eye-toggle" title="Afficher / masquer / Show / hide">
             <i data-lucide="eye" id="eye-icon"></i>
           </button>
         </div>
       </div>
 
       <button class="login-btn" id="login-btn">
-        Se connecter <i data-lucide="arrow-right"></i>
+        <span class="i18n-fr">Se connecter</span><span class="i18n-en">Sign in</span> <i data-lucide="arrow-right"></i>
       </button>
 
       <div class="hint">
-        <strong>Première connexion ?</strong> Entrez votre numéro à 8 chiffres et le code par défaut <strong>123456</strong> pour créer votre profil.<br>
-        Vous pourrez ensuite personnaliser votre démo dans les Paramètres.
+        <strong><span class="i18n-fr">Première connexion ?</span><span class="i18n-en">First time?</span></strong> <span class="i18n-fr">Entrez votre numéro à 8 chiffres et le code par défaut</span><span class="i18n-en">Enter your 8-digit account number with default passcode</span> <strong>123456</strong> <span class="i18n-fr">pour créer votre profil.</span><span class="i18n-en">to create your profile.</span><br><span class="i18n-fr">Vous pourrez ensuite personnaliser votre démo dans les Paramètres.</span><span class="i18n-en">You can then customise your demo in Settings.</span>
       </div>
 
       <div class="footer-links">
-        <a href="#">Aide</a>
-        <span>·</span>
-        <a href="#">FR / EN</a>
+        <a href="#"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></a><span>·</span><a href="#"><span class="i18n-fr">Mentions légales</span><span class="i18n-en">Legal</span></a>
       </div>
     </div>
   </section>
@@ -158,6 +166,8 @@
 
   <script src="config.js"></script>
   <script>
+    // Apply language from localStorage/navigator on load
+    document.documentElement.lang = DemoConfig.getGlobalLang();
     lucide.createIcons();
 
     const loginBtn = document.getElementById('login-btn');
