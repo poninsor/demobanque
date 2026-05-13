@@ -42,7 +42,6 @@ const DemoConfig = (() => {
       region: 'mypurecloud.ie',
       deploymentId: '3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10',
       clientId: 'a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1',
-      clientSecret: 'k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0',
       queueId: '',
       scriptId: '',
       callNumber: '3262'

@@ -134,27 +134,53 @@ const DemoGenesys = (() => {
       .replace(/\/$/, '');
   }
 
-  // OAuth client credentials → Bearer token
-  async function fetchToken(gc) {
-    const domain = regionDomain(gc.region);
-    const url = `https://login.${domain}/oauth/token`;
-    console.log('[DemoGenesys] fetchToken →', url, '| clientId:', gc.clientId);
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + btoa(`${gc.clientId}:${gc.clientSecret}`)
-      },
-      body: 'grant_type=client_credentials'
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      console.error('[DemoGenesys] fetchToken ✗', res.status, body);
-      throw new Error(`OAuth ${res.status}: ${body}`);
+  // ── Implicit grant token cache ───────────────────────────────────────────────
+
+  let _gcToken = null;
+  let _gcTokenExpiry = 0;
+
+  // On page load: detect return from Genesys implicit grant redirect (token in URL hash)
+  (function () {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const token = params.get('access_token');
+    if (!token) return;
+    _gcToken = token;
+    const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
+    _gcTokenExpiry = Date.now() + expiresIn * 1000 - 60000; // 60s safety margin
+    console.log('[DemoGenesys] implicit grant return: token received, expires in', expiresIn, 's');
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    const pending = sessionStorage.getItem('_gc_pending');
+    if (pending === 'testConnection') {
+      sessionStorage.removeItem('_gc_pending');
+      setTimeout(() => showNotif(
+        t('Connexion Genesys Cloud réussie ✓\nLe token OAuth a été obtenu avec succès.',
+          'Genesys Cloud connection successful ✓\nOAuth token obtained successfully.'),
+        false
+      ), 200);
     }
-    const { access_token } = await res.json();
-    console.log('[DemoGenesys] fetchToken ✓ token obtained');
-    return access_token;
+  })();
+
+  // OAuth implicit grant → Bearer token (no client secret required)
+  // If no valid cached token and noRedirect is false, redirects to Genesys login
+  // and returns a never-resolving promise (page navigates away).
+  function fetchToken(gc, opts) {
+    if (_gcToken && Date.now() < _gcTokenExpiry) {
+      console.log('[DemoGenesys] fetchToken: using cached token');
+      return Promise.resolve(_gcToken);
+    }
+    if (!gc.clientId) {
+      return Promise.reject(new Error('clientId not configured'));
+    }
+    if (opts && opts.noRedirect) {
+      console.warn('[DemoGenesys] fetchToken: no valid token, noRedirect=true → skip');
+      return Promise.reject(new Error('no_token'));
+    }
+    const domain = regionDomain(gc.region);
+    const redirectUri = window.location.href.split('#')[0];
+    const authUrl = `https://login.${domain}/oauth/authorize?response_type=token&client_id=${encodeURIComponent(gc.clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    console.log('[DemoGenesys] fetchToken: redirect → implicit grant', authUrl);
+    window.location.href = authUrl;
+    return new Promise(() => {}); // never resolves — page is navigating away
   }
 
   // ── Public API ───────────────────────────────────────────────────────────────
@@ -220,14 +246,13 @@ const DemoGenesys = (() => {
       const persona = profile.persona || {};
       const btn = document.getElementById('confirm-rdv');
 
-      if (!gc.clientId || !gc.clientSecret || !gc.queueId) {
+      if (!gc.clientId || !gc.queueId) {
         console.warn('[DemoGenesys] appointmentConfirm: incomplete config', {
-          region: gc.region, queueId: gc.queueId,
-          hasClientId: !!gc.clientId, hasClientSecret: !!gc.clientSecret
+          region: gc.region, clientId: gc.clientId, queueId: gc.queueId
         });
         showNotif(t(
-          'Configuration Genesys incomplète.\nVérifie Client ID, Client Secret et Queue ID dans Paramètres → Genesys Cloud.',
-          'Incomplete Genesys configuration.\nCheck Client ID, Client Secret and Queue ID in Settings → Genesys Cloud.'
+          'Configuration Genesys incomplète.\nVérifie Client ID et Queue ID dans Paramètres → Genesys Cloud.',
+          'Incomplete Genesys configuration.\nCheck Client ID and Queue ID in Settings → Genesys Cloud.'
         ), true);
         return;
       }
@@ -308,21 +333,30 @@ const DemoGenesys = (() => {
 
     /**
      * Fetch the estimated wait time for a given media type from Genesys Cloud.
-     * Requires queueId, clientId and clientSecret to be configured in settings.
+     * Requires queueId and clientId to be configured in settings.
      *
      * @param {'call'|'message'} mediaType
      * @returns {Promise<number|null>} estimatedWaitTimeSeconds, or null if not configured / on error
      */
     async fetchWaitTime(mediaType) {
       const gc = (DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE).genesys || {};
-      if (!gc.queueId || !gc.clientId || !gc.clientSecret) {
-        console.warn('[DemoGenesys] fetchWaitTime: queueId or credentials not configured, skipping');
+      if (!gc.queueId || !gc.clientId) {
+        console.warn('[DemoGenesys] fetchWaitTime: queueId or clientId not configured, skipping');
         return null;
       }
       const domain = regionDomain(gc.region);
       const url = `https://api.${domain}/api/v2/routing/queues/${gc.queueId}/mediatypes/${mediaType}/estimatedwaittime`;
       console.log('[DemoGenesys] fetchWaitTime →', mediaType, url);
-      const token = await fetchToken(gc);
+      let token;
+      try {
+        token = await fetchToken(gc, { noRedirect: true });
+      } catch (e) {
+        if (e.message === 'no_token') {
+          console.warn('[DemoGenesys] fetchWaitTime: not authenticated yet, skipping');
+          return null;
+        }
+        throw e;
+      }
       const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
       if (!res.ok) {
         const errText = await res.text();
@@ -336,29 +370,35 @@ const DemoGenesys = (() => {
     },
 
     /**
-     * Test the OAuth client credentials connection from the Settings panel.
-     * @param {{ region: string, clientId: string, clientSecret: string }} gc
+     * Test the OAuth implicit grant connection from the Settings panel.
+     * Redirects to Genesys login if no token is cached; shows success toast on return.
+     * @param {{ region: string, clientId: string }} gc
      * @param {HTMLButtonElement} [btn]
      */
     async testConnection(gc, btn) {
-      if (!gc.clientId || !gc.clientSecret) {
-        console.warn('[DemoGenesys] testConnection: clientId or clientSecret missing');
+      if (!gc.clientId) {
+        console.warn('[DemoGenesys] testConnection: clientId missing');
         showNotif(t(
-          'Client ID et Client Secret requis pour tester la connexion.',
-          'Client ID and Client Secret are required to test the connection.'
+          'Client ID requis pour tester la connexion.',
+          'Client ID is required to test the connection.'
         ), true);
         return;
       }
       console.log('[DemoGenesys] testConnection → region:', gc.region, '| clientId:', gc.clientId);
+      // If token already cached, show success immediately; otherwise redirect to login.
+      // On return from redirect, the IIFE above will show the success toast automatically.
+      sessionStorage.setItem('_gc_pending', 'testConnection');
       setButtonLoading(btn, true);
       try {
-        await fetchToken(gc);
-        console.log('[DemoGenesys] testConnection ✓');
+        await fetchToken(gc); // may redirect (never resolves); if cached, resolves immediately
+        sessionStorage.removeItem('_gc_pending');
+        console.log('[DemoGenesys] testConnection ✓ (cached token)');
         showNotif(t(
-          'Connexion Genesys Cloud réussie ✓\nLe token OAuth a été obtenu avec succès.',
-          'Genesys Cloud connection successful ✓\nOAuth token obtained successfully.'
+          'Connexion Genesys Cloud réussie ✓\nLe token OAuth en cache est toujours valide.',
+          'Genesys Cloud connection successful ✓\nCached OAuth token is still valid.'
         ), false);
       } catch (err) {
+        sessionStorage.removeItem('_gc_pending');
         console.error('[DemoGenesys] testConnection ✗', err);
         showNotif(t(
           `Erreur de connexion OAuth :\n${err.message}`,

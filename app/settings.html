@@ -324,36 +324,6 @@
       background: var(--success);
     }
 
-    .secret-wrap {
-      position: relative;
-    }
-
-    .secret-wrap input {
-      padding-right: 80px;
-    }
-
-    .secret-wrap .reveal-btn {
-      position: absolute;
-      right: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: 0;
-      color: var(--fg-muted);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-family: inherit;
-    }
-
-    .secret-wrap .reveal-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-
     .pin-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -875,19 +845,9 @@
                         API</span><span class="i18n-en">— API Call</span></span></label><input id="gc-client"
                     style="font-family:var(--font-mono); font-size:13px;" value="a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1"
                     placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
-                <div class="field">
-                  <label>Client Secret</label>
-                  <div class="secret-wrap">
-                    <input type="password" id="gc-secret" style="font-family:var(--font-mono); font-size:13px;"
-                      value="k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0">
-                    <button type="button" class="reveal-btn" id="secret-reveal"><i data-lucide="eye"></i><span
-                        class="i18n-fr">Afficher</span><span class="i18n-en">Show</span></button>
-                  </div>
-                </div>
                 <div style="grid-column:span 2; font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
-                    class="i18n-fr">Stocké
-                    chiffré. Révoque depuis l'admin Genesys Cloud si compromis.</span><span class="i18n-en">Stored
-                    encrypted. Revoke from the Genesys Cloud admin if compromised.</span></div>
+                    class="i18n-fr">Le flux Implicit Grant ne nécessite pas de Client Secret. L'URI de redirection à configurer dans Genesys Cloud est l'URL de cette page.</span><span
+                    class="i18n-en">The Implicit Grant flow does not require a Client Secret. Set this page's URL as the redirect URI in your Genesys Cloud OAuth client.</span></div>
               </div>
               <div
                 style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
@@ -976,7 +936,6 @@
       const gc = {
         region: document.getElementById('gc-region').value,
         clientId: document.getElementById('gc-client').value.trim(),
-        clientSecret: document.getElementById('gc-secret').value.trim(),
       };
       DemoGenesys.testConnection(gc, document.getElementById('gc-test-btn'));
     }
@@ -1052,7 +1011,6 @@
       if (g.region) { for (let o of regionEl.options) if (o.value === g.region) o.selected = true; }
       document.getElementById('gc-deployment').value = g.deploymentId || '';
       document.getElementById('gc-client').value = g.clientId || '';
-      document.getElementById('gc-secret').value = g.clientSecret || '';
       document.getElementById('gc-queue').value = g.queueId || '';
       document.getElementById('gc-script').value = g.scriptId || '';
       document.getElementById('gc-call-number').value = g.callNumber || '';
@@ -1137,7 +1095,6 @@
           region: document.getElementById('gc-region').value,
           deploymentId: document.getElementById('gc-deployment').value.trim(),
           clientId: document.getElementById('gc-client').value.trim(),
-          clientSecret: document.getElementById('gc-secret').value.trim(),
           queueId: document.getElementById('gc-queue').value.trim(),
           scriptId: document.getElementById('gc-script').value.trim(),
           callNumber: document.getElementById('gc-call-number').value.trim(),
@@ -1231,17 +1188,6 @@
       // Persona preview live update
       ['p-first', 'p-last'].forEach(id => {
         document.getElementById(id).addEventListener('input', updatePreview);
-      });
-
-      // Secret reveal toggle
-      const secretInput = document.getElementById('gc-secret');
-      const revealBtn = document.getElementById('secret-reveal');
-      revealBtn.addEventListener('click', () => {
-        const showing = secretInput.type === 'text';
-        secretInput.type = showing ? 'password' : 'text';
-        revealBtn.querySelector('svg').setAttribute('data-lucide', showing ? 'eye' : 'eye-off');
-        revealBtn.lastChild.textContent = showing ? ' Afficher' : ' Masquer';
-        lucide.createIcons();
       });
 
       // PIN inputs — digits only
