@@ -31,6 +31,10 @@
 
     .booking-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
     .booking-card h3 { font-size: 18px; margin-bottom: 16px; }
+    .asap-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-sunken); border-radius: 12px; cursor: pointer; margin-bottom: 16px; font-size: 14px; font-weight: 500; user-select: none; }
+    .asap-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; margin: 0; }
+    #booking-scheduler { overflow: hidden; transition: opacity 200ms ease; }
+    #booking-scheduler.hidden { display: none; }
     .advisor { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--bg-sunken); border-radius: 14px; margin-bottom: 18px; }
     .advisor .av { width: 52px; height: 52px; border-radius: 999px; background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
     .advisor .adv-name { font-weight: 600; }
@@ -170,24 +174,31 @@
                 <div class="adv-role" id="booking-role">Ta conseillère · Agence Paris 11</div>
               </div>
             </div>
-            <!-- Calendar -->
-            <div class="calendar">
-              <div class="dow"><span class="i18n-fr">L</span><span class="i18n-en">M</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">W</span></div><div class="dow"><span class="i18n-fr">J</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">V</span><span class="i18n-en">F</span></div><div class="dow"><span class="i18n-fr">S</span><span class="i18n-en">S</span></div><div class="dow"><span class="i18n-fr">D</span><span class="i18n-en">S</span></div>
-              <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day disabled">4</div><div class="day disabled">5</div>
-              <div class="day">6</div><div class="day has-slot">7</div><div class="day has-slot">8</div><div class="day has-slot">9</div><div class="day">10</div><div class="day disabled">11</div><div class="day disabled">12</div>
-              <div class="day has-slot">13</div><div class="day selected" id="selected-day">14</div><div class="day has-slot">15</div><div class="day">16</div><div class="day has-slot">17</div><div class="day disabled">18</div><div class="day disabled">19</div>
-              <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day disabled">25</div><div class="day disabled">26</div>
-              <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div><div class="day empty"></div><div class="day empty"></div>
+            <!-- ASAP option -->
+            <label class="asap-row" for="asap-cb">
+              <input type="checkbox" id="asap-cb" onchange="toggleAsap()">
+              <span><span class="i18n-fr">Être rappelé dès que possible</span><span class="i18n-en">Call me back as soon as possible</span></span>
+            </label>
+            <!-- Calendar + slots (hidden when ASAP checked) -->
+            <div id="booking-scheduler">
+              <div class="calendar">
+                <div class="dow"><span class="i18n-fr">L</span><span class="i18n-en">M</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">W</span></div><div class="dow"><span class="i18n-fr">J</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">V</span><span class="i18n-en">F</span></div><div class="dow"><span class="i18n-fr">S</span><span class="i18n-en">S</span></div><div class="dow"><span class="i18n-fr">D</span><span class="i18n-en">S</span></div>
+                <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day disabled">4</div><div class="day disabled">5</div>
+                <div class="day">6</div><div class="day has-slot">7</div><div class="day has-slot">8</div><div class="day has-slot">9</div><div class="day">10</div><div class="day disabled">11</div><div class="day disabled">12</div>
+                <div class="day has-slot">13</div><div class="day selected" id="selected-day">14</div><div class="day has-slot">15</div><div class="day">16</div><div class="day has-slot">17</div><div class="day disabled">18</div><div class="day disabled">19</div>
+                <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day disabled">25</div><div class="day disabled">26</div>
+                <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div><div class="day empty"></div><div class="day empty"></div>
+              </div>
+              <!-- Time slots -->
+              <div class="slots">
+                <div class="slot" onclick="selectSlot(this, '09:00')">09:00</div>
+                <div class="slot" onclick="selectSlot(this, '10:30')">10:30</div>
+                <div class="slot selected" onclick="selectSlot(this, '14:00')">14:00</div>
+                <div class="slot" onclick="selectSlot(this, '15:30')">15:30</div>
+              </div>
             </div>
-            <!-- Time slots -->
-            <div class="slots">
-              <div class="slot" onclick="selectSlot(this, '09:00')">09:00</div>
-              <div class="slot" onclick="selectSlot(this, '10:30')">10:30</div>
-              <div class="slot selected" onclick="selectSlot(this, '14:00')">14:00</div>
-              <div class="slot" onclick="selectSlot(this, '15:30')">15:30</div>
-            </div>
-            <!-- Confirm button — appointment stub -->
-            <button class="btn btn-primary" style="width:100%; margin-top:14px;" id="confirm-rdv" onclick="DemoGenesys.appointmentConfirm(buildScheduledTime())">
+            <!-- Confirm button -->
+            <button class="btn btn-primary" style="width:100%; margin-top:14px;" id="confirm-rdv" onclick="confirmAppointment()">
               Confirmer le 14 mai · 14:00
             </button>
           </div>
@@ -243,10 +254,29 @@
       updateConfirmBtn();
     }
 
+    function toggleAsap() {
+      const asap = document.getElementById('asap-cb').checked;
+      document.getElementById('booking-scheduler').classList.toggle('hidden', asap);
+      updateConfirmBtn();
+    }
+
+    function confirmAppointment() {
+      const asap = document.getElementById('asap-cb').checked;
+      DemoGenesys.appointmentConfirm(asap ? '' : buildScheduledTime());
+    }
+
     function updateConfirmBtn() {
-      document.getElementById('confirm-rdv').textContent = document.documentElement.lang === 'en'
-      ? `Confirm May ${selectedDay} · ${selectedTime}`
-      : `Confirmer le ${selectedDay} mai · ${selectedTime}`;
+      const asap = document.getElementById('asap-cb')?.checked;
+      const btn = document.getElementById('confirm-rdv');
+      if (asap) {
+        btn.textContent = document.documentElement.lang === 'en'
+          ? 'Request an immediate callback'
+          : 'Demander un rappel immédiat';
+      } else {
+        btn.textContent = document.documentElement.lang === 'en'
+          ? `Confirm May ${selectedDay} · ${selectedTime}`
+          : `Confirmer le ${selectedDay} mai · ${selectedTime}`;
+      }
     }
 
     function buildScheduledTime() {
