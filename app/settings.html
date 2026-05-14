@@ -324,6 +324,15 @@
       background: var(--success);
     }
 
+    .badge-connected.disconnected {
+      background: var(--neutral-100);
+      color: var(--fg-muted);
+    }
+
+    .badge-connected.disconnected::before {
+      background: var(--fg-faint);
+    }
+
     .pin-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -797,8 +806,8 @@
                     web messaging et co-browse en direct.</span><span class="i18n-en">Connect this demo to your Genesys
                     Cloud org to enable live chat, web messaging and co-browse.</span></div>
               </div>
-              <span class="badge-connected"><span class="i18n-fr">Connecté</span><span
-                  class="i18n-en">Connected</span></span>
+              <span id="gc-connected-badge" class="badge-connected disconnected"><span class="i18n-fr">Non connecté</span><span
+                  class="i18n-en">Not connected</span></span>
             </div>
             <div class="panel-body">
               <div class="field">
@@ -835,11 +844,11 @@
                       désactiver.</span><span class="i18n-en">Number dialled via <code>tel:</code> link (e.g. 3262,
                       +33123456789). Leave blank to disable.</span></div>
                 </div>
-                <div class="field" style="grid-column:span 2;"><label>Deployment ID<span
-                      style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr">— messagerie
-                        web</span><span class="i18n-en">— web messaging</span></span></label><input id="gc-deployment"
-                    style="font-family:var(--font-mono); font-size:13px;" value="3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10"
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+                <div class="field" style="grid-column:span 2;">
+                  <label>Messenger snippet<span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr"> — code fourni par Genesys Cloud</span><span class="i18n-en"> — code provided by Genesys Cloud</span></span></label>
+                  <textarea id="gc-snippet" style="font-family:var(--font-mono); font-size:12px; min-height:120px; resize:vertical;" placeholder="(function (g, e, n, es, ys) {&#10;  g['_genesysJs'] = e; …&#10;})(window, 'Genesys', 'https://…/genesys.min.js', {…});"></textarea>
+                  <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté sur toutes les pages protégées au chargement. Laisse vide pour désactiver.</span><span class="i18n-en">Executed on every protected page on load. Leave empty to disable.</span></div>
+                </div>
                 <div class="field"><label>Client ID<span
                       style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr">— appel
                         API</span><span class="i18n-en">— API Call</span></span></label><input id="gc-client"
@@ -943,6 +952,7 @@
       const status = DemoGenesys.getTokenStatus();
       const iconWrap = document.getElementById('gc-oauth-icon');
       const text = document.getElementById('gc-oauth-text');
+      const badge = document.getElementById('gc-connected-badge');
       if (!iconWrap || !text) return;
       const lang = document.documentElement.lang;
       if (status.connected) {
@@ -954,12 +964,20 @@
         text.textContent = lang === 'en'
           ? `OAuth token active · valid until ${expStr}.`
           : `Token OAuth actif · valide jusqu'au ${expStr}.`;
+        if (badge) {
+          badge.classList.remove('disconnected');
+          badge.innerHTML = `<span class="i18n-fr">Connecté</span><span class="i18n-en">Connected</span>`;
+        }
       } else {
         iconWrap.innerHTML = `<i data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i>`;
         text.style.color = 'var(--fg-muted)';
         text.textContent = lang === 'en'
           ? 'Not connected · click Test to authenticate with Genesys Cloud.'
           : 'Non connecté · cliquez sur Tester pour vous authentifier avec Genesys Cloud.';
+        if (badge) {
+          badge.classList.add('disconnected');
+          badge.innerHTML = `<span class="i18n-fr">Non connecté</span><span class="i18n-en">Not connected</span>`;
+        }
       }
       lucide.createIcons();
     }
@@ -1033,7 +1051,7 @@
       const g = p.genesys || {};
       const regionEl = document.getElementById('gc-region');
       if (g.region) { for (let o of regionEl.options) if (o.value === g.region) o.selected = true; }
-      document.getElementById('gc-deployment').value = g.deploymentId || '';
+      document.getElementById('gc-snippet').value = g.messengerSnippet || '';
       document.getElementById('gc-client').value = g.clientId || '';
       document.getElementById('gc-queue').value = g.queueId || '';
       document.getElementById('gc-script').value = g.scriptId || '';
@@ -1117,7 +1135,7 @@
         },
         genesys: {
           region: document.getElementById('gc-region').value,
-          deploymentId: document.getElementById('gc-deployment').value.trim(),
+          messengerSnippet: document.getElementById('gc-snippet').value.trim(),
           clientId: document.getElementById('gc-client').value.trim(),
           queueId: document.getElementById('gc-queue').value.trim(),
           scriptId: document.getElementById('gc-script').value.trim(),

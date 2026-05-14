@@ -40,7 +40,7 @@ const DemoConfig = (() => {
     products: { visaPremier: true, visaClassic: true, autoLoan: true, assuranceVie: false },
     genesys: {
       region: 'mypurecloud.ie',
-      deploymentId: '',
+      messengerSnippet: '',
       clientId: '',
       queueId: '',
       scriptId: '',

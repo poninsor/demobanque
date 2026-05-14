@@ -226,7 +226,7 @@ const DemoGenesys = (() => {
   return {
     /** Open a Genesys Cloud web messaging widget */
     webMessaging() {
-      alert('Launch Genesys Cloud web messaging');
+      Genesys("command", "Messenger.open");
     },
 
     /** Initiate a phone call using the configured call number (tel: link) */

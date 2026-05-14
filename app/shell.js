@@ -51,5 +51,13 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') window.closeMobileSheet();
     });
+
+    // Exécuter le Messenger snippet Genesys configuré dans Paramètres
+    try {
+      const snippet = ((DemoConfig.getProfile() || {}).genesys || {}).messengerSnippet || '';
+      if (snippet) new Function(snippet)();
+    } catch (e) {
+      console.warn('[DemoShell] messengerSnippet error:', e);
+    }
   });
 })();
