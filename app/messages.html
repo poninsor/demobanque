@@ -1,121 +1,485 @@
 <!doctype html>
-<html lang="fr"><head>
+<html lang="fr">
+
+<head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Démo banque · Messagerie</title>
   <link rel="stylesheet" href="shell.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { overflow: hidden; }
-    .main { display: grid; grid-template-rows: var(--header-h) 1fr auto; overflow: hidden; }
-    .messenger { display: grid; grid-template-columns: 320px 1fr; flex: 1; min-height: 0; overflow: hidden; }
-    .threads { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-    .threads-head { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .threads-head h2 { font-size: 18px; }
-    .threads-list { overflow: auto; flex: 1; }
-    .thread { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; padding: 14px 20px; cursor: pointer; align-items: center; }
-    .thread:hover { background: var(--bg-sunken); }
-    .thread.active { background: var(--brand-50); border-left: 3px solid var(--brand); padding-left: 17px; }
-    .thread .av { width: 40px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 14px; }
-    .thread .t-name { font-weight: 600; font-size: 14px; }
-    .thread .t-last { font-size: 12px; color: var(--fg-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
-    .thread .when { font-size: 11px; color: var(--fg-faint); }
-    .thread .unread { background: var(--brand); color: white; border-radius: 999px; min-width: 18px; height: 18px; padding: 0 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; margin-top: 4px; }
+    body {
+      overflow: hidden;
+    }
 
-    .conversation { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-    .conv-head { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-    .conv-head .who { display: flex; gap: 12px; align-items: center; }
-    .conv-head .av { width: 44px; height: 44px; border-radius: 999px; background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .conv-head .c-name { font-weight: 600; font-size: 16px; }
-    .conv-head .role { font-size: 12px; color: var(--success-700); display: flex; align-items: center; gap: 6px; }
-    .conv-head .role::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--success); }
+    .main {
+      display: grid;
+      grid-template-rows: var(--header-h) 1fr auto;
+      overflow: hidden;
+    }
 
-    .conv-body { padding: 24px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 18px; background: var(--bg-sunken); }
-    .day-divider { text-align: center; font-size: 11px; color: var(--fg-faint); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+    .messenger {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
 
-    .msg { display: flex; gap: 10px; max-width: 70%; }
-    .msg.me { align-self: flex-end; flex-direction: row-reverse; }
-    .msg .bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.45; background: var(--bg-elev); border: 1px solid var(--border); }
-    .msg.me .bubble { background: var(--brand); color: white; border-color: var(--brand); border-bottom-right-radius: 6px; }
-    .msg.them .bubble { border-bottom-left-radius: 6px; }
-    .msg .m-av { width: 28px; height: 28px; border-radius: 999px; background: linear-gradient(135deg, var(--brand-400), var(--brand-700)); color: white; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
-    .msg .ts { font-size: 11px; color: var(--fg-faint); margin-top: 4px; }
-    .msg.me .ts { text-align: right; }
+    .threads {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
 
-    .attach-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; gap: 10px; align-items: center; max-width: 320px; }
-    .attach-card .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
-    .attach-card .nm { font-size: 13px; font-weight: 600; }
-    .attach-card .sz { font-size: 11px; color: var(--fg-muted); }
+    .threads-head {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
 
-    .quick-replies { display: flex; gap: 8px; padding: 8px 24px; flex-wrap: wrap; background: var(--bg-elev); border-top: 1px solid var(--border); flex-shrink: 0; }
-    .qr { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--bg-inset); cursor: pointer; border: none; font-family: inherit; }
-    .qr:hover { background: var(--brand-50); color: var(--brand-700); }
+    .threads-head h2 {
+      font-size: 18px;
+    }
 
-    .composer { padding: 12px 24px; border-top: 1px solid var(--border); display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: end; background: var(--bg-elev); flex-shrink: 0; }
-    .composer textarea { flex: 1; resize: none; min-height: 44px; max-height: 120px; padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border-strong); font-family: inherit; font-size: 14px; outline: 0; background: var(--bg-elev); color: var(--fg); }
-    .composer textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
-    .send { width: 44px; height: 44px; border-radius: 999px; background: var(--brand); color: white; display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer; flex-shrink: 0; transition: all 140ms; }
-    .send:hover { background: var(--brand-600); }
-    .send svg { width: 18px; height: 18px; }
+    .threads-list {
+      overflow: auto;
+      flex: 1;
+    }
 
-    .advisor-initials { font-size: 14px; font-weight: 700; }
+    .thread {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      align-items: center;
+    }
+
+    .thread:hover {
+      background: var(--bg-sunken);
+    }
+
+    .thread.active {
+      background: var(--brand-50);
+      border-left: 3px solid var(--brand);
+      padding-left: 17px;
+    }
+
+    .thread .av {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      font-size: 14px;
+    }
+
+    .thread .t-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .thread .t-last {
+      font-size: 12px;
+      color: var(--fg-muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .thread .when {
+      font-size: 11px;
+      color: var(--fg-faint);
+    }
+
+    .thread .unread {
+      background: var(--brand);
+      color: white;
+      border-radius: 999px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .conversation {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .conv-head {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .conv-head .who {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .conv-head .av {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .conv-head .c-name {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .conv-head .role {
+      font-size: 12px;
+      color: var(--success-700);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .conv-head .role::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .conv-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: var(--bg-sunken);
+    }
+
+    .day-divider {
+      text-align: center;
+      font-size: 11px;
+      color: var(--fg-faint);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .msg {
+      display: flex;
+      gap: 10px;
+      max-width: 70%;
+    }
+
+    .msg.me {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg .bubble {
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.45;
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+    }
+
+    .msg.me .bubble {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+      border-bottom-right-radius: 6px;
+    }
+
+    .msg.them .bubble {
+      border-bottom-left-radius: 6px;
+    }
+
+    .msg .m-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .msg .ts {
+      font-size: 11px;
+      color: var(--fg-faint);
+      margin-top: 4px;
+    }
+
+    .msg.me .ts {
+      text-align: right;
+    }
+
+    .attach-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      max-width: 320px;
+    }
+
+    .attach-card .ic {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--brand-50);
+      color: var(--brand-700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .attach-card .nm {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .attach-card .sz {
+      font-size: 11px;
+      color: var(--fg-muted);
+    }
+
+    .quick-replies {
+      display: flex;
+      gap: 8px;
+      padding: 8px 24px;
+      flex-wrap: wrap;
+      background: var(--bg-elev);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .qr {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--bg-inset);
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    .qr:hover {
+      background: var(--brand-50);
+      color: var(--brand-700);
+    }
+
+    .composer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: end;
+      background: var(--bg-elev);
+      flex-shrink: 0;
+    }
+
+    .composer textarea {
+      flex: 1;
+      resize: none;
+      min-height: 44px;
+      max-height: 120px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-strong);
+      font-family: inherit;
+      font-size: 14px;
+      outline: 0;
+      background: var(--bg-elev);
+      color: var(--fg);
+    }
+
+    .composer textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+    }
+
+    .send {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: var(--brand);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 140ms;
+    }
+
+    .send:hover {
+      background: var(--brand-600);
+    }
+
+    .send svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .advisor-initials {
+      font-size: 14px;
+      font-weight: 700;
+    }
 
     /* Bouton retour visible uniquement sur mobile */
-    .mobile-back-btn { display: none !important; }
+    .mobile-back-btn {
+      display: none !important;
+    }
 
     @media (max-width: 768px) {
-      body { display: block; height: 100svh; overflow: hidden; }
+      body {
+        display: block;
+        height: 100svh;
+        overflow: hidden;
+      }
+
       .main {
-        display: flex; flex-direction: column;
+        display: flex;
+        flex-direction: column;
         height: calc(100svh - 60px - env(safe-area-inset-bottom));
         overflow: hidden;
       }
+
       /* Messenger : conteneur de positionnement pour le slide */
       .messenger {
-        flex: 1; min-height: 0;
-        position: relative; overflow: hidden;
-        grid-template-columns: 1fr; /* désactive la grille desktop */
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+        grid-template-columns: 1fr;
+        /* désactive la grille desktop */
         display: block;
       }
+
       /* Les deux panneaux se superposent et slident */
-      .threads, .conversation {
-        position: absolute; inset: 0;
-        display: flex; flex-direction: column;
+      .threads,
+      .conversation {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
         transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
         background: var(--bg-elev);
         overflow: hidden;
       }
+
       /* Par défaut sur mobile : fils visible, conversation hors-champ à droite */
-      .threads { transform: translateX(0); border-right: none; }
-      .conversation { transform: translateX(100%); }
+      .threads {
+        transform: translateX(0);
+        border-right: none;
+      }
+
+      .conversation {
+        transform: translateX(100%);
+      }
+
       /* Avec .show-conversation : conversation visible, fils hors-champ à gauche */
-      .messenger.show-conversation .threads { transform: translateX(-100%); }
-      .messenger.show-conversation .conversation { transform: translateX(0); }
+      .messenger.show-conversation .threads {
+        transform: translateX(-100%);
+      }
+
+      .messenger.show-conversation .conversation {
+        transform: translateX(0);
+      }
 
       /* Bouton retour */
-      .mobile-back-btn { display: flex !important; margin-right: 4px; }
+      .mobile-back-btn {
+        display: flex !important;
+        margin-right: 4px;
+      }
 
-      .conv-head { padding: 10px 14px; }
-      .conv-body { padding: 12px 14px; gap: 12px; background: var(--bg-sunken); }
-      .composer { padding: 8px 12px; gap: 8px; }
-      .quick-replies { padding: 6px 12px; }
-      .threads-list { overflow-y: auto; }
+      .conv-head {
+        padding: 10px 14px;
+      }
+
+      .conv-body {
+        padding: 12px 14px;
+        gap: 12px;
+        background: var(--bg-sunken);
+      }
+
+      .composer {
+        padding: 8px 12px;
+        gap: 8px;
+      }
+
+      .quick-replies {
+        padding: 6px 12px;
+      }
+
+      .threads-list {
+        overflow-y: auto;
+      }
     }
   </style>
 </head>
+
 <body>
   <aside class="sidebar">
     <div class="logo"><img src="assets/logo.svg" alt="Démo banque" data-logo></div>
-    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de bord</span><span class="i18n-en">Dashboard</span></span></a>
-    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></span></a>
-    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
-    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
-    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
-    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
+    <a class="nav-link" href="dashboard.html"><i data-lucide="home"></i><span><span class="i18n-fr">Tableau de
+          bord</span><span class="i18n-en">Dashboard</span></span></a>
+    <a class="nav-link" href="account.html"><i data-lucide="wallet"></i><span><span class="i18n-fr">Comptes</span><span
+          class="i18n-en">Accounts</span></span></a>
+    <a class="nav-link" href="transfer.html"><i data-lucide="arrow-right-left"></i><span><span
+          class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></span></a>
+    <a class="nav-link" href="cards.html"><i data-lucide="credit-card"></i><span><span
+          class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></span></a>
+    <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span
+          class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
+    <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span
+          class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
     <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
-    <a class="nav-link active" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
-    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
-    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
+    <a class="nav-link active" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie
+          sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
+    <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous
+          contacter</span><span class="i18n-en">Contact us</span></span></a>
+    <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span
+          class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
     <div class="lang-switcher">
       <button class="lang-btn" data-lang="fr" onclick="DemoConfig.setLanguage('fr')">FR</button>
       <button class="lang-btn" data-lang="en" onclick="DemoConfig.setLanguage('en')">EN</button>
@@ -123,15 +487,19 @@
     <div class="spacer"></div>
     <div class="profile-card" id="profile-card">
       <div class="av" data-persona-initials>SM</div>
-      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role"><span class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span></div>
-      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button></div>
+      <div class="info"><span class="name" data-persona-full>Sophie Martin</span><span class="role"><span
+            class="i18n-fr">Compte particulier</span><span class="i18n-en">Personal account</span></span></div>
+      <div class="logout-btn"><button onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span
+            class="i18n-fr">Se déconnecter</span><span class="i18n-en">Sign out</span></button></div>
     </div>
   </aside>
 
   <main class="main">
     <div class="topbar">
-      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher dans les messages…</span><span class="i18n-en">Search messages…</span></span></div>
-      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button></div>
+      <div class="search"><i data-lucide="search"></i><span><span class="i18n-fr">Rechercher dans les
+            messages…</span><span class="i18n-en">Search messages…</span></span></div>
+      <div class="topbar-actions"><button class="icon-btn"><i data-lucide="bell"></i><span class="dot"></span></button>
+      </div>
     </div>
 
     <div class="messenger">
@@ -142,35 +510,69 @@
         </div>
         <div class="threads-list">
           <div class="thread active" id="thread-advisor">
-            <div class="av" id="advisor-av" style="background: linear-gradient(135deg, var(--brand-400), var(--brand-700));"><span id="advisor-initials">CL</span></div>
+            <div class="av" id="advisor-av"
+              style="background: linear-gradient(135deg, var(--brand-400), var(--brand-700));"><span
+                id="advisor-initials">CL</span></div>
             <div>
               <div class="t-name" id="advisor-name">Camille Lefebvre</div>
-              <div class="t-last" id="thread-preview"><span class="i18n-fr">D'accord, je prépare l'attestation pour ce soir.</span><span class="i18n-en">Ok, I will prepare the document for this evening.</span></div>
+              <div class="t-last" id="thread-preview"><span class="i18n-fr">D'accord, je prépare l'attestation pour ce
+                  soir.</span><span class="i18n-en">Ok, I will prepare the document for this evening.</span></div>
             </div>
-            <div style="text-align:right;"><div class="when">14:21</div><div class="unread" id="unread-badge">2</div></div>
+            <div style="text-align:right;">
+              <div class="when">14:21</div>
+              <div class="unread" id="unread-badge">2</div>
+            </div>
           </div>
           <div class="thread">
             <div class="av" style="background: linear-gradient(135deg, #6366f1, #4338ca);">FR</div>
-            <div><div class="t-name"><span class="i18n-fr">Service crédits</span><span class="i18n-en">Loans department</span></div><div class="t-last"><span class="i18n-fr">Ton dossier prêt travaux a été validé.</span><span class="i18n-en">Your home improvement loan has been approved.</span></div></div>
-            <div style="text-align:right;"><div class="when">Hier</div></div>
+            <div>
+              <div class="t-name"><span class="i18n-fr">Service crédits</span><span class="i18n-en">Loans
+                  department</span></div>
+              <div class="t-last"><span class="i18n-fr">Ton dossier prêt travaux a été validé.</span><span
+                  class="i18n-en">Your home improvement loan has been approved.</span></div>
+            </div>
+            <div style="text-align:right;">
+              <div class="when">Hier</div>
+            </div>
           </div>
           <div class="thread">
-            <div class="av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12);" data-logo-av><span data-brand>DB</span></div>
-            <div><div class="t-name" data-brand>Démo banque</div><div class="t-last"><span class="i18n-fr">Ton relevé de mai est disponible.</span><span class="i18n-en">Your May statement is available.</span></div></div>
-            <div style="text-align:right;"><div class="when">8 mai</div></div>
+            <div class="av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12);" data-logo-av><span
+                data-brand>DB</span></div>
+            <div>
+              <div class="t-name" data-brand>Démo banque</div>
+              <div class="t-last"><span class="i18n-fr">Ton relevé de mai est disponible.</span><span
+                  class="i18n-en">Your May statement is available.</span></div>
+            </div>
+            <div style="text-align:right;">
+              <div class="when">8 mai</div>
+            </div>
           </div>
           <div class="thread">
             <div class="av" style="background: linear-gradient(135deg, #00a35a, #00723f);">SF</div>
-            <div><div class="t-name"><span class="i18n-fr">Sécurité & Fraude</span><span class="i18n-en">Security & Fraud</span></div><div class="t-last"><span class="i18n-fr">Une connexion a été détectée à Lyon…</span><span class="i18n-en">A login was detected in Lyon…</span></div></div>
-            <div style="text-align:right;"><div class="when">2 mai</div></div>
+            <div>
+              <div class="t-name"><span class="i18n-fr">Sécurité & Fraude</span><span class="i18n-en">Security &
+                  Fraud</span></div>
+              <div class="t-last"><span class="i18n-fr">Une connexion a été détectée à Lyon…</span><span
+                  class="i18n-en">A login was detected in Lyon…</span></div>
+            </div>
+            <div style="text-align:right;">
+              <div class="when">2 mai</div>
+            </div>
+          </div>
+          <div class="thread" style="position:absolute; bottom:0;"><a href="#"
+              onclick="event.preventDefault(); resetMessages();"
+              style="margin-left:auto; font-size:12px; color:var(--fg-faint); text-decoration:none;"
+              onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--fg-faint)'">Reset</a>
           </div>
         </div>
+
       </section>
 
       <section class="conversation">
         <div class="conv-head">
           <div class="who">
-            <button class="icon-btn mobile-back-btn" id="back-to-threads" title="Retour" aria-label="Retour aux conversations"><i data-lucide="arrow-left"></i></button>
+            <button class="icon-btn mobile-back-btn" id="back-to-threads" title="Retour"
+              aria-label="Retour aux conversations"><i data-lucide="arrow-left"></i></button>
             <div class="av" id="conv-av"><span id="conv-initials">CL</span></div>
             <div>
               <div class="c-name" id="conv-name">Camille Lefebvre</div>
@@ -189,14 +591,19 @@
         </div>
 
         <div class="quick-replies" id="quick-replies">
-          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Merci 🙏</span><span class="i18n-en">Thank you 🙏</span></button>
-          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">J'ai bien reçu</span><span class="i18n-en">Got it</span></button>
-          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Une dernière question…</span><span class="i18n-en">One more question…</span></button>
-          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">On peut s'appeler ?</span><span class="i18n-en">Can we talk?</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Merci 🙏</span><span
+              class="i18n-en">Thank you 🙏</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">J'ai bien reçu</span><span
+              class="i18n-en">Got it</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">Une dernière question…</span><span
+              class="i18n-en">One more question…</span></button>
+          <button class="qr" onclick="sendQuickReply(this)"><span class="i18n-fr">On peut s'appeler ?</span><span
+              class="i18n-en">Can we talk?</span></button>
         </div>
 
         <div class="composer">
-          <button class="icon-btn" style="width:44px;height:44px;flex-shrink:0;"><i data-lucide="paperclip"></i></button>
+          <button class="icon-btn" style="width:44px;height:44px;flex-shrink:0;"><i
+              data-lucide="paperclip"></i></button>
           <textarea id="compose-area" placeholder="Écris ton message…" rows="1"></textarea>
           <button class="send" id="send-btn" onclick="sendMessage()"><i data-lucide="send"></i></button>
         </div>
@@ -208,23 +615,34 @@
 
   <nav class="mobile-nav" aria-label="Navigation">
     <div class="mobile-nav-inner">
-      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
-      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
-      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
-      <a class="m-nav-item active" href="messages.html"><i data-lucide="mail"></i><span class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
-      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span
+          class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span
+          class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span
+          class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item active" href="messages.html"><i data-lucide="mail"></i><span
+          class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i
+          data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
     </div>
   </nav>
   <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
   <div class="mobile-sheet" id="mobile-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-grid">
-      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
-      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
-      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
-      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
-      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
-      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span
+          class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span
+          class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span
+          class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span
+          class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span
+          class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span
+          class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
     </div>
   </div>
 
@@ -239,7 +657,7 @@
 
     function getTime() {
       const n = new Date();
-      return `${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;
+      return `${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}`;
     }
 
     function renderMessage(msg) {
@@ -267,7 +685,7 @@
     }
 
     function escapeHtml(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
     function loadMessages() {
@@ -304,6 +722,16 @@
 
       // Execute additional JS (workitem creation etc.)
       setTimeout(() => DemoConfig.executeAdditionalJS(), 300);
+    }
+
+    function resetMessages() {
+      const lang = document.documentElement.lang || 'fr';
+      const msg = lang === 'en'
+        ? 'Reset the conversation to default messages?'
+        : 'Réinitialiser la conversation avec les messages par défaut ?';
+      if (!confirm(msg)) return;
+      DemoConfig.updateProfile({ messages: null });
+      loadMessages();
     }
 
     function sendQuickReply(btn) {
@@ -343,6 +771,21 @@
       lucide.createIcons();
       loadMessages();
 
+      window.addEventListener('storage', (event) => {
+        if (event.key !== 'demobank_v1') return;
+        const body = document.getElementById('conv-body');
+        const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;
+        const msgs = DemoConfig.getMessages();
+        const lang = document.documentElement.lang || 'fr';
+        body.innerHTML = '<div class="day-divider">' + (lang === 'en' ? 'Today' : "Aujourd\'hui") + '</div>';
+        msgs.forEach(m => body.appendChild(renderMessage(m)));
+        if (atBottom) body.scrollTop = body.scrollHeight;
+        if (msgs.length > 0) {
+          const last = msgs[msgs.length - 1];
+          document.getElementById('thread-preview').textContent = last.text || last.fileName || '';
+        }
+      });
+
       const card = document.getElementById('profile-card');
       card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
       document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });
@@ -370,4 +813,6 @@
       });
     });
   </script>
-</body></html>
+</body>
+
+</html>

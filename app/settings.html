@@ -467,8 +467,8 @@
     <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span
           class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
     <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
-    <a class="nav-link" href="messages.html"><i data-lucide="mail"></i><span><span
-          class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
+    <a class="nav-link" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie
+          sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
     <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous
           contacter</span><span class="i18n-en">Contact us</span></span></a>
     <a class="nav-link active" href="settings.html"><i data-lucide="settings"></i><span><span
@@ -498,7 +498,7 @@
       <div class="page-header">
         <div class="page-title">
           <h1><span class="i18n-fr">Paramètres de démo</span><span class="i18n-en">Demo settings</span></h1>
-          <div class="sub"><span class="i18n-fr">White-label · personnalise la marque, le client et les produits
+          <div class="sub"><span class="i18n-fr">Marque-blanche · personnalise la marque, le client et les produits
               affichés pour cette démo Genesys.</span><span class="i18n-en">White-label · customise the brand, persona
               and products for this Genesys demo.</span></div>
         </div>
@@ -512,6 +512,8 @@
 
       <div class="settings-grid">
         <nav class="settings-nav">
+          <a href="#backup"><i data-lucide="hard-drive"></i><span class="i18n-fr">Sauvegarde</span><span
+              class="i18n-en">Backup</span></a>
           <a class="active" href="#brand"><i data-lucide="palette"></i><span class="i18n-fr">Marque</span><span
               class="i18n-en">Brand</span></a>
           <a href="#persona"><i data-lucide="user"></i><span class="i18n-fr">Persona</span><span
@@ -531,6 +533,46 @@
         </nav>
 
         <div id="panels-container">
+
+          <!-- BACKUP / RESTORE -->
+          <div class="panel" id="backup">
+            <div class="panel-head">
+              <div class="panel-head-icon"><i data-lucide="hard-drive"></i></div>
+              <div class="panel-head-text">
+                <h3><span class="i18n-fr">Sauvegarde & restauration</span><span class="i18n-en">Backup & restore</span>
+                </h3>
+                <div class="sub"><span class="i18n-fr">Exporte ou importe l'intégralité du paramétrage de ce profil
+                    (hors token OAuth) — utile après un Reset.</span><span class="i18n-en">Export or import all profile
+                    settings (OAuth token excluded) — handy after a Reset.</span></div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="row-setting">
+                <div>
+                  <div style="font-weight:600;"><span class="i18n-fr">Exporter</span><span class="i18n-en">Export</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Télécharge un fichier
+                      <code>.json</code> avec tous les paramètres de ce profil.</span><span class="i18n-en">Downloads a
+                      <code>.json</code> file containing all settings for this profile.</span></div>
+                </div>
+                <button class="btn btn-secondary" onclick="exportProfile()"><i data-lucide="download"></i><span
+                    class="i18n-fr">Exporter</span><span class="i18n-en">Export</span></button>
+              </div>
+              <div class="row-setting">
+                <div>
+                  <div style="font-weight:600;"><span class="i18n-fr">Importer</span><span class="i18n-en">Import</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Restaure un fichier exporté
+                      précédemment. Remplace le paramétrage actuel.</span><span class="i18n-en">Restores a previously
+                      exported file. Replaces all current settings.</span></div>
+                </div>
+                <button class="btn btn-secondary" onclick="document.getElementById('import-file-input').click()"><i
+                    data-lucide="upload"></i><span class="i18n-fr">Importer…</span><span
+                    class="i18n-en">Import…</span></button>
+              </div>
+              <input type="file" id="import-file-input" accept=".json,application/json" style="display:none;">
+            </div>
+          </div>
 
           <!-- BRAND -->
           <div class="panel" id="brand">
@@ -806,8 +848,8 @@
                     web messaging et co-browse en direct.</span><span class="i18n-en">Connect this demo to your Genesys
                     Cloud org to enable live chat, web messaging and co-browse.</span></div>
               </div>
-              <span id="gc-connected-badge" class="badge-connected disconnected"><span class="i18n-fr">Non connecté</span><span
-                  class="i18n-en">Not connected</span></span>
+              <span id="gc-connected-badge" class="badge-connected disconnected"><span class="i18n-fr">Non
+                  connecté</span><span class="i18n-en">Not connected</span></span>
             </div>
             <div class="panel-body">
               <div class="field">
@@ -834,6 +876,27 @@
                     Cloud login URL will be used for the OAuth implicit grant.</span></div>
               </div>
               <div class="gc-2col">
+                <div class="field"><label>Client ID<span
+                      style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr">— appel
+                        API</span><span class="i18n-en">— API Call</span></span></label><input id="gc-client"
+                    style="font-family:var(--font-mono); font-size:13px;" value="a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1"
+                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
+                <div style="grid-column:span 2; font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
+                    class="i18n-fr">Le flux Implicit Grant ne nécessite pas de Client Secret. L'URI de redirection à
+                    configurer dans Genesys Cloud est l'URL de cette page.</span><span class="i18n-en">The Implicit
+                    Grant flow does not require a Client Secret. Set this page's URL as the redirect URI in your Genesys
+                    Cloud OAuth client.</span></div>
+              </div>
+              <div
+                style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
+                <span id="gc-oauth-icon" style="flex-shrink:0; display:flex; align-items:center;"><i
+                    data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i></span>
+                <span id="gc-oauth-text" style="flex:1; color:var(--fg-muted);">—</span>
+                <button class="btn btn-secondary btn-sm" id="gc-test-btn" onclick="testGenesysConnection()"><i
+                    data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span
+                    class="i18n-en">Test</span></button>
+              </div>
+              <div class="gc-2col">
                 <div class="field" style="grid-column:span 2;">
                   <label><span class="i18n-fr">Numéro d'appel</span><span class="i18n-en">Call number</span> <span
                       style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr">— bouton
@@ -845,26 +908,16 @@
                       +33123456789). Leave blank to disable.</span></div>
                 </div>
                 <div class="field" style="grid-column:span 2;">
-                  <label>Messenger snippet<span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr"> — code fourni par Genesys Cloud</span><span class="i18n-en"> — code provided by Genesys Cloud</span></span></label>
-                  <textarea id="gc-snippet" style="font-family:var(--font-mono); font-size:12px; min-height:120px; resize:vertical;" placeholder="(function (g, e, n, es, ys) {&#10;  g['_genesysJs'] = e; …&#10;})(window, 'Genesys', 'https://…/genesys.min.js', {…});"></textarea>
-                  <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté sur toutes les pages protégées au chargement. Laisse vide pour désactiver.</span><span class="i18n-en">Executed on every protected page on load. Leave empty to disable.</span></div>
+                  <label>Messenger snippet<span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
+                        class="i18n-fr"> — code fourni par Genesys Cloud</span><span class="i18n-en"> — code provided by
+                        Genesys Cloud</span></span></label>
+                  <textarea id="gc-snippet"
+                    style="font-family:var(--font-mono); font-size:12px; min-height:120px; resize:vertical;"
+                    placeholder="(function (g, e, n, es, ys) {&#10;  g['_genesysJs'] = e; …&#10;})(window, 'Genesys', 'https://…/genesys.min.js', {…});"></textarea>
+                  <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté sur
+                      toutes les pages protégées au chargement. Laisse vide pour désactiver.</span><span
+                      class="i18n-en">Executed on every protected page on load. Leave empty to disable.</span></div>
                 </div>
-                <div class="field"><label>Client ID<span
-                      style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span class="i18n-fr">— appel
-                        API</span><span class="i18n-en">— API Call</span></span></label><input id="gc-client"
-                    style="font-family:var(--font-mono); font-size:13px;" value="a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1"
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></div>
-                <div style="grid-column:span 2; font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
-                    class="i18n-fr">Le flux Implicit Grant ne nécessite pas de Client Secret. L'URI de redirection à configurer dans Genesys Cloud est l'URL de cette page.</span><span
-                    class="i18n-en">The Implicit Grant flow does not require a Client Secret. Set this page's URL as the redirect URI in your Genesys Cloud OAuth client.</span></div>
-              </div>
-              <div
-                style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
-                <span id="gc-oauth-icon" style="flex-shrink:0; display:flex; align-items:center;"><i data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i></span>
-                <span id="gc-oauth-text" style="flex:1; color:var(--fg-muted);">—</span>
-                <button class="btn btn-secondary btn-sm" id="gc-test-btn" onclick="testGenesysConnection()"><i
-                    data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span
-                    class="i18n-en">Test</span></button>
               </div>
 
               <div class="gc-2col" style="grid-column:span 2;">
@@ -915,21 +968,28 @@
           class="i18n-en">Accounts</span></a>
       <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span
           class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
-      <a class="m-nav-item" href="messages.html"><i data-lucide="mail"></i><span
-          class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
-      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+      <a class="m-nav-item" href="messages.html"><i data-lucide="mail"></i><span class="i18n-fr">Sécurisée</span><span
+          class="i18n-en">Secure</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i
+          data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
     </div>
   </nav>
   <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
   <div class="mobile-sheet" id="mobile-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-grid">
-      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
-      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
-      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
-      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
-      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
-      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span
+          class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span
+          class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span
+          class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span
+          class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span
+          class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span
+          class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
     </div>
   </div>
 
@@ -938,6 +998,24 @@
   <script src="genesys.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
+
+    function exportProfile() {
+      const p = DemoConfig.getProfile();
+      if (!p) return;
+      const exported = JSON.parse(JSON.stringify(p));
+      const lang = document.documentElement.lang || 'fr';
+      const slug = (p.brandName || 'demobanque').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'demobanque';
+      const blob = new Blob([JSON.stringify(exported, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${slug}-config.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(lang === 'en' ? '✓ Profile exported' : '✓ Profil exporté');
+    }
 
     async function testGenesysConnection() {
       const gc = {
@@ -1218,6 +1296,28 @@
           lucide.createIcons();
         };
         reader.readAsDataURL(file);
+      });
+
+      document.getElementById('import-file-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const lang = document.documentElement.lang || 'fr';
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (typeof imported !== 'object' || Array.isArray(imported)) throw new Error('invalid');
+            DemoConfig.updateProfile(imported);
+            loadProfile();
+            DemoConfig.applyBranding();
+            lucide.createIcons();
+            showToast(lang === 'en' ? '✓ Profile imported successfully' : '✓ Profil importé avec succès');
+          } catch {
+            showToast(lang === 'en' ? 'Import failed: invalid JSON file.' : "Échec de l'import : fichier JSON invalide.", true);
+          }
+          e.target.value = '';
+        };
+        reader.readAsText(file);
       });
 
       document.getElementById('logo-reset-btn').addEventListener('click', () => {
