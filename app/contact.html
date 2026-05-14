@@ -19,6 +19,8 @@
     .channel .desc { font-size: 14px; color: var(--fg-muted); }
     .channel .meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--success-700); margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); font-weight: 600; }
     .channel .meta::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: var(--success); }
+    .channel .meta.meta-unavailable { color: var(--fg-muted); }
+    .channel .meta.meta-unavailable::before { background: var(--fg-faint); }
     .channel.featured { background: linear-gradient(180deg, var(--brand-50), var(--bg-elev)); border-color: var(--brand-200); }
 
     .row-2col { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
@@ -29,6 +31,10 @@
 
     .booking-card { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 20px; padding: 22px; }
     .booking-card h3 { font-size: 18px; margin-bottom: 16px; }
+    .asap-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--bg-sunken); border-radius: 12px; cursor: pointer; margin-bottom: 16px; font-size: 14px; font-weight: 500; user-select: none; }
+    .asap-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--brand); cursor: pointer; flex-shrink: 0; margin: 0; }
+    #booking-scheduler { overflow: hidden; transition: opacity 200ms ease; }
+    #booking-scheduler.hidden { display: none; }
     .advisor { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--bg-sunken); border-radius: 14px; margin-bottom: 18px; }
     .advisor .av { width: 52px; height: 52px; border-radius: 999px; background: linear-gradient(135deg, #ff7a4a 0%, var(--brand-500) 45%, var(--brand-800) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
     .advisor .adv-name { font-weight: 600; }
@@ -50,6 +56,17 @@
 
     .branch { display: flex; gap: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; margin-top: 14px; align-items: flex-start; }
     .branch .pin { width: 36px; height: 36px; border-radius: 999px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    @media (max-width: 768px) {
+      .hero { padding: 22px 20px; margin-bottom: 20px; }
+      .hero h1 { font-size: 26px; }
+      .hero p { font-size: 15px; }
+      .channels { grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+      .row-2col { grid-template-columns: 1fr; gap: 16px; }
+      .form-row { grid-template-columns: 1fr; }
+      .slots { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+      .booking-card { padding: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -62,7 +79,7 @@
     <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
     <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
     <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
     <a class="nav-link active" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
     <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
     <div class="lang-switcher">
@@ -90,21 +107,21 @@
 
       <div class="channels">
         <!-- Chat button — Genesys Web Messaging stub -->
-        <div class="channel featured" onclick="alert('Launch Genesys Cloud web messaging')" style="cursor:pointer;">
+        <div class="channel featured" onclick="DemoGenesys.webMessaging()" style="cursor:pointer;">
           <div class="icon"><i data-lucide="message-circle"></i></div>
           <h4><span class="i18n-fr">Chat avec un conseiller</span><span class="i18n-en">Chat with an advisor</span></h4>
           <div class="desc" id="advisor-desc">Camille Lefebvre te répond en moins de 2 min en moyenne.</div>
-          <div class="meta"><span class="i18n-fr">Disponible maintenant · 1 nouveau message</span><span class="i18n-en">Available now · 1 new message</span></div>
+          <div class="meta" id="chat-wait-meta"><span class="i18n-fr">Disponible maintenant · 1 nouveau message</span><span class="i18n-en">Available now · 1 new message</span></div>
         </div>
         <!-- Phone button -->
-        <div class="channel" onclick="alert('Launch Genesys Cloud web messaging')" style="cursor:pointer;">
+        <div class="channel" onclick="DemoGenesys.call()" style="cursor:pointer;">
           <div class="icon"><i data-lucide="phone"></i></div>
           <h4><span class="i18n-fr">Appel téléphonique</span><span class="i18n-en">Phone call</span></h4>
-          <div class="desc"><span class="i18n-fr">Du lundi au samedi · 8h–20h · 3262 (gratuit).</span><span class="i18n-en">Mon–Sat · 8am–8pm · 3262 (free).</span></div>
-          <div class="meta"><span class="i18n-fr">Temps d'attente · 2 min</span><span class="i18n-en">Wait time · 2 min</span></div>
+          <div class="desc"><span class="i18n-fr">Du lundi au samedi · 8h–20h · <span id="call-number-display">3262</span> (gratuit).</span><span class="i18n-en">Mon–Sat · 8am–8pm · <span id="call-number-display-en">3262</span> (free).</span></div>
+          <div class="meta" id="call-wait-meta"><span class="i18n-fr">Temps d'attente · 2 min</span><span class="i18n-en">Wait time · 2 min</span></div>
         </div>
         <!-- Video button — stub -->
-        <div class="channel" onclick="alert('démarrage session vidéo')" style="cursor:pointer;">
+        <div class="channel" onclick="DemoGenesys.video()" style="cursor:pointer;">
           <div class="icon"><i data-lucide="video"></i></div>
           <h4><span class="i18n-fr">Visio avec ton conseiller</span><span class="i18n-en">Video call with your advisor</span></h4>
           <div class="desc"><span class="i18n-fr">Pour un projet immo, un crédit, une succession.</span><span class="i18n-en">For a mortgage, loan, or estate planning.</span></div>
@@ -117,12 +134,25 @@
           <h3><span class="i18n-fr">Nous laisser un message</span><span class="i18n-en">Leave us a message</span></h3>
           <p class="sub"><span class="i18n-fr">On te répond sous 24 h ouvrées. Pour une opération urgente, préfère le chat.</span><span class="i18n-en">We reply within 24 working hours. For urgent matters, use the chat.</span></p>
           <div class="form-row">
-            <div class="field"><label><span class="i18n-fr">Sujet</span><span class="i18n-en">Subject</span></label><select><option><span class="i18n-fr">Demande d'attestation</span><span class="i18n-en">Proof of address request</span></option><option><span class="i18n-fr">Question sur une opération</span><span class="i18n-en">Question about a transaction</span></option><option><span class="i18n-fr">Carte perdue ou volée</span><span class="i18n-en">Lost or stolen card</span></option><option><span class="i18n-fr">Crédit & financement</span><span class="i18n-en">Loan & financing</span></option><option><span class="i18n-fr">Réclamation</span><span class="i18n-en">Complaint</span></option></select></div>
-            <div class="field"><label><span class="i18n-fr">Compte concerné</span><span class="i18n-en">Related account</span></label><select><option><span class="i18n-fr">Compte courant</span><span class="i18n-en">Current account</span> — ****6892</option><option>Livret A — ****2210</option><option><span class="i18n-fr">Aucun</span><span class="i18n-en">None</span></option></select></div>
+            <div class="field"><label><span class="i18n-fr">Sujet</span><span class="i18n-en">Subject</span></label><select id="contact-subject">
+              <option data-fr="Demande d'attestation" data-en="Proof of address request">Demande d'attestation</option>
+              <option data-fr="Question sur une opération" data-en="Question about a transaction">Question sur une opération</option>
+              <option data-fr="Carte perdue ou volée" data-en="Lost or stolen card">Carte perdue ou volée</option>
+              <option data-fr="Crédit &amp; financement" data-en="Loan &amp; financing">Crédit &amp; financement</option>
+              <option data-fr="Réclamation" data-en="Complaint">Réclamation</option>
+            </select></div>
+            <div class="field"><label><span class="i18n-fr">Compte concerné</span><span class="i18n-en">Related account</span></label><select id="contact-account">
+              <option data-fr="Compte courant — ****6892" data-en="Current account — ****6892">Compte courant — ****6892</option>
+              <option>Livret A — ****2210</option>
+              <option data-fr="Aucun" data-en="None">Aucun</option>
+            </select></div>
           </div>
           <div class="field" style="margin-bottom:14px;">
             <label><span class="i18n-fr">Ton message</span><span class="i18n-en">Your message</span></label>
-            <textarea placeholder="Décris-nous ta demande… / Describe your request…"><span class="i18n-fr">Bonjour, j'aurais besoin d'une attestation de domiciliation pour un dossier de location. Merci d'avance !</span><span class="i18n-en">Hello, I would need a proof of address for a rental application. Thank you in advance!</span></textarea>
+            <textarea id="contact-message"
+              data-fr="Bonjour, j'aurais besoin d'une attestation de domiciliation pour un dossier de location. Merci d'avance !"
+              data-en="Hello, I would need a proof of address for a rental application. Thank you in advance!"
+              placeholder="Décris-nous ta demande… / Describe your request…"></textarea>
           </div>
           <div style="display:flex; gap:10px; align-items:center; padding:12px 14px; background:var(--info-50); color:var(--info-700); border-radius:10px; font-size:13px; margin-bottom:14px;">
             <i data-lucide="paperclip" style="width:16px;height:16px;flex-shrink:0;"></i>
@@ -130,7 +160,7 @@
           </div>
           <div style="display:flex; justify-content:flex-end; gap:10px;">
             <button class="btn btn-secondary"><span class="i18n-fr">Brouillon</span><span class="i18n-en">Save draft</span></button>
-            <button class="btn btn-primary" onclick="alert(document.documentElement.lang==='en'?'Message sent to your advisor.':'Message envoyé à ton conseiller.')"><i data-lucide="send"></i><span class="i18n-fr">Envoyer</span><span class="i18n-en">Send</span></button>
+            <button class="btn btn-primary" onclick="DemoGenesys.messageSent()"><i data-lucide="send"></i><span class="i18n-fr">Envoyer</span><span class="i18n-en">Send</span></button>
           </div>
         </div>
 
@@ -144,24 +174,31 @@
                 <div class="adv-role" id="booking-role">Ta conseillère · Agence Paris 11</div>
               </div>
             </div>
-            <!-- Calendar -->
-            <div class="calendar">
-              <div class="dow"><span class="i18n-fr">L</span><span class="i18n-en">M</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">W</span></div><div class="dow"><span class="i18n-fr">J</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">V</span><span class="i18n-en">F</span></div><div class="dow"><span class="i18n-fr">S</span><span class="i18n-en">S</span></div><div class="dow"><span class="i18n-fr">D</span><span class="i18n-en">S</span></div>
-              <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day disabled">4</div><div class="day disabled">5</div>
-              <div class="day">6</div><div class="day has-slot">7</div><div class="day has-slot">8</div><div class="day has-slot">9</div><div class="day">10</div><div class="day disabled">11</div><div class="day disabled">12</div>
-              <div class="day has-slot">13</div><div class="day selected" id="selected-day">14</div><div class="day has-slot">15</div><div class="day">16</div><div class="day has-slot">17</div><div class="day disabled">18</div><div class="day disabled">19</div>
-              <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day disabled">25</div><div class="day disabled">26</div>
-              <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div><div class="day empty"></div><div class="day empty"></div>
+            <!-- ASAP option -->
+            <label class="asap-row" for="asap-cb">
+              <input type="checkbox" id="asap-cb" onchange="toggleAsap()">
+              <span><span class="i18n-fr">Être rappelé dès que possible</span><span class="i18n-en">Call me back as soon as possible</span></span>
+            </label>
+            <!-- Calendar + slots (hidden when ASAP checked) -->
+            <div id="booking-scheduler">
+              <div class="calendar">
+                <div class="dow"><span class="i18n-fr">L</span><span class="i18n-en">M</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">M</span><span class="i18n-en">W</span></div><div class="dow"><span class="i18n-fr">J</span><span class="i18n-en">T</span></div><div class="dow"><span class="i18n-fr">V</span><span class="i18n-en">F</span></div><div class="dow"><span class="i18n-fr">S</span><span class="i18n-en">S</span></div><div class="dow"><span class="i18n-fr">D</span><span class="i18n-en">S</span></div>
+                <div class="day empty"></div><div class="day empty"></div><div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day disabled">4</div><div class="day disabled">5</div>
+                <div class="day">6</div><div class="day has-slot">7</div><div class="day has-slot">8</div><div class="day has-slot">9</div><div class="day">10</div><div class="day disabled">11</div><div class="day disabled">12</div>
+                <div class="day has-slot">13</div><div class="day selected" id="selected-day">14</div><div class="day has-slot">15</div><div class="day">16</div><div class="day has-slot">17</div><div class="day disabled">18</div><div class="day disabled">19</div>
+                <div class="day">20</div><div class="day">21</div><div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day disabled">25</div><div class="day disabled">26</div>
+                <div class="day">27</div><div class="day">28</div><div class="day">29</div><div class="day">30</div><div class="day">31</div><div class="day empty"></div><div class="day empty"></div>
+              </div>
+              <!-- Time slots -->
+              <div class="slots">
+                <div class="slot" onclick="selectSlot(this, '09:00')">09:00</div>
+                <div class="slot" onclick="selectSlot(this, '10:30')">10:30</div>
+                <div class="slot selected" onclick="selectSlot(this, '14:00')">14:00</div>
+                <div class="slot" onclick="selectSlot(this, '15:30')">15:30</div>
+              </div>
             </div>
-            <!-- Time slots -->
-            <div class="slots">
-              <div class="slot" onclick="selectSlot(this, '09:00')">09:00</div>
-              <div class="slot" onclick="selectSlot(this, '10:30')">10:30</div>
-              <div class="slot selected" onclick="selectSlot(this, '14:00')">14:00</div>
-              <div class="slot" onclick="selectSlot(this, '15:30')">15:30</div>
-            </div>
-            <!-- Confirm button — appointment stub -->
-            <button class="btn btn-primary" style="width:100%; margin-top:14px;" id="confirm-rdv" onclick="alert('rendez-vous programmé')">
+            <!-- Confirm button -->
+            <button class="btn btn-primary" style="width:100%; margin-top:14px;" id="confirm-rdv" onclick="confirmAppointment()">
               Confirmer le 14 mai · 14:00
             </button>
           </div>
@@ -180,6 +217,30 @@
     <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
   </main>
 
+  <nav class="mobile-nav" aria-label="Navigation">
+    <div class="mobile-nav-inner">
+      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item" href="messages.html"><i data-lucide="mail"></i><span class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+    </div>
+  </nav>
+  <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
+  <div class="mobile-sheet" id="mobile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-grid">
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
+  <script src="genesys.js"></script>
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
@@ -193,10 +254,40 @@
       updateConfirmBtn();
     }
 
+    function toggleAsap() {
+      const asap = document.getElementById('asap-cb').checked;
+      document.getElementById('booking-scheduler').classList.toggle('hidden', asap);
+      updateConfirmBtn();
+    }
+
+    function confirmAppointment() {
+      const asap = document.getElementById('asap-cb').checked;
+      DemoGenesys.appointmentConfirm(asap ? '' : buildScheduledTime());
+    }
+
     function updateConfirmBtn() {
-      document.getElementById('confirm-rdv').textContent = document.documentElement.lang === 'en'
-      ? `Confirm May ${selectedDay} · ${selectedTime}`
-      : `Confirmer le ${selectedDay} mai · ${selectedTime}`;
+      const asap = document.getElementById('asap-cb')?.checked;
+      const btn = document.getElementById('confirm-rdv');
+      if (asap) {
+        btn.textContent = document.documentElement.lang === 'en'
+          ? 'Request an immediate callback'
+          : 'Demander un rappel immédiat';
+      } else {
+        btn.textContent = document.documentElement.lang === 'en'
+          ? `Confirm May ${selectedDay} · ${selectedTime}`
+          : `Confirmer le ${selectedDay} mai · ${selectedTime}`;
+      }
+    }
+
+    function buildScheduledTime() {
+      const ref = new Date();
+      const year = ref.getFullYear();
+      const month = String(ref.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDay).padStart(2, '0');
+      const [h, m] = selectedTime.split(':');
+      // Paris timezone: CEST (UTC+2) Apr–Oct, CET (UTC+1) otherwise
+      const tz = (ref.getMonth() >= 3 && ref.getMonth() <= 9) ? '+02:00' : '+01:00';
+      return `${year}-${month}-${day}T${h}:${m}:00.000${tz}`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -205,6 +296,10 @@
       const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
       document.getElementById('hero-title').textContent = `Comment peut-on t'aider, ${p.persona.firstName} ?`;
 
+      const callNum = (p.genesys || {}).callNumber || '3262';
+      document.getElementById('call-number-display').textContent = callNum;
+      document.getElementById('call-number-display-en').textContent = callNum;
+
       const adv = (p.persona.advisor || 'Camille Lefebvre — Paris 11').split('—');
       const advName = adv[0].trim();
       const advLocation = adv[1] ? adv[1].trim() : 'Paris 11';
@@ -212,10 +307,10 @@
 
       document.getElementById('booking-av').textContent = advInitials;
       document.getElementById('booking-name').textContent = advName;
-      document.getElementById('booking-role').textContent = lang === 'en'
+      document.getElementById('booking-role').textContent = document.documentElement.lang === 'en'
         ? `Your advisor · ${advLocation} branch`
         : `Ta conseillère · Agence ${advLocation}`;
-      document.getElementById('advisor-desc').textContent = lang === 'en'
+      document.getElementById('advisor-desc').textContent = document.documentElement.lang === 'en'
         ? `${advName} typically replies within 2 minutes.`
         : `${advName} te répond en moins de 2 min en moyenne.`;
 
@@ -229,7 +324,56 @@
         });
       });
 
+      // Synchronise les <option> et <textarea> dont le texte dépend de la langue
+      function syncI18nInputs() {
+        const lang = document.documentElement.lang || 'fr';
+        document.querySelectorAll('option[data-fr]').forEach(opt => {
+          opt.textContent = lang === 'en' ? opt.dataset.en : opt.dataset.fr;
+        });
+        document.querySelectorAll('textarea[data-fr]').forEach(ta => {
+          ta.value = lang === 'en' ? ta.dataset.en : ta.dataset.fr;
+        });
+      }
+      syncI18nInputs();
+      new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
       lucide.createIcons();
+
+      // Temps d'attente réels depuis Genesys Cloud (si queueId configuré)
+      function formatWait(seconds) {
+        if (seconds === null) return null;
+        if (seconds < 0) return {
+          fr: 'Aucun agent disponible',
+          en: 'No agents available'
+        };
+        if (seconds === 0) return {
+          fr: 'Disponible maintenant',
+          en: 'Available now'
+        };
+        const mins = Math.ceil(seconds / 60);
+        return {
+          fr: `Temps d'attente · ${mins} min`,
+          en: `Wait time · ${mins} min`
+        };
+      }
+
+      function applyWaitMeta(id, seconds) {
+        const w = formatWait(seconds);
+        if (!w) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = `<span class="i18n-fr">${w.fr}</span><span class="i18n-en">${w.en}</span>`;
+        el.classList.toggle('meta-unavailable', seconds < 0);
+      }
+
+      Promise.all([
+        DemoGenesys.fetchWaitTime('message'),
+        DemoGenesys.fetchWaitTime('call')
+      ]).then(([chatWait, callWait]) => {
+        applyWaitMeta('chat-wait-meta', chatWait);
+        applyWaitMeta('call-wait-meta', callWait);
+      }).catch(() => { /* queueId absent ou erreur réseau — on garde le texte statique */ });
+
       const card = document.getElementById('profile-card');
       card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
       document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });

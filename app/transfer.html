@@ -49,6 +49,26 @@
     .summary-strip { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; background: var(--neutral-900); color: white; border-radius: 16px; margin-top: 24px; }
     .summary-strip .what { font-size: 13px; opacity: 0.85; }
     .summary-strip .amt { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 768px) {
+      .wizard { grid-template-columns: 1fr; gap: 16px; }
+      .stepper { flex-direction: row; justify-content: center; gap: 2px; padding: 0; }
+      .step { flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; flex: 1; border-radius: 10px; }
+      .step .lbl { font-size: 11px; text-align: center; }
+      .step .sub { display: none; }
+      .form-card { padding: 20px 16px; }
+      .benef-grid { grid-template-columns: repeat(2, 1fr); }
+      .schedule-grid { grid-template-columns: 1fr 1fr; }
+      .amount-input { padding: 20px 0; }
+      .amount-input input { font-size: 40px; }
+      .amount-input .euro { font-size: 28px; }
+      .summary-strip { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; }
+      .from-account { gap: 10px; }
+      .from-account .bal { font-size: 15px; }
+    }
+    @media (max-width: 480px) {
+      .schedule-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -61,7 +81,7 @@
     <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
     <a class="nav-link" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
     <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
     <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
     <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
     <div class="lang-switcher">
@@ -168,6 +188,29 @@
     <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
   </main>
 
+  <nav class="mobile-nav" aria-label="Navigation">
+    <div class="mobile-nav-inner">
+      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item active" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item" href="messages.html"><i data-lucide="mail"></i><span class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+    </div>
+  </nav>
+  <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
+  <div class="mobile-sheet" id="mobile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-grid">
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';

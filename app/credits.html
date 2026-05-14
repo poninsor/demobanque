@@ -39,6 +39,38 @@
     .timeline li { display:grid; grid-template-columns:110px 1fr; padding:12px 0; border-top:1px solid var(--border); align-items:center; font-size:14px; }
     .timeline li:first-child { border-top:0; }
     .timeline .date { color:var(--fg-muted); font-size:13px; }
+
+    @media (max-width: 768px) {
+      .row-2col { grid-template-columns: 1fr; gap: 16px; }
+      .credit-hero { padding: 22px; }
+      .credit-hero .amt { font-size: 36px; }
+      .offer-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+      .timeline li { grid-template-columns: 90px 1fr; gap: 8px; }
+      .sim-modal { padding: 22px !important; }
+    }
+
+    /* Simulation modal */
+    .sim-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center; padding: 16px;
+    }
+    .sim-overlay.open { display: flex; }
+    .sim-modal { width: 100%; max-width: 500px; position: relative; }
+    .sim-icon-wrap {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: var(--brand-50); color: var(--brand-700);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sim-icon-wrap svg { width: 22px; height: 22px; stroke-width: 1.75; }
+    .sim-result {
+      margin-top: 24px; padding: 20px; background: var(--brand-50);
+      border-radius: 16px; text-align: center;
+    }
+    .sim-result .lbl { font-size: 11px; color: var(--brand-700); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .sim-result .val { font-size: 40px; font-weight: 700; letter-spacing: -0.025em; color: var(--brand-700); font-family: var(--font-display); line-height: 1; }
+    .sim-result .sub { font-size: 12px; color: var(--fg-muted); margin-top: 6px; }
+    input[type="range"] { accent-color: var(--brand); width: 100%; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -51,7 +83,7 @@
     <a class="nav-link" href="beneficiaries.html"><i data-lucide="users"></i><span><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></span></a>
     <a class="nav-link active" href="credits.html"><i data-lucide="banknote"></i><span><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></span></a>
     <div class="nav-section"><span class="i18n-fr">Aide</span><span class="i18n-en">Help</span></div>
-    <a class="nav-link" href="messages.html"><i data-lucide="message-circle"></i><span><span class="i18n-fr">Messagerie</span><span class="i18n-en">Inbox</span></span></a>
+    <a class="nav-link" href="messages.html"><i data-lucide="mail"></i><span><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></span></a>
     <a class="nav-link" href="contact.html"><i data-lucide="phone"></i><span><span class="i18n-fr">Nous contacter</span><span class="i18n-en">Contact us</span></span></a>
     <a class="nav-link" href="settings.html"><i data-lucide="settings"></i><span><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></span></a>
     <div class="lang-switcher">
@@ -110,7 +142,7 @@
           <h4><span class="i18n-fr">Crédit auto</span><span class="i18n-en">Car loan</span></h4>
           <div class="desc"><span class="i18n-fr">Jusqu'à 30 000 € · 12 à 84 mois.</span><span class="i18n-en">Up to €30,000 · 12 to 84 months.</span></div>
           <div class="rate"><span class="v">3,20&nbsp;%</span><span class="u"><span class="i18n-fr">TAEG fixe à partir de</span><span class="i18n-en">Fixed APR from</span></span></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
+          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;" onclick="openSimulator('auto')"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
         </div>
         <div class="offer featured">
           <span class="badge brand" style="position:absolute; top:14px; right:14px;"><span class="i18n-fr">Recommandé</span><span class="i18n-en">Recommended</span></span>
@@ -118,14 +150,14 @@
           <h4><span class="i18n-fr">Prêt travaux</span><span class="i18n-en">Home improvement loan</span></h4>
           <div class="desc"><span class="i18n-fr">Pour ta cuisine, ta toiture, ta rénovation énergétique.</span><span class="i18n-en">For your kitchen, roof, or energy renovation.</span></div>
           <div class="rate"><span class="v">2,90&nbsp;%</span><span class="u"><span class="i18n-fr">TAEG fixe à partir de</span><span class="i18n-en">Fixed APR from</span></span></div>
-          <button class="btn btn-primary btn-sm" style="margin-top:14px; width:100%;"><span class="i18n-fr">Continuer</span><span class="i18n-en">Continue</span></button>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px; width:100%;" onclick="openSimulator('travaux')"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
         </div>
         <div class="offer">
           <div class="icon"><i data-lucide="plane"></i></div>
           <h4><span class="i18n-fr">Crédit projet</span><span class="i18n-en">Personal loan</span></h4>
           <div class="desc"><span class="i18n-fr">Voyage, mariage, équipement… 1 000 € à 75 000 €.</span><span class="i18n-en">Travel, wedding, equipment… €1,000 to €75,000.</span></div>
           <div class="rate"><span class="v">3,90&nbsp;%</span><span class="u"><span class="i18n-fr">TAEG fixe à partir de</span><span class="i18n-en">Fixed APR from</span></span></div>
-          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
+          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;" onclick="openSimulator('projet')"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
         </div>
       </div>
 
@@ -141,9 +173,170 @@
     <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
   </main>
 
+  <!-- Simulation modal -->
+  <div id="sim-overlay" class="sim-overlay" onclick="overlayClick(event)">
+    <div class="card card-pad sim-modal" id="sim-modal">
+      <button class="icon-btn" style="position:absolute; top:14px; right:14px;" onclick="closeSimulator()"><i data-lucide="x"></i></button>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:24px; padding-right:36px;">
+        <div class="sim-icon-wrap" id="sim-icon-wrap"></div>
+        <div>
+          <div style="font-size:20px; font-weight:700; letter-spacing:-0.02em;" id="sim-title"></div>
+          <div style="font-size:13px; color:var(--fg-muted); margin-top:2px;" id="sim-rate-label"></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="field">
+          <label id="sim-amount-label"></label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <input type="range" id="sim-range" style="flex:1;" oninput="syncSimulator('range')">
+            <input type="number" id="sim-amount" class="field" style="width:120px; height:44px; padding:0 12px; font-size:15px; border:1px solid var(--border-strong); border-radius:10px; background:var(--bg-elev); color:var(--fg);" oninput="syncSimulator('number')">
+          </div>
+        </div>
+        <div class="field">
+          <label id="sim-duration-label"></label>
+          <select id="sim-months" onchange="updateSimResult()"></select>
+        </div>
+      </div>
+      <div class="sim-result">
+        <div class="lbl" id="sim-monthly-label"></div>
+        <div class="val" id="sim-monthly">—</div>
+        <div class="sub" id="sim-total-label"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitSimulation()">
+        <i data-lucide="send"></i>
+        <span id="sim-submit-label"></span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Navigation">
+    <div class="mobile-nav-inner">
+      <a class="m-nav-item" href="dashboard.html"><i data-lucide="home"></i><span class="i18n-fr">Accueil</span><span class="i18n-en">Home</span></a>
+      <a class="m-nav-item" href="account.html"><i data-lucide="wallet"></i><span class="i18n-fr">Comptes</span><span class="i18n-en">Accounts</span></a>
+      <a class="m-nav-item" href="transfer.html"><i data-lucide="arrow-right-left"></i><span class="i18n-fr">Virements</span><span class="i18n-en">Transfers</span></a>
+      <a class="m-nav-item" href="messages.html"><i data-lucide="mail"></i><span class="i18n-fr">Sécurisée</span><span class="i18n-en">Secure</span></a>
+      <button class="m-nav-item" id="more-nav-btn" type="button" onclick="toggleMobileSheet()"><i data-lucide="more-horizontal"></i><span class="i18n-fr">Plus</span><span class="i18n-en">More</span></button>
+    </div>
+  </nav>
+  <div class="mobile-sheet-overlay" id="mobile-sheet-overlay" onclick="closeMobileSheet()"></div>
+  <div class="mobile-sheet" id="mobile-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-grid">
+      <a class="sheet-item" href="cards.html"><i data-lucide="credit-card"></i><span class="i18n-fr">Cartes</span><span class="i18n-en">Cards</span></a>
+      <a class="sheet-item" href="beneficiaries.html"><i data-lucide="users"></i><span class="i18n-fr">Bénéficiaires</span><span class="i18n-en">Payees</span></a>
+      <a class="sheet-item" href="credits.html"><i data-lucide="banknote"></i><span class="i18n-fr">Crédits</span><span class="i18n-en">Loans</span></a>
+      <a class="sheet-item" href="contact.html"><i data-lucide="phone"></i><span class="i18n-fr">Contact</span><span class="i18n-en">Contact</span></a>
+      <a class="sheet-item" href="settings.html"><i data-lucide="settings"></i><span class="i18n-fr">Paramètres</span><span class="i18n-en">Settings</span></a>
+      <button class="sheet-item sheet-item-logout" onclick="DemoConfig.logout()"><i data-lucide="log-out"></i><span class="i18n-fr">Déconnexion</span><span class="i18n-en">Sign out</span></button>
+    </div>
+  </div>
+
+  <script src="shell.js"></script>
+  <script src="genesys.js"></script>
   <script src="config.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
+
+    /* ── Loan simulator ─────────────────────────────────────────────────── */
+    const SIM_OFFERS = {
+      auto:    { icon: 'car',   rate: 3.20, min: 5000,  max: 30000, def: 10000 },
+      travaux: { icon: 'home',  rate: 2.90, min: 5000,  max: 75000, def: 20000 },
+      projet:  { icon: 'plane', rate: 3.90, min: 1000,  max: 75000, def: 15000 },
+    };
+    const SIM_LABELS = {
+      auto:    ['Crédit auto',    'Car loan'],
+      travaux: ['Prêt travaux',   'Home improvement loan'],
+      projet:  ['Crédit projet',  'Personal loan'],
+    };
+    let currentOffer = 'auto';
+
+    function openSimulator(type) {
+      currentOffer = type;
+      const offer = SIM_OFFERS[type];
+      const isFr = (document.documentElement.lang || 'fr') !== 'en';
+
+      document.getElementById('sim-title').textContent = isFr ? SIM_LABELS[type][0] : SIM_LABELS[type][1];
+      document.getElementById('sim-rate-label').textContent =
+        (isFr ? 'Taux fixe ' : 'Fixed rate ') + offer.rate.toFixed(2).replace('.', ',') + ' % TAEG';
+      document.getElementById('sim-amount-label').textContent = isFr ? 'Montant souhaité' : 'Requested amount';
+      document.getElementById('sim-duration-label').textContent = isFr ? 'Durée' : 'Duration';
+      document.getElementById('sim-monthly-label').textContent = isFr ? 'Mensualité estimée' : 'Estimated monthly payment';
+      document.getElementById('sim-submit-label').textContent = isFr ? 'Soumettre ma simulation' : 'Submit my simulation';
+
+      // Icon
+      const wrap = document.getElementById('sim-icon-wrap');
+      wrap.innerHTML = `<i data-lucide="${offer.icon}" style="width:22px;height:22px;stroke-width:1.75;"></i>`;
+
+      // Range & number inputs
+      const rangeEl = document.getElementById('sim-range');
+      const amountEl = document.getElementById('sim-amount');
+      rangeEl.min = amountEl.min = offer.min;
+      rangeEl.max = amountEl.max = offer.max;
+      rangeEl.step = amountEl.step = 500;
+      rangeEl.value = amountEl.value = offer.def;
+
+      // Duration options
+      const sel = document.getElementById('sim-months');
+      sel.innerHTML = '';
+      [[12,1],[24,2],[36,3],[48,4],[60,5],[72,6],[84,7]].forEach(([m, y]) => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = isFr ? `${m} mois — ${y} an${y > 1 ? 's' : ''}` : `${m} months — ${y} year${y > 1 ? 's' : ''}`;
+        if (m === 36) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      updateSimResult();
+      document.getElementById('sim-overlay').classList.add('open');
+      lucide.createIcons();
+    }
+
+    function closeSimulator() {
+      document.getElementById('sim-overlay').classList.remove('open');
+    }
+
+    function overlayClick(e) {
+      if (e.target === document.getElementById('sim-overlay')) closeSimulator();
+    }
+
+    function syncSimulator(source) {
+      const r = document.getElementById('sim-range');
+      const n = document.getElementById('sim-amount');
+      if (source === 'range') n.value = r.value;
+      else r.value = n.value;
+      updateSimResult();
+    }
+
+    function updateSimResult() {
+      const amount = parseFloat(document.getElementById('sim-amount').value) || 0;
+      const months = parseInt(document.getElementById('sim-months').value) || 36;
+      const rAnnual = SIM_OFFERS[currentOffer].rate;
+      const r = rAnnual / 100 / 12;
+      let monthly = r === 0 ? amount / months : amount * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+      const total = monthly * months;
+      const fmt = n => n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      const isFr = (document.documentElement.lang || 'fr') !== 'en';
+      document.getElementById('sim-monthly').textContent = fmt(monthly) + ' €';
+      document.getElementById('sim-total-label').textContent = (isFr ? 'Coût total : ' : 'Total cost: ') + fmt(total) + ' €';
+    }
+
+    function submitSimulation() {
+      const amount  = parseFloat(document.getElementById('sim-amount').value);
+      const months  = parseInt(document.getElementById('sim-months').value);
+      const rate    = SIM_OFFERS[currentOffer].rate;
+      const r       = rate / 100 / 12;
+      const monthly = r === 0 ? amount / months : amount * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+      DemoGenesys.loanSimulation({
+        offerType: currentOffer,
+        amount,
+        months,
+        rate,
+        monthly:   parseFloat(monthly.toFixed(2)),
+        totalCost: parseFloat((monthly * months).toFixed(2)),
+      });
+      closeSimulator();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       DemoConfig.applyBranding();
       lucide.createIcons();

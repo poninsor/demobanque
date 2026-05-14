@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vue conseiller · Démo banque</title>
+  <link rel="stylesheet" href="shell.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ── Layout global ────────────────────────────────────────────────────── */
+    body { display: flex; flex-direction: column; height: 100svh; overflow: hidden; }
+
+    /* ── Topbar ───────────────────────────────────────────────────────────── */
+    .adv-top {
+      height: var(--header-h, 64px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      background: var(--bg-elev);
+    }
+    .adv-top-left { display: flex; align-items: center; gap: 10px; }
+    .adv-logo { height: 28px; width: auto; object-fit: contain; }
+    .adv-brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+    .badge-advisor {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--brand-50); color: var(--brand-700);
+      border: 1px solid var(--brand-200, color-mix(in srgb, var(--brand) 25%, white));
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .badge-advisor svg { width: 14px; height: 14px; }
+    .adv-top-right { display: flex; align-items: center; gap: 8px; }
+
+    /* ── Workspace (threads + conversation) ───────────────────────────────── */
+    .adv-workspace {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── Thread list ──────────────────────────────────────────────────────── */
+    .adv-threads {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .threads-head {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .threads-head h2 { font-size: 16px; }
+    .threads-list { overflow-y: auto; flex: 1; }
+    .thread {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .thread:hover { background: var(--bg-sunken); }
+    .thread.active { background: var(--brand-50); border-left: 3px solid var(--brand); padding-left: 17px; }
+    .thread .av {
+      width: 40px; height: 40px; border-radius: 999px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: white; font-size: 14px; flex-shrink: 0;
+    }
+    .thread .t-name { font-weight: 600; font-size: 14px; }
+    .thread .t-id { font-size: 11px; color: var(--fg-faint); font-family: var(--font-mono); margin-top: 1px; }
+    .thread .t-last { font-size: 12px; color: var(--fg-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+    .thread .when { font-size: 11px; color: var(--fg-faint); }
+    .thread .unread {
+      background: var(--brand); color: white; border-radius: 999px;
+      min-width: 18px; height: 18px; padding: 0 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; margin-top: 4px;
+    }
+    .adv-empty {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px; padding: 40px 24px; text-align: center;
+      color: var(--fg-muted);
+    }
+    .adv-empty svg { width: 40px; height: 40px; opacity: 0.35; }
+    .adv-empty p { font-size: 14px; line-height: 1.5; }
+
+    /* ── Conversation panel ───────────────────────────────────────────────── */
+    .adv-conv {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .adv-select-prompt {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      color: var(--fg-faint); padding: 40px;
+    }
+    .adv-select-prompt svg { width: 48px; height: 48px; opacity: 0.3; }
+    .adv-select-prompt p { font-size: 15px; }
+
+    /* ── Conversation active ──────────────────────────────────────────────── */
+    #active-conv { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .conv-head {
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+    }
+    .conv-head .who { display: flex; gap: 12px; align-items: center; }
+    .conv-head .av {
+      width: 42px; height: 42px; border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;
+    }
+    .conv-head .c-name { font-weight: 600; font-size: 16px; }
+    .conv-head .c-sub { font-size: 11px; color: var(--fg-faint); font-family: var(--font-mono); margin-top: 2px; }
+
+    .conv-body {
+      padding: 24px; overflow-y: auto; flex: 1;
+      display: flex; flex-direction: column; gap: 18px;
+      background: var(--bg-sunken);
+    }
+    .day-divider {
+      text-align: center; font-size: 11px; color: var(--fg-faint);
+      font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+
+    /* ── Messages (same as messages.html, perspective gérée dans JS) ────── */
+    .msg { display: flex; gap: 10px; max-width: 70%; }
+    .msg.me { align-self: flex-end; flex-direction: row-reverse; }
+    .msg .bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.45; background: var(--bg-elev); border: 1px solid var(--border); }
+    .msg.me .bubble { background: var(--brand); color: white; border-color: var(--brand); border-bottom-right-radius: 6px; }
+    .msg.them .bubble { border-bottom-left-radius: 6px; }
+    .msg .m-av {
+      width: 28px; height: 28px; border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand-400), var(--brand-700));
+      color: white; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .msg .ts { font-size: 11px; color: var(--fg-faint); margin-top: 4px; }
+    .msg.me .ts { text-align: right; }
+
+    .attach-card {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: 14px; padding: 12px; display: flex; gap: 10px; align-items: center; max-width: 280px;
+    }
+    .attach-card .ic { width: 32px; height: 32px; border-radius: 8px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
+    .attach-card .nm { font-size: 13px; font-weight: 600; }
+    .attach-card .sz { font-size: 11px; color: var(--fg-muted); }
+
+    /* ── Quick replies ────────────────────────────────────────────────────── */
+    .quick-replies {
+      display: flex; gap: 8px; padding: 8px 20px; flex-wrap: wrap;
+      background: var(--bg-elev); border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .qr {
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      background: var(--bg-inset); cursor: pointer; border: none; font-family: inherit;
+    }
+    .qr:hover { background: var(--brand-50); color: var(--brand-700); }
+
+    /* ── Composer ─────────────────────────────────────────────────────────── */
+    .composer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: grid; grid-template-columns: 1fr auto; gap: 12px;
+      align-items: end; background: var(--bg-elev); flex-shrink: 0;
+    }
+    .composer textarea {
+      flex: 1; resize: none; min-height: 44px; max-height: 120px;
+      padding: 12px 16px; border-radius: 14px; border: 1px solid var(--border-strong);
+      font-family: inherit; font-size: 14px; outline: 0;
+      background: var(--bg-elev); color: var(--fg);
+    }
+    .composer textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+    .send {
+      width: 44px; height: 44px; border-radius: 999px;
+      background: var(--brand); color: white;
+      display: flex; align-items: center; justify-content: center;
+      border: 0; cursor: pointer; flex-shrink: 0; transition: all 140ms;
+    }
+    .send:hover { background: var(--brand-600); }
+    .send svg { width: 18px; height: 18px; }
+
+    /* ── Notification d'arrivée de message ───────────────────────────────── */
+    .new-msg-notif {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: var(--brand); color: white;
+      padding: 8px 18px; border-radius: 999px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      opacity: 0; pointer-events: none;
+      transition: opacity 280ms ease;
+      z-index: 999;
+    }
+    .new-msg-notif.show { opacity: 1; pointer-events: auto; cursor: pointer; }
+    .new-msg-notif svg { width: 15px; height: 15px; }
+
+    /* ── Mobile ───────────────────────────────────────────────────────────── */
+    .mobile-back-btn { display: none; }
+
+    @media (max-width: 768px) {
+      .adv-brand { display: none; }
+      .adv-workspace {
+        grid-template-columns: 1fr;
+        position: relative;
+        overflow: hidden;
+      }
+      .adv-threads, .adv-conv {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--bg-elev);
+      }
+      .adv-threads { transform: translateX(0); }
+      .adv-conv { transform: translateX(100%); }
+      .adv-workspace.show-conversation .adv-threads { transform: translateX(-100%); }
+      .adv-workspace.show-conversation .adv-conv { transform: translateX(0); }
+      .mobile-back-btn { display: flex; margin-right: 4px; }
+      .conv-body { padding: 12px; gap: 12px; }
+      .composer { padding: 8px 12px; }
+      .quick-replies { padding: 6px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Topbar ───────────────────────────────────────────────────────────── -->
+  <div class="adv-top">
+    <div class="adv-top-left">
+      <img src="assets/logo.svg" class="adv-logo" id="logo-img" alt="">
+      <span class="adv-brand" id="brand-name">Démo banque</span>
+    </div>
+    <div>
+      <span class="badge-advisor">
+        <i data-lucide="headset"></i>
+        <span class="i18n-fr">Vue conseiller</span><span class="i18n-en">Advisor view</span>
+      </span>
+    </div>
+    <div class="adv-top-right">
+      <a href="messages.html" target="_blank" class="btn btn-secondary btn-sm" style="display:flex;align-items:center;gap:6px;text-decoration:none;">
+        <i data-lucide="external-link" style="width:14px;height:14px;"></i>
+        <span class="i18n-fr">Vue client</span><span class="i18n-en">Client view</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Workspace ────────────────────────────────────────────────────────── -->
+  <div class="adv-workspace" id="workspace">
+
+    <!-- Thread list -->
+    <section class="adv-threads" id="threads-panel">
+      <div class="threads-head">
+        <h2><span class="i18n-fr">Conversations</span><span class="i18n-en">Conversations</span></h2>
+        <span class="badge neutral" id="account-count" style="display:none;"></span>
+      </div>
+      <div class="threads-list" id="threads-list"></div>
+      <div class="adv-empty" id="empty-state">
+        <i data-lucide="inbox"></i>
+        <p><span class="i18n-fr">Aucun compte trouvé.<br>Connectez-vous d'abord côté client.</span><span class="i18n-en">No accounts found.<br>Log in on the client side first.</span></p>
+      </div>
+    </section>
+
+    <!-- Conversation panel -->
+    <section class="adv-conv" id="conv-panel">
+      <div class="adv-select-prompt" id="select-prompt">
+        <i data-lucide="message-square-dashed"></i>
+        <p><span class="i18n-fr">Sélectionne une conversation</span><span class="i18n-en">Select a conversation</span></p>
+      </div>
+
+      <div id="active-conv">
+        <div class="conv-head">
+          <div class="who">
+            <button class="icon-btn mobile-back-btn" id="back-to-threads" title="Retour"><i data-lucide="arrow-left"></i></button>
+            <div class="av" id="conv-av">SM</div>
+            <div>
+              <div class="c-name" id="conv-name">Sophie Martin</div>
+              <div class="c-sub" id="conv-account-id">12345678</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <a id="client-link" href="messages.html" target="_blank" class="icon-btn" title="Vue client"><i data-lucide="external-link"></i></a>
+            <button class="icon-btn" onclick="refreshConversation()" title="Actualiser"><i data-lucide="refresh-cw"></i></button>
+          </div>
+        </div>
+
+        <div class="conv-body" id="conv-body"></div>
+
+        <div class="quick-replies">
+          <button class="qr" onclick="sendQuick(this)"><span class="i18n-fr">Je vérifie ça 🔍</span><span class="i18n-en">Let me check 🔍</span></button>
+          <button class="qr" onclick="sendQuick(this)"><span class="i18n-fr">Bien reçu</span><span class="i18n-en">Got it</span></button>
+          <button class="qr" onclick="sendQuick(this)"><span class="i18n-fr">Je vous rappelle sous 24h</span><span class="i18n-en">I'll call you within 24h</span></button>
+          <button class="qr" onclick="sendQuick(this)"><span class="i18n-fr">Pouvez-vous m'envoyer un justificatif ?</span><span class="i18n-en">Can you send a supporting document?</span></button>
+        </div>
+
+        <div class="composer">
+          <textarea id="compose-area" rows="1" placeholder="Répondre…"></textarea>
+          <button class="send" id="send-btn" onclick="advisorSend()"><i data-lucide="send"></i></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Notification toast (nouveaux messages entrants) -->
+  <div class="new-msg-notif" id="new-msg-notif" onclick="scrollToBottom()">
+    <i data-lucide="arrow-down"></i>
+    <span class="i18n-fr">Nouveau message</span><span class="i18n-en">New message</span>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    // ── Langue ──────────────────────────────────────────────────────────────
+    const _lang = DemoConfig.getGlobalLang();
+    document.documentElement.lang = _lang;
+    const t = (fr, en) => _lang === 'en' ? en : fr;
+
+    // ── État ────────────────────────────────────────────────────────────────
+    let selectedAccountId = null;
+    let lastSeenCount = {};   // { accountId: number } — suivi des messages vus
+
+    // ── Utilitaires ─────────────────────────────────────────────────────────
+    function getTime() {
+      const n = new Date();
+      return `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function getAllAccounts() {
+      try { return JSON.parse(localStorage.getItem('demobank_v1') || '{}').accounts || {}; }
+      catch { return {}; }
+    }
+
+    function getAccountMessages(accountId) {
+      const profile = getAllAccounts()[accountId];
+      if (!profile) return [];
+      if (profile.messages?.length) return profile.messages;
+      const pl = profile.language || 'fr';
+      return JSON.parse(JSON.stringify(DemoConfig.DEFAULT_MESSAGES[pl] || []));
+    }
+
+    function getInitials(profile) {
+      const fn = profile.persona?.firstName || '';
+      const ln = profile.persona?.lastName || '';
+      return ((fn[0] || '') + (ln[0] || '')).toUpperCase() || '?';
+    }
+
+    // ── Rendu des messages (perspective conseiller : me=eux, them=nous) ─────
+    function renderMessage(msg, customerInitials) {
+      const div = document.createElement('div');
+      // 'them' = conseiller → droite (classe "me") ; 'me' = client → gauche (classe "them")
+      const isAdvisor = msg.from === 'them';
+      div.className = `msg ${isAdvisor ? 'me' : 'them'}`;
+      const avatar = !isAdvisor ? `<div class="m-av">${escapeHtml(customerInitials)}</div>` : '';
+
+      const fileSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+
+      if (msg.type === 'file') {
+        div.innerHTML = `${avatar}<div><div class="attach-card"><div class="ic">${fileSvg}</div><div><div class="nm">${escapeHtml(msg.fileName || '')}</div><div class="sz">${escapeHtml(msg.fileSize || '')}</div></div></div><div class="ts">${msg.time}</div></div>`;
+      } else {
+        div.innerHTML = `${avatar}<div><div class="bubble">${escapeHtml(msg.text || '')}</div><div class="ts">${msg.time}</div></div>`;
+      }
+      return div;
+    }
+
+    // ── Liste des conversations ──────────────────────────────────────────────
+    function renderThreadList() {
+      const accounts = getAllAccounts();
+      const list = document.getElementById('threads-list');
+      const empty = document.getElementById('empty-state');
+      const countBadge = document.getElementById('account-count');
+      const ids = Object.keys(accounts);
+
+      list.innerHTML = '';
+      countBadge.textContent = ids.length;
+      countBadge.style.display = ids.length ? '' : 'none';
+      empty.style.display = ids.length ? 'none' : '';
+
+      ids.forEach(accountId => {
+        const profile = accounts[accountId];
+        const msgs = getAccountMessages(accountId);
+        const last = msgs[msgs.length - 1];
+        const initials = getInitials(profile);
+        const name = `${profile.persona?.firstName || ''} ${profile.persona?.lastName || ''}`.trim() || accountId;
+        const lastText = last?.fileName ? `📎 ${last.fileName}` : (last?.text || '');
+        const seenCount = lastSeenCount[accountId] ?? msgs.length; // initialise sans badge au 1er rendu
+        const unread = msgs.length > seenCount;
+
+        const div = document.createElement('div');
+        div.className = `thread${accountId === selectedAccountId ? ' active' : ''}`;
+        div.dataset.account = accountId;
+        div.innerHTML = `
+          <div class="av" style="background:linear-gradient(135deg,var(--brand-400),var(--brand-700));">${escapeHtml(initials)}</div>
+          <div>
+            <div class="t-name">${escapeHtml(name)}</div>
+            <div class="t-id">${accountId}</div>
+            <div class="t-last">${escapeHtml(lastText.slice(0, 55))}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="when">${last?.time || ''}</div>
+            <div id="unread-${accountId}" class="unread" style="display:${unread ? 'flex' : 'none'};">●</div>
+          </div>`;
+        div.addEventListener('click', () => selectAccount(accountId));
+        list.appendChild(div);
+      });
+    }
+
+    // ── Sélection d'une conversation ─────────────────────────────────────────
+    function selectAccount(accountId) {
+      selectedAccountId = accountId;
+
+      // Mise à jour URL
+      const url = new URL(location.href);
+      url.searchParams.set('account', accountId);
+      history.pushState({}, '', url);
+
+      // Active state dans la liste
+      document.querySelectorAll('.thread').forEach(t => {
+        t.classList.toggle('active', t.dataset.account === accountId);
+      });
+
+      // Effacer badge non-lu
+      const badge = document.getElementById(`unread-${accountId}`);
+      if (badge) badge.style.display = 'none';
+
+      const accounts = getAllAccounts();
+      const profile = accounts[accountId];
+      if (!profile) return;
+
+      const msgs = getAccountMessages(accountId);
+      lastSeenCount[accountId] = msgs.length;
+
+      // En-tête conversation
+      const name = `${profile.persona?.firstName || ''} ${profile.persona?.lastName || ''}`.trim();
+      const initials = getInitials(profile);
+      document.getElementById('conv-av').textContent = initials;
+      document.getElementById('conv-name').textContent = name;
+      document.getElementById('conv-account-id').textContent = accountId;
+
+      // Placeholder du composer
+      document.getElementById('compose-area').placeholder =
+        t(`Répondre à ${profile.persona?.firstName || 'ce client'}…`,
+          `Reply to ${profile.persona?.firstName || 'this client'}…`);
+
+      // Rendu des messages
+      const profileLang = profile.language || 'fr';
+      const body = document.getElementById('conv-body');
+      body.innerHTML = `<div class="day-divider">${profileLang === 'en' ? 'Today' : "Aujourd'hui"}</div>`;
+      msgs.forEach(m => body.appendChild(renderMessage(m, initials)));
+      body.scrollTop = body.scrollHeight;
+
+      // Afficher le panneau conversation
+      document.getElementById('select-prompt').style.display = 'none';
+      document.getElementById('active-conv').style.display = 'flex';
+
+      // Mobile : slide vers la conversation
+      document.getElementById('workspace').classList.add('show-conversation');
+    }
+
+    // ── Rafraîchissement de la conversation ouverte ─────────────────────────
+    function refreshConversation() {
+      if (!selectedAccountId) return;
+      const accounts = getAllAccounts();
+      const profile = accounts[selectedAccountId];
+      if (!profile) return;
+      const msgs = getAccountMessages(selectedAccountId);
+      const initials = getInitials(profile);
+      const profileLang = profile.language || 'fr';
+
+      const body = document.getElementById('conv-body');
+      body.innerHTML = `<div class="day-divider">${profileLang === 'en' ? 'Today' : "Aujourd'hui"}</div>`;
+      msgs.forEach(m => body.appendChild(renderMessage(m, initials)));
+      body.scrollTop = body.scrollHeight;
+      lastSeenCount[selectedAccountId] = msgs.length;
+    }
+
+    function scrollToBottom() {
+      const body = document.getElementById('conv-body');
+      body.scrollTop = body.scrollHeight;
+      document.getElementById('new-msg-notif').classList.remove('show');
+    }
+
+    // ── Envoi d'un message conseiller ────────────────────────────────────────
+    function advisorSend() {
+      if (!selectedAccountId) return;
+      const area = document.getElementById('compose-area');
+      const text = area.value.trim();
+      if (!text) return;
+
+      const accounts = getAllAccounts();
+      const profile = accounts[selectedAccountId];
+      if (!profile) return;
+
+      // Initiales du conseiller depuis le profil du compte
+      const advName = (profile.persona?.advisor || 'Conseiller').split('—')[0].trim();
+      const initials = advName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+      const msg = { id: 'adv_' + Date.now(), from: 'them', initials, text, time: getTime() };
+
+      // Écriture dans localStorage
+      try {
+        const data = JSON.parse(localStorage.getItem('demobank_v1') || '{}');
+        const p = data.accounts[selectedAccountId];
+        if (!p) return;
+        if (!p.messages?.length) {
+          const pl = p.language || 'fr';
+          p.messages = JSON.parse(JSON.stringify(DemoConfig.DEFAULT_MESSAGES[pl] || []));
+        }
+        p.messages.push(msg);
+        data.accounts[selectedAccountId] = p;
+        localStorage.setItem('demobank_v1', JSON.stringify(data));
+        lastSeenCount[selectedAccountId] = p.messages.length;
+      } catch (e) {
+        console.error('[Advisor] advisorSend error:', e);
+        return;
+      }
+
+      // Rendu immédiat (l'event storage ne se déclenche pas dans le même onglet)
+      const body = document.getElementById('conv-body');
+      body.appendChild(renderMessage(msg, getInitials(profile)));
+      body.scrollTop = body.scrollHeight;
+
+      area.value = '';
+      area.style.height = 'auto';
+      renderThreadList();
+    }
+
+    function sendQuick(btn) {
+      const span = btn.querySelector(_lang === 'en' ? '.i18n-en' : '.i18n-fr');
+      const text = (span ? span.textContent : btn.textContent).trim();
+      document.getElementById('compose-area').value = text;
+      advisorSend();
+    }
+
+    // ── Synchronisation temps réel via l'API storage ─────────────────────────
+    // L'event 'storage' se déclenche dans les autres onglets quand localStorage change.
+    // Quand le client envoie un message dans messages.html → advisor.html est notifié ici.
+    window.addEventListener('storage', (event) => {
+      if (event.key !== 'demobank_v1') return;
+
+      renderThreadList();
+
+      if (!selectedAccountId) return;
+      const msgs = getAccountMessages(selectedAccountId);
+      const seenCount = lastSeenCount[selectedAccountId] || 0;
+      if (msgs.length <= seenCount) return;
+
+      // Nouveaux messages client reçus
+      const accounts = getAllAccounts();
+      const profile = accounts[selectedAccountId];
+      if (!profile) return;
+      const customerInitials = getInitials(profile);
+
+      const body = document.getElementById('conv-body');
+      msgs.slice(seenCount).forEach(m => body.appendChild(renderMessage(m, customerInitials)));
+      lastSeenCount[selectedAccountId] = msgs.length;
+
+      const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
+      if (atBottom) {
+        body.scrollTop = body.scrollHeight;
+      } else {
+        // Montrer la notification "Nouveau message"
+        const notif = document.getElementById('new-msg-notif');
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 5000);
+      }
+
+      // Clignotement du titre si l'onglet est en arrière-plan
+      if (document.hidden) {
+        const prev = document.title;
+        document.title = t('● Nouveau message · Vue conseiller', '● New message · Advisor view');
+        document.addEventListener('visibilitychange', function restore() {
+          document.title = prev;
+          document.removeEventListener('visibilitychange', restore);
+        });
+      }
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+
+      // Initialiser lastSeenCount avec les comptes existants (sans badge au 1er chargement)
+      const accounts = getAllAccounts();
+      Object.keys(accounts).forEach(id => {
+        lastSeenCount[id] = getAccountMessages(id).length;
+      });
+
+      // Charger le branding depuis le 1er compte disponible
+      const firstId = Object.keys(accounts)[0];
+      if (firstId) {
+        const p = accounts[firstId];
+        const brandName = p.brandName || 'Démo banque';
+        document.getElementById('brand-name').textContent = brandName;
+        document.title = `${t('Vue conseiller', 'Advisor view')} · ${brandName}`;
+        if (p.logoData) document.getElementById('logo-img').src = p.logoData;
+        if (p.primaryColor) {
+          const palette = DemoConfig.generatePalette(p.primaryColor);
+          const root = document.documentElement;
+          Object.entries(palette).forEach(([k, v]) => root.style.setProperty(`--brand-${k}`, v));
+          root.style.setProperty('--brand', palette[500]);
+          root.style.setProperty('--brand-soft', palette[50]);
+          root.style.setProperty('--brand-border', palette[100]);
+        }
+      }
+
+      renderThreadList();
+
+      // Ouvrir directement la conversation si ?account= dans l'URL
+      const params = new URLSearchParams(location.search);
+      const preselect = params.get('account');
+      if (preselect && accounts[preselect]) selectAccount(preselect);
+
+      // Auto-resize textarea
+      const area = document.getElementById('compose-area');
+      area.addEventListener('input', () => {
+        area.style.height = 'auto';
+        area.style.height = Math.min(area.scrollHeight, 120) + 'px';
+      });
+      area.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); advisorSend(); }
+      });
+
+      // Bouton retour mobile
+      document.getElementById('back-to-threads').addEventListener('click', () => {
+        document.getElementById('workspace').classList.remove('show-conversation');
+      });
+    });
+  </script>
+</body>
+</html>

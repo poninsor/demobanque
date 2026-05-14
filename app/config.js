@@ -32,17 +32,19 @@ const DemoConfig = (() => {
       firstName: 'Sophie',
       lastName: 'Martin',
       email: 'sophie.martin@example.fr',
-      phone: '06 12 34 56 78',
+      phone: '+33612345678',
       profileType: 'Particulier — salariée cadre',
       advisor: 'Camille Lefebvre — Paris 11'
     },
     balances: { checking: '12 480,57', savings: '22 950,00', pel: '0,00' },
     products: { visaPremier: true, visaClassic: true, autoLoan: true, assuranceVie: false },
     genesys: {
-      region: 'https://login.mypurecloud.ie',
-      deploymentId: '3d8b2e74-8f12-4a7a-9c5e-1b6d4f9a2e10',
-      clientId: 'a92f7c1d-4e8b-49ce-bcaa-7f3219e0d8b1',
-      clientSecret: 'k7fJ9pQwLm2RxNvT8sH4yC6bA1eZ3uV0'
+      region: 'mypurecloud.ie',
+      messengerSnippet: '',
+      clientId: '',
+      queueId: '',
+      scriptId: '',
+      callNumber: '3262'
     },
     additionalJS: 'alert("création d\'un workitem");',
     language: null,
@@ -51,6 +53,8 @@ const DemoConfig = (() => {
   };
 
   // ── Palette generation ──────────────────────────────────────────────────────
+
+  /** Converts a 6-digit hex colour to [h, s, l] (degrees / percent / percent). */
   function hexToHsl(hex) {
     let r = parseInt(hex.slice(1, 3), 16) / 255;
     let g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -69,6 +73,7 @@ const DemoConfig = (() => {
     return [h * 360, s * 100, l * 100];
   }
 
+  /** Converts HSL (degrees / percent / percent) to a 6-digit hex colour string. */
   function hslToHex(h, s, l) {
     h /= 360; s /= 100; l /= 100;
     let r, g, b;
@@ -77,22 +82,29 @@ const DemoConfig = (() => {
       const p = 2 * l - q;
       const hue2rgb = (p, q, t) => {
         if (t < 0) t += 1; if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
         return p;
       };
-      r = hue2rgb(p, q, h + 1/3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1/3);
+      r = hue2rgb(p, q, h + 1 / 3); g = hue2rgb(p, q, h); b = hue2rgb(p, q, h - 1 / 3);
     }
     return '#' + [r, g, b].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
   }
 
+  /**
+   * Generates a 10-stop colour palette (50–900) from a single brand hex colour.
+   * Falls back to Genesys Orange (#FF4515) if the input is invalid.
+   * @param {string} hex - Base brand colour, e.g. "#FF4515".
+   * @returns {{ 50: string, 100: string, 200: string, 300: string, 400: string,
+   *             500: string, 600: string, 700: string, 800: string, 900: string }}
+   */
   function generatePalette(hex) {
     if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) hex = '#FF4515';
     const [h, s, l] = hexToHsl(hex);
     const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
     return {
-      50:  hslToHex(h, clamp(s * 0.25, 5, 30), 97),
+      50: hslToHex(h, clamp(s * 0.25, 5, 30), 97),
       100: hslToHex(h, clamp(s * 0.45, 8, 55), 93),
       200: hslToHex(h, clamp(s * 0.65, 12, 75), 86),
       300: hslToHex(h, clamp(s * 0.82, 15, 90), 76),
@@ -106,24 +118,48 @@ const DemoConfig = (() => {
   }
 
   // ── Storage helpers ─────────────────────────────────────────────────────────
+
+  /** Reads and parses the full storage object from localStorage. Never throws. */
   function getData() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { accounts: {}, current: null }; }
     catch { return { accounts: {}, current: null }; }
   }
+
+  /** Serialises and writes the storage object to localStorage. */
   function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
 
   // ── Global language (pre-login) ─────────────────────────────────────────────
+
+  /**
+   * Returns the active UI language ('fr' or 'en').
+   * Reads from localStorage first, then falls back to the browser locale.
+   * @returns {'fr' | 'en'}
+   */
   function getGlobalLang() {
     return localStorage.getItem(LANG_KEY) ||
       (typeof navigator !== 'undefined' && navigator.language && navigator.language.startsWith('fr') ? 'fr' : 'en');
   }
 
+  /**
+   * Persists the UI language and updates the <html lang> attribute.
+   * @param {'fr' | 'en'} lang
+   */
   function setGlobalLang(lang) {
     localStorage.setItem(LANG_KEY, lang);
     if (typeof document !== 'undefined') document.documentElement.lang = lang;
   }
 
   // ── Auth ────────────────────────────────────────────────────────────────────
+
+  /**
+   * Attempts to log in with the given credentials.
+   * - If the account doesn't exist and the PIN is '123456', a new profile is created from DEFAULT_PROFILE.
+   * - On success, sets `current` in storage and returns `{ ok: true, isNew: boolean }`.
+   * - On failure, returns `{ ok: false, msg: string }` with a localised error message.
+   * @param {string} accountId - 8-digit account number.
+   * @param {string} pin - 6-digit passcode.
+   * @returns {{ ok: boolean, isNew?: boolean, msg?: string }}
+   */
   function login(accountId, pin) {
     const lang = getGlobalLang();
     const isEn = lang === 'en';
@@ -145,22 +181,38 @@ const DemoConfig = (() => {
     return { ok: true, isNew: false };
   }
 
+  /** Clears the current session and redirects to index.html. */
   function logout() {
     const d = getData(); d.current = null; saveData(d);
     window.location.href = 'index.html';
   }
 
+  /**
+   * Guards a protected page: redirects to index.html if no valid session exists.
+   * Call at the top of every page script before doing anything else.
+   * @returns {boolean} true if authenticated, false if redirected.
+   */
   function requireAuth() {
     const d = getData();
     if (!d.current || !d.accounts[d.current]) { window.location.href = 'index.html'; return false; }
     return true;
   }
 
+  /**
+   * Returns the full profile object for the currently logged-in account, or null.
+   * @returns {object | null}
+   */
   function getProfile() {
     const d = getData();
     return (d.current && d.accounts[d.current]) ? d.accounts[d.current] : null;
   }
 
+  /**
+   * Shallow-merges `updates` into the current account's profile and persists it.
+   * Top-level keys in `updates` overwrite existing ones; nested objects are replaced entirely.
+   * Use `deepUpdateProfile` to merge into a nested key instead.
+   * @param {object} updates - Partial profile fields to overwrite.
+   */
   function updateProfile(updates) {
     const d = getData();
     if (!d.current) return;
@@ -168,6 +220,13 @@ const DemoConfig = (() => {
     saveData(d);
   }
 
+  /**
+   * Merges `value` into a single top-level key of the current profile and persists it.
+   * If `value` is an object, it is shallow-merged with the existing sub-object.
+   * If `value` is a primitive, it replaces the key directly.
+   * @param {string} key - Top-level profile key (e.g. 'genesys', 'persona').
+   * @param {*} value - New value or partial object to merge in.
+   */
   function deepUpdateProfile(key, value) {
     const d = getData();
     if (!d.current) return;
@@ -180,6 +239,16 @@ const DemoConfig = (() => {
   }
 
   // ── Branding applicator ─────────────────────────────────────────────────────
+
+  /**
+   * Applies the current profile's branding to the page:
+   * - Sets all --brand-* CSS custom properties from the generated palette.
+   * - Updates every [data-brand], [data-persona-*], [data-balance-*], [data-logo] element.
+   * - Replaces the leading "Démo banque" in the page <title>.
+   * - Sets the <html lang> attribute.
+   * Safe to call multiple times; idempotent for the same profile state.
+   * @param {object} [profile] - Profile to apply; defaults to the current session profile.
+   */
   function applyBranding(profile) {
     profile = profile || getProfile() || DEFAULT_PROFILE;
     const color = profile.primaryColor || '#FF4515';
@@ -214,6 +283,12 @@ const DemoConfig = (() => {
   }
 
   // ── Language switcher ───────────────────────────────────────────────────────
+
+  /**
+   * Sets the UI language globally and persists it to the current profile if logged in.
+   * Also updates the <html lang> attribute immediately.
+   * @param {'fr' | 'en'} lang
+   */
   function setLanguage(lang) {
     setGlobalLang(lang);
     const p = getProfile();
@@ -221,6 +296,12 @@ const DemoConfig = (() => {
   }
 
   // ── Messages ────────────────────────────────────────────────────────────────
+
+  /**
+   * Returns the message thread for the current account.
+   * Falls back to DEFAULT_MESSAGES in the account's language if no messages have been saved yet.
+   * @returns {Array<object>} Array of message objects.
+   */
   function getMessages() {
     const p = getProfile();
     const lang = (p && p.language) || getGlobalLang();
@@ -229,6 +310,12 @@ const DemoConfig = (() => {
     return (p.messages && p.messages.length > 0) ? p.messages : JSON.parse(JSON.stringify(defaults));
   }
 
+  /**
+   * Appends a message to the current account's thread and persists it.
+   * Initialises the thread from DEFAULT_MESSAGES first if it is still empty.
+   * @param {{ id: string, from: 'me'|'them', text?: string, time: string,
+   *           type?: 'file', fileName?: string, fileSize?: string, initials?: string }} msg
+   */
   function addMessage(msg) {
     const d = getData();
     if (!d.current) return;
@@ -242,20 +329,48 @@ const DemoConfig = (() => {
   }
 
   // ── Additional JS executor ──────────────────────────────────────────────────
+
+  /**
+   * Executes the `additionalJS` snippet stored in the current profile.
+   * Used to trigger custom Genesys Cloud actions (e.g. workitem creation) after a message is sent.
+   * Errors are caught and logged; they do not propagate.
+   */
   function executeAdditionalJS() {
     const p = getProfile() || DEFAULT_PROFILE;
     const code = p.additionalJS || 'alert("création d\'un workitem");';
     try { new Function(code)(); } catch (e) { console.error('AdditionalJS error:', e); }
   }
 
+  /**
+   * Returns the Genesys Cloud configuration object for the current account.
+   * Falls back to DEFAULT_PROFILE.genesys if not logged in.
+   * @returns {{ region: string, messengerSnippet: string, clientId: string,
+   *             queueId: string, scriptId: string, callNumber: string }}
+   */
+  function getGenesys() {
+    const p = getProfile() || DEFAULT_PROFILE;
+    return p.genesys || DEFAULT_PROFILE.genesys;
+  }
+
+  /**
+   * Returns the 8-digit account ID of the currently logged-in user, or null.
+   * @returns {string | null}
+   */
+  function getCurrentAccountId() {
+    return getData().current;
+  }
+
   return {
     DEFAULT_PROFILE,
+    DEFAULT_MESSAGES,
     generatePalette,
     getGlobalLang, setGlobalLang,
     login, logout, requireAuth,
     getProfile, updateProfile, deepUpdateProfile,
     applyBranding, setLanguage,
     getMessages, addMessage,
-    executeAdditionalJS
+    executeAdditionalJS,
+    getGenesys,
+    getCurrentAccountId
   };
 })();
