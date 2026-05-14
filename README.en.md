@@ -19,6 +19,7 @@ A fully static banking app built for Genesys Cloud sales demonstrations. Simulat
 - **Genesys Cloud integration**: Messenger snippet (executed on page load), OAuth 2.0 Implicit Grant, `tel:` call button, additional JavaScript triggered on every message send
 - **Bilingual FR/EN**: instant toggle, persisted per profile
 - **Import / Export**: full profile backup and restore as `.json` (OAuth token excluded)
+- **Responsive & mobile-ready**: fully adapted for small screens, bottom sheet navigation, usable as a web app from the home screen (PWA-like)
 
 ---
 

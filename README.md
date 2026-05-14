@@ -19,6 +19,7 @@ Application bancaire statique pour les démonstrations Genesys Cloud. Simule une
 - **Intégration Genesys Cloud** : Messenger snippet (exécuté au chargement), OAuth 2.0 Implicit Grant, numéro d'appel `tel:`, JavaScript additionnel déclenché à chaque envoi de message
 - **Bilingue FR/EN** : basculement instantané, persisté par profil
 - **Import / Export** : sauvegarde et restauration du paramétrage complet en `.json` (hors token OAuth)
+- **Responsive & mobile-ready** : interface adaptée aux petits écrans, navigation par bottom sheet, utilisable comme web app depuis l'écran d'accueil (PWA-like)
 
 ---
 
