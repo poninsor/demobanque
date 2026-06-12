@@ -324,8 +324,16 @@ const DemoGenesys = (() => {
       Genesys("command", "Messenger.open");
     },
 
-    /** Initiate a phone call using the configured call number (tel: link) */
-    call() {
+    /**
+     * Initiate a phone call.
+     * Delegates to AudioCodes WebRTC when enabled; falls back to tel: otherwise.
+     * @param {string[]} [urlHeaders] - Optional extra SIP headers ('Name: Value'), forwarded to AudioCodes only.
+     */
+    call(urlHeaders) {
+      if (DemoAudioCodes.isEnabled()) {
+        DemoAudioCodes.call(urlHeaders);
+        return;
+      }
       const gc = (DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE).genesys || {};
       const raw = gc.callNumber || '';
       const digits = raw.replace(/\D/g, '');
