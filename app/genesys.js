@@ -101,7 +101,22 @@ const DemoGenesys = (() => {
     const errorSvg = `<svg class="gc-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
 
     el.className = isError ? 'gc-error' : '';
-    el.innerHTML = `${isError ? errorSvg : successSvg}<span style="flex:1">${message.replace(/\n/g, '<br>')}</span><button class="gc-close" aria-label="Fermer" onclick="this.closest('#_gc-notif').classList.remove('gc-visible')">✕</button>`;
+
+    // Build content via DOM to avoid XSS (err.message may contain HTML)
+    const iconWrap = document.createElement('span');
+    iconWrap.innerHTML = isError ? errorSvg : successSvg;
+    const textEl = document.createElement('span');
+    textEl.style.flex = '1';
+    message.split('\n').forEach((line, i) => {
+      if (i > 0) textEl.appendChild(document.createElement('br'));
+      textEl.appendChild(document.createTextNode(line));
+    });
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'gc-close';
+    closeBtn.setAttribute('aria-label', 'Fermer');
+    closeBtn.textContent = '✕';
+    closeBtn.addEventListener('click', () => el.classList.remove('gc-visible'));
+    el.replaceChildren(iconWrap, textEl, closeBtn);
 
     // Force reflow before adding class so transition plays
     el.getBoundingClientRect();
@@ -134,7 +149,38 @@ const DemoGenesys = (() => {
       .replace(/\/$/, '');
   }
 
-  // ── Implicit grant token cache ───────────────────────────────────────────────
+  // ── PKCE helpers ─────────────────────────────────────────────────────────────
+
+  function _generateVerifier() {
+    const arr = new Uint8Array(32);
+    crypto.getRandomValues(arr);
+    return btoa(String.fromCharCode(...arr))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  async function _generateChallenge(verifier) {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  async function _buildAuthUrl(gc, redirectUri) {
+    const domain = regionDomain(gc.region);
+    const verifier = _generateVerifier();
+    const challenge = await _generateChallenge(verifier);
+    const state = _generateVerifier();
+    sessionStorage.setItem('_gc_code_verifier', verifier);
+    sessionStorage.setItem('_gc_oauth_state', state);
+    return `https://login.${domain}/oauth/authorize`
+      + `?response_type=code`
+      + `&client_id=${encodeURIComponent(gc.clientId)}`
+      + `&redirect_uri=${encodeURIComponent(redirectUri)}`
+      + `&code_challenge=${encodeURIComponent(challenge)}`
+      + `&code_challenge_method=S256`
+      + `&state=${encodeURIComponent(state)}`;
+  }
+
+  // ── Authorization Code / PKCE token cache ────────────────────────────────────
 
   const GC_TOKEN_KEY = 'demobank_gc_token';
   let _gcToken = null;
@@ -165,17 +211,66 @@ const DemoGenesys = (() => {
     }
   }
 
-  // On page load: detect return from implicit grant redirect, else restore from localStorage
-  (function () {
-    const params = new URLSearchParams(window.location.hash.slice(1));
-    const token = params.get('access_token');
-    if (token) {
-      _gcToken = token;
-      const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
-      _gcTokenExpiry = Date.now() + expiresIn * 1000 - 60000;
-      console.log('[DemoGenesys] implicit grant return: token received, expires in', expiresIn, 's');
-      history.replaceState(null, '', window.location.pathname + window.location.search);
+  // On page load: detect return from PKCE authorization code redirect, else restore from localStorage
+  (async function () {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const returnedState = params.get('state');
+
+    if (code) {
+      // Validate state to prevent CSRF
+      const expectedState = sessionStorage.getItem('_gc_oauth_state');
+      if (returnedState !== expectedState) {
+        console.warn('[DemoGenesys] PKCE callback: state mismatch, ignoring');
+        history.replaceState(null, '', window.location.pathname);
+        _loadToken();
+        return;
+      }
+      sessionStorage.removeItem('_gc_oauth_state');
+
+      const verifier = sessionStorage.getItem('_gc_code_verifier');
+      sessionStorage.removeItem('_gc_code_verifier');
+
+      const gc = ((DemoConfig.getProfile() || {}).genesys) || {};
+      const domain = regionDomain(gc.region);
+      // redirect_uri must exactly match what was sent in the authorization request
+      const redirectUri = window.location.origin + window.location.pathname;
+
+      try {
+        const res = await fetch(`https://login.${domain}/oauth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            client_id: gc.clientId,
+            code,
+            redirect_uri: redirectUri,
+            code_verifier: verifier
+          })
+        });
+        if (!res.ok) throw new Error(`Token exchange ${res.status}`);
+        const data = await res.json();
+        _gcToken = data.access_token;
+        const expiresIn = parseInt(data.expires_in || '3600', 10);
+        _gcTokenExpiry = Date.now() + expiresIn * 1000 - 60000;
+        console.log('[DemoGenesys] PKCE callback: token received, expires in', expiresIn, 's');
+      } catch (e) {
+        console.error('[DemoGenesys] PKCE token exchange failed', e);
+        history.replaceState(null, '', window.location.pathname);
+        _loadToken();
+        sessionStorage.removeItem('_gc_pending');
+        setTimeout(() => showNotif(
+          t('Échec de l\'échange OAuth PKCE.\n' + e.message,
+            'PKCE token exchange failed.\n' + e.message),
+          true
+        ), 200);
+        return;
+      }
+
+      // Clean ?code=&state= from the URL
+      history.replaceState(null, '', window.location.pathname);
       _saveToken();
+
       // Post-login redirect set by index.html before triggering auth
       const postLogin = sessionStorage.getItem('_gc_post_login_redirect');
       if (postLogin) {
@@ -195,28 +290,28 @@ const DemoGenesys = (() => {
       }
       return;
     }
+
     _loadToken();
   })();
 
-  // OAuth implicit grant → Bearer token (no client secret required)
+  // OAuth Authorization Code + PKCE → Bearer token (no client secret required)
   // If no valid cached token and noRedirect is false, redirects to Genesys login
   // and returns a never-resolving promise (page navigates away).
-  function fetchToken(gc, opts) {
+  async function fetchToken(gc, opts) {
     if (_gcToken && Date.now() < _gcTokenExpiry) {
       console.log('[DemoGenesys] fetchToken: using cached token');
-      return Promise.resolve(_gcToken);
+      return _gcToken;
     }
     if (!gc.clientId) {
-      return Promise.reject(new Error('clientId not configured'));
+      throw new Error('clientId not configured');
     }
     if (opts && opts.noRedirect) {
       console.warn('[DemoGenesys] fetchToken: no valid token, noRedirect=true → skip');
-      return Promise.reject(new Error('no_token'));
+      throw new Error('no_token');
     }
-    const domain = regionDomain(gc.region);
-    const redirectUri = window.location.href.split('#')[0];
-    const authUrl = `https://login.${domain}/oauth/authorize?response_type=token&client_id=${encodeURIComponent(gc.clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-    console.log('[DemoGenesys] fetchToken: redirect → implicit grant', authUrl);
+    const redirectUri = window.location.origin + window.location.pathname;
+    const authUrl = await _buildAuthUrl(gc, redirectUri);
+    console.log('[DemoGenesys] fetchToken: redirect → PKCE authorization code', authUrl);
     window.location.href = authUrl;
     return new Promise(() => { }); // never resolves — page is navigating away
   }
@@ -270,7 +365,7 @@ const DemoGenesys = (() => {
      * @param {string} scheduledTime  ISO-8601 datetime, e.g. "2026-05-14T14:00:00.000+02:00"
      *
      * Flow:
-     *   1. OAuth client credentials → access token
+     *   1. OAuth Authorization Code + PKCE → access token
      *   2. POST /api/v2/conversations/callbacks
      *      callbackUserName     : persona.firstName + lastName
      *      callbackNumbers      : [persona.phone] (digits only)
@@ -365,7 +460,7 @@ const DemoGenesys = (() => {
      *   totalCost: number    Total repayment amount (€)
      * }} data
      */
-    loanSimulation(data) {
+    loanSimulation(_data) {
       alert(t('Demande de devis soumise', 'Loan simulation submitted'));
     },
 
@@ -387,7 +482,7 @@ const DemoGenesys = (() => {
       console.log('[DemoGenesys] fetchWaitTime →', mediaType, url);
       let token;
       try {
-        token = await fetchToken(gc, { noRedirect: false });
+        token = await fetchToken(gc, { noRedirect: true });
       } catch (e) {
         if (e.message === 'no_token') {
           console.warn('[DemoGenesys] fetchWaitTime: not authenticated yet, skipping');
@@ -408,7 +503,7 @@ const DemoGenesys = (() => {
     },
 
     /**
-     * Test the OAuth implicit grant connection from the Settings panel.
+     * Test the OAuth PKCE connection from the Settings panel.
      * Redirects to Genesys login if no token is cached; shows success toast on return.
      * @param {{ region: string, clientId: string }} gc
      * @param {HTMLButtonElement} [btn]
@@ -464,13 +559,12 @@ const DemoGenesys = (() => {
     },
 
     /**
-     * Redirect to Genesys implicit grant authorization.
+     * Redirect to Genesys Cloud authorization (Authorization Code + PKCE).
      * @param {{ region: string, clientId: string }} gc
      * @param {string} redirectUri  Full URL of the page to return to after auth
      */
-    redirectForAuth(gc, redirectUri) {
-      const domain = regionDomain(gc.region);
-      const url = `https://login.${domain}/oauth/authorize?response_type=token&client_id=${encodeURIComponent(gc.clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    async redirectForAuth(gc, redirectUri) {
+      const url = await _buildAuthUrl(gc, redirectUri);
       console.log('[DemoGenesys] redirectForAuth →', url);
       window.location.href = url;
     },

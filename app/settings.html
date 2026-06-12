@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Démo banque · Paramètres</title>
   <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="audiocodes.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     .settings-grid {
@@ -529,6 +530,7 @@
               class="i18n-en">Passcode</span></a>
           <div class="nav-sect"><span class="i18n-fr">Intégration</span><span class="i18n-en">Integration</span></div>
           <a href="#genesys"><i data-lucide="cloud"></i>Genesys Cloud</a>
+          <a href="#audiocodes"><i data-lucide="phone-call"></i>AudioCodes WebRTC</a>
 
         </nav>
 
@@ -543,7 +545,7 @@
                 </h3>
                 <div class="sub"><span class="i18n-fr">Exporte ou importe l'intégralité du paramétrage de ce profil
                     (hors token OAuth) — utile après un Reset.</span><span class="i18n-en">Export or import all profile
-                    settings (OAuth token excluded) — handy after a Reset.</span></div>
+                    settings — handy after a Reset.</span></div>
               </div>
             </div>
             <div class="panel-body">
@@ -895,6 +897,9 @@
                 <button class="btn btn-secondary btn-sm" id="gc-test-btn" onclick="testGenesysConnection()"><i
                     data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span
                     class="i18n-en">Test</span></button>
+                <button class="btn btn-secondary btn-sm" id="gc-renew-btn" onclick="renewGenesysToken()"><i
+                    data-lucide="rotate-ccw"></i><span class="i18n-fr">Renouveler</span><span
+                    class="i18n-en">Renew</span></button>
               </div>
               <div class="gc-2col">
                 <div class="field" style="grid-column:span 2;">
@@ -906,6 +911,18 @@
                       composé via le lien <code>tel:</code> (ex. 3262, +33123456789). Laisse vide pour
                       désactiver.</span><span class="i18n-en">Number dialled via <code>tel:</code> link (e.g. 3262,
                       +33123456789). Leave blank to disable.</span></div>
+                </div>
+                <div class="field" style="grid-column:span 2;">
+                  <label><span class="i18n-fr">Numéro d'appel interne</span><span class="i18n-en">Internal call
+                      number</span> <span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
+                        class="i18n-fr">— extension SIP composée par AudioCodes WebRTC</span><span class="i18n-en">— SIP
+                        extension dialled by AudioCodes WebRTC</span></span></label>
+                  <input id="gc-internal-call-number" placeholder="1001"
+                    style="font-family:var(--font-mono); font-size:13px;">
+                  <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Numéro SIP
+                      réel routé par le widget WebRTC. Si vide, le numéro d'appel ci-dessus est utilisé.</span><span
+                      class="i18n-en">Actual SIP number routed by the WebRTC widget. If blank, the call number above is
+                      used.</span></div>
                 </div>
                 <div class="field" style="grid-column:span 2;">
                   <label>Messenger snippet<span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
@@ -947,6 +964,84 @@
                     Messaging.</span><span class="i18n-en">This code runs on every message send in the inbox. Replace
                     the alert with your Genesys Web Messaging call.</span></div>
               </div>
+            </div>
+          </div>
+
+          <!-- AUDIOCODES CLICK-TO-CALL -->
+          <div class="panel" id="audiocodes">
+            <div class="panel-head">
+              <div class="panel-head-icon"><i data-lucide="phone-call"></i></div>
+              <div class="panel-head-text">
+                <h3>AudioCodes Click-to-Call</h3>
+                <div class="sub"><span class="i18n-fr">Widget WebRTC custom (UI dans la charte) avec persistance d'appel
+                    entre pages et passage du contexte client via SIP headers.</span><span class="i18n-en">Custom WebRTC
+                    widget (project-styled UI) with cross-page call persistence and SIP headers carrying customer
+                    context.</span></div>
+              </div>
+            </div>
+            <div class="panel-body">
+
+              <div class="row-setting">
+                <div>
+                  <div style="font-weight:600;"><span class="i18n-fr">Activer AudioCodes</span><span
+                      class="i18n-en">Enable AudioCodes</span></div>
+                  <div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Remplace le lien tel: par
+                      le widget WebRTC sur la page Contact.</span><span class="i18n-en">Replaces the tel: link with the
+                      WebRTC widget on the Contact page.</span></div>
+                </div>
+                <button class="toggle off" id="ac-enabled"></button>
+              </div>
+
+              <div class="field">
+                <label>SIP Server (FQDN)</label>
+                <input id="ac-domain" style="font-family:var(--font-mono);font-size:13px;"
+                  placeholder="xyz.sip1-region1.audiocodes.io">
+              </div>
+
+              <div class="field">
+                <label><span class="i18n-fr">Adresse WSS (optionnel)</span><span class="i18n-en">WSS address
+                    (optional)</span></label>
+                <input id="ac-wss" style="font-family:var(--font-mono);font-size:13px;"
+                  placeholder="wss://webrtc-server.xyz.sip1-region1.audiocodes.io">
+                <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;"><span class="i18n-fr">Laissé vide :
+                    dérivé automatiquement depuis le FQDN.</span><span class="i18n-en">If blank, auto-derived as
+                    wss://&lt;domain&gt;.</span></div>
+              </div>
+
+              <div class="gc-2col">
+                <div class="field">
+                  <label><span class="i18n-fr">Utilisateur SIP</span><span class="i18n-en">SIP username</span></label>
+                  <input id="ac-caller" style="font-family:var(--font-mono);font-size:13px;" placeholder="genesys"
+                    autocomplete="off">
+                </div>
+                <div class="field">
+                  <label><span class="i18n-fr">Mot de passe SIP</span><span class="i18n-en">SIP password</span></label>
+                  <input id="ac-password" type="password" style="font-family:var(--font-mono);font-size:13px;"
+                    placeholder="••••••••" autocomplete="new-password">
+                </div>
+              </div>
+
+              <div class="field">
+                <label><span class="i18n-fr">Headers SIP additionnels (optionnel)</span><span class="i18n-en">Additional
+                    SIP headers (optional)</span></label>
+                <textarea id="ac-extra-headers" rows="4"
+                  style="font-family:var(--font-mono); font-size:13px; min-height:88px; resize:vertical;"
+                  placeholder="X-Loyalty-Tier: Gold&#10;X-Lang: fr"></textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;">
+                  <span class="i18n-fr">Un header par ligne au format <code>Nom: Valeur</code>. S'ajoute aux headers
+                    automatiques générés depuis le profil (<code>X-User-FirstName</code>,
+                    <code>X-User-LastName</code>, <code>X-User-Email</code>, <code>X-User-Phone</code>,
+                    <code>X-User-ProfileType</code>, <code>X-User-AdvisorName</code>,
+                    <code>X-User-AccountId</code>). Récupérables côté Genesys Cloud via l'action Architect
+                    "Get SIP Headers".</span><span class="i18n-en">One header per line in <code>Name: Value</code>
+                    format. Added to the auto-generated headers from the profile (<code>X-User-FirstName</code>,
+                    <code>X-User-LastName</code>, <code>X-User-Email</code>, <code>X-User-Phone</code>,
+                    <code>X-User-ProfileType</code>, <code>X-User-AdvisorName</code>,
+                    <code>X-User-AccountId</code>). Retrievable in Genesys Cloud via the Architect "Get SIP Headers"
+                    action.</span>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -996,6 +1091,7 @@
   <script src="shell.js"></script>
   <script src="config.js"></script>
   <script src="genesys.js"></script>
+  <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
 
@@ -1024,6 +1120,21 @@
       };
       await DemoGenesys.testConnection(gc, document.getElementById('gc-test-btn'));
       updateOAuthStatus();
+    }
+
+    async function renewGenesysToken() {
+      const gc = {
+        region: document.getElementById('gc-region').value,
+        clientId: document.getElementById('gc-client').value.trim(),
+      };
+      if (!gc.clientId) {
+        const lang = document.documentElement.lang;
+        showToast(lang === 'en' ? 'Client ID is required.' : 'Client ID requis.', true);
+        return;
+      }
+      DemoGenesys.clearToken();
+      sessionStorage.setItem('_gc_pending', 'testConnection');
+      await DemoGenesys.redirectForAuth(gc, window.location.origin + window.location.pathname);
     }
 
     function updateOAuthStatus() {
@@ -1072,7 +1183,8 @@
 
     function showToast(msg, isError) {
       const t = document.getElementById('toast');
-      const icon = t.querySelector('svg');
+      const iconEl = t.querySelector('i[data-lucide]');
+      if (iconEl) iconEl.setAttribute('data-lucide', isError ? 'alert-circle' : 'check-circle');
       document.getElementById('toast-msg').textContent = msg;
       t.style.background = isError ? 'var(--danger-700)' : 'var(--neutral-900)';
       t.classList.add('show');
@@ -1134,7 +1246,17 @@
       document.getElementById('gc-queue').value = g.queueId || '';
       document.getElementById('gc-script').value = g.scriptId || '';
       document.getElementById('gc-call-number').value = g.callNumber || '';
+      document.getElementById('gc-internal-call-number').value = g.internalCallNumber || '';
       document.getElementById('gc-additional-js').value = p.additionalJS || "alert(\"création d'un workitem\");";
+
+      // AudioCodes
+      const ac = p.audiocodes || {};
+      setToggle('ac-enabled', !!ac.enabled);
+      document.getElementById('ac-domain').value = ac.domain || '';
+      document.getElementById('ac-wss').value = ac.wssAddress || '';
+      document.getElementById('ac-caller').value = ac.caller || '';
+      document.getElementById('ac-password').value = ac.password || '';
+      document.getElementById('ac-extra-headers').value = ac.extraHeaders || '';
 
       updatePreview();
     }
@@ -1191,7 +1313,7 @@
         brandName: document.getElementById('brand-name').value.trim() || 'Démo banque',
         slogan: document.getElementById('brand-slogan').value.trim(),
         primaryColor: currentColor,
-        logoData: document.getElementById('logo-preview-img').src.startsWith('data:') ? document.getElementById('logo-preview-img').src : (p.logoData || null),
+        logoData: document.getElementById('logo-preview-img').dataset.isCustom === 'true' ? document.getElementById('logo-preview-img').src : (p.logoData || null),
         persona: {
           firstName: document.getElementById('p-first').value.trim(),
           lastName: document.getElementById('p-last').value.trim(),
@@ -1218,8 +1340,17 @@
           queueId: document.getElementById('gc-queue').value.trim(),
           scriptId: document.getElementById('gc-script').value.trim(),
           callNumber: document.getElementById('gc-call-number').value.trim(),
+          internalCallNumber: document.getElementById('gc-internal-call-number').value.trim(),
         },
         additionalJS: document.getElementById('gc-additional-js').value,
+        audiocodes: {
+          enabled: getToggle('ac-enabled'),
+          domain: document.getElementById('ac-domain').value.trim(),
+          wssAddress: document.getElementById('ac-wss').value.trim(),
+          caller: document.getElementById('ac-caller').value.trim(),
+          password: document.getElementById('ac-password').value.trim(),
+          extraHeaders: document.getElementById('ac-extra-headers').value,
+        },
         tutoiement: getToggle('toggle-tutoiement'),
         language: currentLang,
       };
@@ -1233,9 +1364,15 @@
       document.getElementById('new-pin').value = '';
       document.getElementById('confirm-pin').value = '';
       showToast(lang === 'en' ? '✓ Settings saved successfully' : '✓ Paramètres enregistrés avec succès');
+
+      const url = new URL(location.href);
+      if (url.searchParams.has('welcome')) {
+        url.searchParams.delete('welcome');
+        history.replaceState(null, '', url);
+      }
     }
 
-    // Synchronise les <option> dont le texte dépend de la langue
+    // Sync <option> elements whose text depends on the current language
     function syncI18nInputs() {
       const lang = document.documentElement.lang || 'fr';
       document.querySelectorAll('option[data-fr]').forEach(opt => {
@@ -1249,7 +1386,7 @@
       loadProfile();
       updateOAuthStatus();
       syncI18nInputs();
-      new MutationObserver(() => { syncI18nInputs(); updateOAuthStatus(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
       // Clear token when clientId changes (token is scoped to the OAuth client)
       document.getElementById('gc-client').addEventListener('input', () => {
@@ -1288,7 +1425,9 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = ev => {
-          document.getElementById('logo-preview-img').src = ev.target.result;
+          const img = document.getElementById('logo-preview-img');
+          img.src = ev.target.result;
+          img.dataset.isCustom = 'true';
           document.getElementById('logo-filename').textContent = file.name;
           document.getElementById('logo-reset-btn').style.display = 'inline-flex';
           // Also update all logo elements live

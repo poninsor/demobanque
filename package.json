@@ -1,0 +1,12 @@
+{
+  "name": "demobanque",
+  "version": "1.0.0",
+  "description": "Static white-label banking demo for Genesys Cloud",
+  "scripts": {
+    "start": "node server.js",
+    "start:5000": "PORT=5000 node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

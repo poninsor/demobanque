@@ -4,6 +4,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Démo banque · Tableau de bord</title>
   <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="audiocodes.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
     .hero {
@@ -286,6 +287,7 @@
 
   <script src="shell.js"></script>
   <script src="config.js"></script>
+  <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
     document.addEventListener('DOMContentLoaded', () => {
@@ -306,10 +308,10 @@
         if (!card.contains(e.target)) card.classList.remove('open');
       });
 
-      // Compute patrimoine total from balances
+      // Compute total assets from balances
       const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
       const b = p.balances;
-      const parse = s => parseFloat(String(s).replace(/\s/g,'').replace(',','.')) || 0;
+      const parse = s => parseFloat(String(s).replace(/\s/g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
       const total = parse(b.checking) + parse(b.savings) + parse(b.pel);
       document.getElementById('hero-total').textContent = total.toLocaleString('fr-FR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
     });

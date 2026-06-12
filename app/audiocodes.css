@@ -1,0 +1,378 @@
+/* =============================================================================
+   AudioCodes WebRTC Click-to-Call — custom UI built on the standalone SDK.
+   Floating action button + call panel, styled with project brand variables.
+   ============================================================================= */
+
+/* ── Hidden audio element for remote stream playback ─────────────────────── */
+#dac-audio {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Floating action button (FAB) ────────────────────────────────────────── */
+.dac-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  z-index: 9000;
+  transition: background 140ms var(--ease-out),
+              transform 140ms var(--ease-out),
+              box-shadow 140ms var(--ease-out);
+}
+
+/* FAB is only visible during active calls */
+.dac-fab[data-state="idle"] {
+  display: none;
+}
+
+.dac-fab:hover {
+  background: var(--brand-600);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.dac-fab:active {
+  transform: scale(0.96);
+}
+
+.dac-fab svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+/* In-call → success colour + pulse */
+.dac-fab[data-state="in-call"],
+.dac-fab[data-state="on-hold"],
+.dac-fab[data-state="connecting"],
+.dac-fab[data-state="ringing"] {
+  background: var(--success-500);
+}
+
+.dac-fab[data-state="in-call"]::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid var(--success-500);
+  opacity: 0.6;
+  animation: dac-pulse 1.6s ease-out infinite;
+}
+
+.dac-fab[data-state="on-hold"] {
+  background: var(--warning-500);
+}
+
+@keyframes dac-pulse {
+  0%   { opacity: 0.7; transform: scale(1);   }
+  100% { opacity: 0;   transform: scale(1.4); }
+}
+
+/* Mobile bottom-nav adjustment — lift the FAB above the tab bar */
+@media (max-width: 1023px) {
+  .dac-fab {
+    bottom: 88px; /* approx height of mobile bottom nav + breathing room */
+  }
+}
+
+/* ── Call panel ──────────────────────────────────────────────────────────── */
+.dac-panel {
+  position: fixed;
+  bottom: 92px;
+  right: 24px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-elev);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+  padding: 20px;
+  z-index: 9001;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  font-family: var(--font-body);
+}
+
+.dac-panel.open {
+  display: flex;
+  animation: dac-slide-up 220ms var(--ease-out);
+}
+
+@keyframes dac-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+@media (max-width: 1023px) {
+  .dac-panel {
+    bottom: 156px; /* lift above FAB which is itself above mobile nav */
+  }
+}
+
+/* Panel header */
+.dac-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.dac-status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dac-status-dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fg-faint);
+}
+
+.dac-panel[data-state="connecting"] .dac-status-dot::before,
+.dac-panel[data-state="ringing"]    .dac-status-dot::before { background: var(--warning-500); }
+.dac-panel[data-state="in-call"]    .dac-status-dot::before { background: var(--success-500); }
+.dac-panel[data-state="on-hold"]    .dac-status-dot::before { background: var(--warning-500); }
+
+.dac-timer {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+/* Peer info */
+.dac-peer {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.dac-peer-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+
+.dac-peer-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--fg-muted);
+  margin-top: 2px;
+}
+
+/* Secondary actions row (mute, hold, keypad) */
+.dac-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.dac-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 4px;
+  cursor: pointer;
+  color: var(--fg);
+  font-size: 11px;
+  font-weight: 500;
+  transition: background 140ms var(--ease-out), border-color 140ms var(--ease-out);
+}
+
+.dac-action:hover {
+  background: var(--bg-inset);
+}
+
+.dac-action svg {
+  width: 18px;
+  height: 18px;
+}
+
+.dac-action.active {
+  background: var(--brand-soft);
+  border-color: var(--brand-border);
+  color: var(--brand-700);
+}
+
+.dac-action[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Hangup button (primary destructive) */
+.dac-hangup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--danger-500);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 140ms var(--ease-out), transform 140ms var(--ease-out);
+}
+
+.dac-hangup:hover  { background: var(--danger-700); }
+.dac-hangup:active { transform: scale(0.98); }
+
+.dac-hangup svg { width: 18px; height: 18px; }
+
+/* ── DTMF keypad (foldable) ──────────────────────────────────────────────── */
+.dac-keypad {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.dac-keypad.open { display: grid; }
+
+.dac-key {
+  height: 38px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 80ms var(--ease-out);
+}
+
+.dac-key:hover  { background: var(--bg-inset); }
+.dac-key:active { background: var(--brand-soft); }
+
+/* ── Call preview (device setup before dialling) ────────────────────────── */
+
+/* FAB stays hidden while the preview panel is open */
+.dac-fab[data-state="ready"] {
+  display: none;
+}
+
+/* Device selector rows — hidden by default, shown in ready state only */
+.dac-devices {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dac-panel[data-state="ready"] .dac-devices {
+  display: flex;
+}
+
+.dac-device-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dac-device-row label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+.dac-device-select {
+  width: 100%;
+  height: 36px;
+  padding: 0 8px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  appearance: auto;
+}
+
+/* "Start call" button — hidden by default, primary green in ready state */
+.dac-call-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--success-500);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 140ms var(--ease-out), transform 140ms var(--ease-out);
+}
+
+.dac-panel[data-state="ready"] .dac-call-btn {
+  display: flex;
+}
+
+.dac-call-btn:hover  { background: var(--success-700, #15803d); }
+.dac-call-btn:active { transform: scale(0.98); }
+
+.dac-call-btn svg { width: 18px; height: 18px; }
+
+/* "Cancel" link-button — hidden by default, muted text in ready state */
+.dac-cancel {
+  display: none;
+  background: none;
+  border: 0;
+  color: var(--fg-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  padding: 4px 0;
+  width: 100%;
+  transition: color 140ms var(--ease-out);
+}
+
+.dac-panel[data-state="ready"] .dac-cancel {
+  display: block;
+}
+
+.dac-cancel:hover { color: var(--fg); }
+
+/* Hide active-call controls and peer name during device preview */
+.dac-panel[data-state="ready"] .dac-peer,
+.dac-panel[data-state="ready"] .dac-timer,
+.dac-panel[data-state="ready"] .dac-actions,
+.dac-panel[data-state="ready"] .dac-keypad,
+.dac-panel[data-state="ready"] .dac-hangup {
+  display: none;
+}

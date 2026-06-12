@@ -178,7 +178,7 @@
     const errorText = document.getElementById('error-text');
     const eyeToggle = document.getElementById('eye-toggle');
 
-    if (DemoConfig.getProfile()) window.location.href = 'dashboard.html';
+    if (DemoConfig.getProfile() && !new URLSearchParams(location.search).has('code')) window.location.href = 'dashboard.html';
 
     eyeToggle.addEventListener('click', () => {
       const isPassword = pinInput.type === 'password';
@@ -192,7 +192,7 @@
       errorMsg.classList.add('show');
     }
 
-    function doLogin() {
+    async function doLogin() {
       const id = accountInput.value.trim();
       const pin = pinInput.value.trim();
       errorMsg.classList.remove('show');
@@ -203,7 +203,7 @@
         const gc = (DemoConfig.getProfile() || {}).genesys || {};
         if (gc.clientId && !DemoGenesys.getTokenStatus().connected) {
           sessionStorage.setItem('_gc_post_login_redirect', dest);
-          DemoGenesys.redirectForAuth(gc, window.location.href.split('#')[0]);
+          await DemoGenesys.redirectForAuth(gc, window.location.origin + window.location.pathname);
         } else {
           window.location.href = dest;
         }

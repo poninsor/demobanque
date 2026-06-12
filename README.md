@@ -16,7 +16,8 @@ Application bancaire statique pour les démonstrations Genesys Cloud. Simule une
 - **Soldes & produits** : comptes courant, Livret A, PEL ; cartes Visa Premier/Classic, prêt auto, assurance-vie
 - **Messagerie sécurisée** : conversation client ↔ conseiller persistée en localStorage, synchronisation temps réel entre onglets
 - **Vue conseiller** (`advisor.html`) : interface miroir pour répondre aux clients, accessible sans authentification client
-- **Intégration Genesys Cloud** : Messenger snippet (exécuté au chargement), OAuth 2.0 Implicit Grant, numéro d'appel `tel:`, JavaScript additionnel déclenché à chaque envoi de message
+- **Intégration Genesys Cloud** : Messenger snippet (exécuté au chargement), OAuth 2.0 Authorization Code + PKCE, JavaScript additionnel déclenché à chaque envoi de message
+- **AudioCodes WebRTC Click-to-Call** : intégration custom complète bâtie sur le SDK standalone AudioCodes (bouton flottant + panel d'appel dans la charte — pas de widget tout-fait) ; SIP over WSS avec authentification Basic ; **`extraHeaders` SIP custom (`X-User-FirstName`, `X-User-Email`, etc.) auto-générés depuis le persona et configurables dans les Paramètres** pour permettre à Architect Genesys Cloud de router sur le contexte client via l'action "Get SIP Headers" ; **les appels en cours survivent à la navigation entre pages** (état persisté dans `localStorage` sur `beforeunload` et repris via SIP REPLACES sur la page suivante, fenêtre de 20 s) ; bascule sur `tel:` si non configuré ; déclenchable via `contact.html?call=1` (cas d'usage chatbot) ; **les paramètres URL préfixés `X-User-`** (`contact.html?call=1&X-User-ParentConnID=abc123`) sont automatiquement ajoutés aux headers SIP de l'appel
 - **Bilingue FR/EN** : basculement instantané, persisté par profil
 - **Import / Export** : sauvegarde et restauration du paramétrage complet en `.json` (hors token OAuth)
 - **Responsive & mobile-ready** : interface adaptée aux petits écrans, navigation par bottom sheet, utilisable comme web app depuis l'écran d'accueil (PWA-like)
@@ -37,7 +38,7 @@ Application bancaire statique pour les démonstrations Genesys Cloud. Simule une
 | `messages.html` | Messagerie sécurisée — conversation client |
 | `advisor.html` | Vue conseiller — liste de toutes les conversations, réponses en temps réel |
 | `contact.html` | Nous contacter — canaux, prise de rendez-vous, rappel immédiat |
-| `settings.html` | Paramètres — 8 panneaux : sauvegarde, marque, persona, soldes, produits, langue, sécurité, Genesys Cloud |
+| `settings.html` | Paramètres — 9 panneaux : sauvegarde, marque, persona, soldes, produits, langue, sécurité, Genesys Cloud, AudioCodes WebRTC |
 
 ---
 
@@ -64,15 +65,18 @@ Tout se passe dans **Paramètres** (`settings.html`) :
 - **Genesys Cloud** — région AWS, Client ID OAuth, Messenger snippet, Queue ID, Script ID, numéro d'appel, JavaScript additionnel
 
 > **Configuration OAuth dans Genesys Cloud**
-> L'intégration utilise le flux **Implicit Grant** (pas de Client Secret). Dans votre org Genesys Cloud, créez un client OAuth de type *Token Implicit Grant* et autorisez au minimum les URI de redirection suivantes :
+> L'intégration utilise le flux **Authorization Code + PKCE** (pas de Client Secret). Dans votre org Genesys Cloud, créez un client OAuth de type *Code Authorization* avec l'option **PKCE Required** activée, et autorisez au minimum les URI de redirection suivantes :
 >
 > ```
 > https://poninsor.github.io/demobanque/app/index.html
 > https://poninsor.github.io/demobanque/app/settings.html
 > https://poninsor.github.io/demobanque/app/contact.html
+> http://localhost/index.html
+> http://localhost/settings.html
+> http://localhost/contact.html
 > ```
 >
-> En local, ajoutez également l'URL de votre serveur (ex. `http://localhost:8080/index.html`, etc.).
+> Genesys Cloud ignore le numéro de port pour les URI `localhost`, ce qui couvre tous vos ports locaux avec ces trois entrées.
 
 ### Vue conseiller
 
@@ -117,15 +121,20 @@ app/
 ├── settings.html
 ├── config.js           # DemoConfig — toute la logique localStorage
 ├── genesys.js          # DemoGenesys — intégration Genesys Cloud
+├── audiocodes.js       # DemoAudioCodes — intégration WebRTC custom (UI propre sur le SDK standalone)
 ├── shell.js            # Comportements globaux (nav mobile, Messenger snippet)
 ├── shell.css           # Design system + app shell
-└── assets/
-    ├── logo.svg
-    ├── logo-light.svg
-    ├── logo-mark.svg
-    ├── visa.svg
-    ├── visa-white.svg
-    └── genesys.png
+├── audiocodes.css      # Bouton flottant + panel d'appel (charte projet)
+├── assets/
+│   ├── logo.svg
+│   ├── logo-light.svg
+│   ├── logo-mark.svg
+│   ├── visa.svg
+│   ├── visa-white.svg
+│   └── genesys.png
+└── lib/
+    └── audiocodes/     # SDK AudioCodes — fichiers vendor (ne pas modifier)
+        └── click-to-call.js   # SDK standalone (AudioCodesUA + JsSIP) — chargé au runtime
 ```
 
 ### Schéma localStorage (`demobank_v1`)
@@ -155,7 +164,16 @@ app/
         "clientId": "",
         "queueId": "",
         "scriptId": "",
-        "callNumber": "3262"
+        "callNumber": "3262",
+        "internalCallNumber": ""
+      },
+      "audiocodes": {
+        "enabled": false,
+        "domain": "",
+        "wssAddress": "",
+        "caller": "",
+        "password": "",
+        "extraHeaders": ""
       },
       "additionalJS": "alert(\"création d'un workitem\");",
       "language": "fr",
@@ -185,27 +203,35 @@ app/
 | `getMessages()` | Retourne les messages du compte actif (ou les défauts) |
 | `addMessage(msg)` | Ajoute un message et persiste |
 | `getGenesys()` | Retourne la config Genesys du compte actif |
+| `getAudiocodes()` | Retourne la config AudioCodes du compte actif |
 | `executeAdditionalJS()` | Exécute le snippet `additionalJS` du profil |
 
 ---
 
 ## Exécution locale
 
-Aucun build requis. N'importe quel serveur de fichiers statiques suffit :
+Aucun build requis, aucune dépendance à installer.
+
+### Recommandé — serveur Node.js intégré
 
 ```bash
-# Python
-cd app/
-python3 -m http.server 8080
+node server.js            # http://localhost:3000/
+PORT=5000 node server.js  # port personnalisé
+# ou
+npm start
+```
 
-# Node (npx)
-npx serve app/
+`server.js` utilise uniquement les modules Node.js natifs (Node 18+ requis).
+
+### Alternatives
+
+```bash
+# Python (si Node non disponible)
+cd app && python3 -m http.server 3000
 
 # VS Code : Live Server
 # Clic droit sur index.html → "Open with Live Server"
 ```
-
-Puis ouvrir `http://localhost:8080`.
 
 ---
 

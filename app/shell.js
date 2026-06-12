@@ -1,6 +1,6 @@
 /**
- * shell.js — comportements globaux de l'app shell
- * Chargé sur toutes les pages avant config.js
+ * shell.js — global app shell behaviours
+ * Loaded on every page before config.js
  */
 (function () {
   const SHEET_PAGES = ['cards', 'beneficiaries', 'credits', 'contact', 'settings'];
@@ -36,23 +36,23 @@
   document.addEventListener('DOMContentLoaded', () => {
     const page = currentPage();
 
-    // Marquer le bouton Plus actif si on est sur une page du sheet
+    // Highlight the "More" button when on a sheet page
     if (isSheetPage()) {
       document.getElementById('more-nav-btn')?.classList.add('active');
     }
 
-    // Marquer l'item du sheet correspondant à la page courante
+    // Highlight the sheet item matching the current page
     document.querySelectorAll('.sheet-item').forEach(el => {
       const href = (el.getAttribute('href') || '').replace('.html', '');
       if (href && href === page) el.classList.add('active');
     });
 
-    // Fermer sur Echap
+    // Close on Escape
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') window.closeMobileSheet();
     });
 
-    // Exécuter le Messenger snippet Genesys configuré dans Paramètres
+    // Execute the Genesys Messenger snippet configured in Settings
     try {
       const snippet = ((DemoConfig.getProfile() || {}).genesys || {}).messengerSnippet || '';
       if (snippet) new Function(snippet)();

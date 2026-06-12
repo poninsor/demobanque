@@ -44,7 +44,16 @@ const DemoConfig = (() => {
       clientId: '',
       queueId: '',
       scriptId: '',
-      callNumber: '3262'
+      callNumber: '3262',
+      internalCallNumber: ''
+    },
+    audiocodes: {
+      enabled: false,
+      domain: '',
+      wssAddress: '',
+      caller: '',
+      password: '',
+      extraHeaders: ''
     },
     additionalJS: 'alert("création d\'un workitem");',
     language: null,
@@ -352,6 +361,11 @@ const DemoConfig = (() => {
     return p.genesys || DEFAULT_PROFILE.genesys;
   }
 
+  function getAudiocodes() {
+    const p = getProfile() || DEFAULT_PROFILE;
+    return p.audiocodes || DEFAULT_PROFILE.audiocodes;
+  }
+
   /**
    * Returns the 8-digit account ID of the currently logged-in user, or null.
    * @returns {string | null}
@@ -371,6 +385,7 @@ const DemoConfig = (() => {
     getMessages, addMessage,
     executeAdditionalJS,
     getGenesys,
+    getAudiocodes,
     getCurrentAccountId
   };
 })();
