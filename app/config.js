@@ -337,6 +337,40 @@ const DemoConfig = (() => {
     saveData(d);
   }
 
+  // ── Storage quota helpers ───────────────────────────────────────────────────
+
+  /**
+   * Estimates total localStorage usage in bytes (UTF-16, 2 bytes per char).
+   * @returns {number}
+   */
+  function getStorageUsageBytes() {
+    let total = 0;
+    try {
+      for (const key of Object.keys(localStorage)) {
+        total += (localStorage.getItem(key) || '').length * 2;
+      }
+    } catch (e) { /* noop */ }
+    return total;
+  }
+
+  /**
+   * Removes fileData (base64) from all messages of a given account to reclaim storage.
+   * The message card (fileName, fileSize) is preserved; the image is no longer displayable.
+   * @param {string} accountId
+   * @returns {number} number of attachments purged
+   */
+  function purgeMessageAttachments(accountId) {
+    const d = getData();
+    const p = (d.accounts || {})[accountId];
+    if (!p || !p.messages) return 0;
+    let count = 0;
+    p.messages.forEach(msg => {
+      if (msg.fileData) { delete msg.fileData; count++; }
+    });
+    if (count > 0) saveData(d);
+    return count;
+  }
+
   // ── Additional JS executor ──────────────────────────────────────────────────
 
   /**
@@ -383,6 +417,7 @@ const DemoConfig = (() => {
     getProfile, updateProfile, deepUpdateProfile,
     applyBranding, setLanguage,
     getMessages, addMessage,
+    getStorageUsageBytes, purgeMessageAttachments,
     executeAdditionalJS,
     getGenesys,
     getAudiocodes,

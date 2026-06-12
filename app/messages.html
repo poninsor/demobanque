@@ -270,14 +270,184 @@
       justify-content: center;
     }
 
+    .attach-card .attach-meta {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
     .attach-card .nm {
       font-size: 13px;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .attach-card .sz {
       font-size: 11px;
       color: var(--fg-muted);
+      white-space: nowrap;
+    }
+
+    .attach-img {
+      max-width: 220px;
+      border-radius: 12px;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .attach-img-btn {
+      display: inline-block;
+      line-height: 0;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: zoom-in;
+    }
+
+    /* ── Image lightbox ───────────────────────────────────────────────────── */
+    #img-viewer {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #img-viewer.open {
+      display: flex;
+    }
+
+    #img-viewer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .82);
+      backdrop-filter: blur(4px);
+    }
+
+    #img-viewer-inner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: min(90vw, 900px);
+      max-height: 90svh;
+      z-index: 1;
+    }
+
+    #img-viewer-img {
+      max-width: 100%;
+      max-height: calc(90svh - 80px);
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    }
+
+    #img-viewer-pdf {
+      width: min(88vw, 860px);
+      height: calc(90svh - 80px);
+      border: none;
+      border-radius: 8px;
+      background: white;
+    }
+
+    #img-viewer-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    #img-viewer-close {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: white;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #img-viewer-close:hover {
+      background: rgba(255,255,255,.28);
+    }
+
+    #img-viewer-dl {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: white;
+      color: #111;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #img-viewer-dl:hover {
+      background: #f0f0f0;
+    }
+
+    #img-viewer-dl svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    #file-preview {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 24px 0;
+      background: var(--bg-elev);
+      flex-shrink: 0;
+    }
+
+    #file-preview img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    #file-preview .fp-name {
+      font-size: 13px;
+      font-weight: 500;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #file-preview .fp-cancel {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--bg-sunken);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg-muted);
+      flex-shrink: 0;
+    }
+
+    #file-preview .fp-cancel:hover {
+      background: var(--danger-100, #fee2e2);
+      color: var(--danger-500);
     }
 
     .quick-replies {
@@ -304,6 +474,37 @@
     .qr:hover {
       background: var(--brand-50);
       color: var(--brand-700);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--neutral-900);
+      color: white;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 300ms var(--ease-out);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast svg {
+      width: 18px;
+      height: 18px;
     }
 
     .composer {
@@ -602,8 +803,16 @@
               class="i18n-en">Can we talk?</span></button>
         </div>
 
+        <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none">
+        <div id="file-preview">
+          <img id="fp-thumb" src="" alt="">
+          <span class="fp-name" id="fp-name"></span>
+          <button class="fp-cancel" id="fp-cancel" aria-label="Annuler">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
         <div class="composer">
-          <button class="icon-btn" style="width:44px;height:44px;flex-shrink:0;"><i
+          <button class="icon-btn" style="width:44px;height:44px;flex-shrink:0;" onclick="document.getElementById('file-input').click()" type="button" aria-label="Joindre une image"><i
               data-lucide="paperclip"></i></button>
           <textarea id="compose-area" placeholder="Écris ton message…" rows="1"></textarea>
           <button class="send" id="send-btn" onclick="sendMessage()"><i data-lucide="send"></i></button>
@@ -613,6 +822,23 @@
 
     <footer class="genesys-footer"><span>Powered by Genesys Cloud</span><img src="assets/genesys.png" alt=""></footer>
   </main>
+
+  <div class="toast" id="toast"><i data-lucide="check-circle"></i><span id="toast-msg"></span></div>
+
+  <div id="img-viewer" role="dialog" aria-modal="true" aria-label="Aperçu">
+    <div id="img-viewer-backdrop"></div>
+    <div id="img-viewer-inner">
+      <button id="img-viewer-close" aria-label="Fermer">×</button>
+      <img id="img-viewer-img" src="" alt="">
+      <iframe id="img-viewer-pdf" src="" title="PDF" style="display:none"></iframe>
+      <div id="img-viewer-actions">
+        <a id="img-viewer-dl" download="">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="i18n-fr">Télécharger</span><span class="i18n-en">Download</span>
+        </a>
+      </div>
+    </div>
+  </div>
 
   <nav class="mobile-nav" aria-label="Navigation">
     <div class="mobile-nav-inner">
@@ -662,26 +888,119 @@
       return `${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}`;
     }
 
+    let _viewerBlobUrl = null;
+
+    function openViewer(src, fileName, mimeType) {
+      const isPdf = mimeType === 'application/pdf';
+      const imgEl = document.getElementById('img-viewer-img');
+      const pdfEl = document.getElementById('img-viewer-pdf');
+
+      if (isPdf) {
+        // Convert data URL → blob URL (avoids browser security blocks on data: iframes)
+        const b64 = src.split(',')[1] || '';
+        const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+        _viewerBlobUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+        pdfEl.src = _viewerBlobUrl;
+        pdfEl.style.display = '';
+        imgEl.style.display = 'none';
+        imgEl.src = '';
+      } else {
+        imgEl.src = src;
+        imgEl.style.display = '';
+        pdfEl.style.display = 'none';
+        pdfEl.src = '';
+      }
+
+      const dl = document.getElementById('img-viewer-dl');
+      dl.href = src;
+      dl.download = fileName || 'fichier';
+      document.getElementById('img-viewer').classList.add('open');
+    }
+
+    function closeViewer() {
+      document.getElementById('img-viewer').classList.remove('open');
+      document.getElementById('img-viewer-pdf').src = '';
+      document.getElementById('img-viewer-img').src = '';
+      if (_viewerBlobUrl) { URL.revokeObjectURL(_viewerBlobUrl); _viewerBlobUrl = null; }
+    }
+
+    function showToast(msg, isError) {
+      const el = document.getElementById('toast');
+      const icon = el.querySelector('i[data-lucide]');
+      if (icon) icon.setAttribute('data-lucide', isError ? 'alert-circle' : 'check-circle');
+      document.getElementById('toast-msg').textContent = msg;
+      el.style.background = isError ? 'var(--danger-700)' : 'var(--neutral-900)';
+      el.classList.add('show');
+      lucide.createIcons();
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
     function renderMessage(msg) {
       const div = document.createElement('div');
       div.className = `msg ${msg.from}`;
+      const av = msg.from === 'them'
+        ? `<div class="m-av">${msg.initials || advisorInitials}</div>` : '';
       if (msg.type === 'file') {
-        div.innerHTML = `
-          ${msg.from === 'them' ? `<div class="m-av">${msg.initials || advisorInitials}</div>` : ''}
-          <div>
-            <div class="attach-card">
-              <div class="ic"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
-              <div><div class="nm">${msg.fileName}</div><div class="sz">${msg.fileSize}</div></div>
-            </div>
-            <div class="ts">${msg.time}</div>
-          </div>`;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = av;
+        const inner = document.createElement('div');
+        const isImage = msg.mimeType && msg.mimeType.startsWith('image/');
+        const isPdf = msg.mimeType === 'application/pdf';
+
+        if (msg.fileData && isImage) {
+          // Inline thumbnail — click opens image lightbox
+          const btn = document.createElement('button');
+          btn.className = 'attach-img-btn';
+          btn.addEventListener('click', () => openViewer(msg.fileData, msg.fileName, msg.mimeType));
+          const img = document.createElement('img');
+          img.src = msg.fileData;
+          img.alt = msg.fileName || '';
+          img.className = 'attach-img';
+          btn.appendChild(img);
+          inner.appendChild(btn);
+        } else {
+          // Attach card — clickable for PDF preview, static otherwise
+          const fileSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+          const card = document.createElement('div');
+          card.className = 'attach-card';
+          card.innerHTML = `<div class="ic">${fileSvg}</div>`;
+          const meta = document.createElement('div');
+          meta.className = 'attach-meta';
+          const nm = document.createElement('div');
+          nm.className = 'nm';
+          nm.textContent = msg.fileName || '';
+          const sz = document.createElement('div');
+          sz.className = 'sz';
+          sz.textContent = msg.fileSize || '';
+          meta.append(nm, sz);
+          card.appendChild(meta);
+          if (msg.fileData && isPdf) {
+            const btn = document.createElement('button');
+            btn.className = 'attach-img-btn';
+            btn.style.cssText = 'text-align:left;line-height:normal;display:block;';
+            btn.addEventListener('click', () => openViewer(msg.fileData, msg.fileName, msg.mimeType));
+            btn.appendChild(card);
+            inner.appendChild(btn);
+          } else if (msg.fileData) {
+            // Non-previewable file — direct download on click
+            const a = document.createElement('a');
+            a.href = msg.fileData;
+            a.download = msg.fileName || 'fichier';
+            a.style.cssText = 'text-decoration:none;display:block;line-height:normal;';
+            a.appendChild(card);
+            inner.appendChild(a);
+          } else {
+            inner.appendChild(card);
+          }
+        }
+        const ts = document.createElement('div');
+        ts.className = 'ts';
+        ts.textContent = msg.time;
+        inner.appendChild(ts);
+        wrapper.appendChild(inner);
+        div.appendChild(wrapper);
       } else {
-        div.innerHTML = `
-          ${msg.from === 'them' ? `<div class="m-av">${msg.initials || advisorInitials}</div>` : ''}
-          <div>
-            <div class="bubble">${escapeHtml(msg.text)}</div>
-            <div class="ts">${msg.time}</div>
-          </div>`;
+        div.innerHTML = `${av}<div><div class="bubble">${escapeHtml(msg.text)}</div><div class="ts">${msg.time}</div></div>`;
       }
       return div;
     }
@@ -705,12 +1024,116 @@
       }
     }
 
+    let _pendingFile = null; // { fileData, fileName, fileSize, mimeType }
+
+    function _advisorIsPresent() {
+      try {
+        const d = JSON.parse(localStorage.getItem('demobank_adv_active') || 'null');
+        return d && d.accountId === DemoConfig.getCurrentAccountId() && (Date.now() - d.ts < 30000);
+      } catch { return false; }
+    }
+
+    const _ALLOWED_TYPES = [
+      'image/',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+
+    function _isAllowedType(mimeType) {
+      return _ALLOWED_TYPES.some(t => t.endsWith('/') ? mimeType.startsWith(t) : mimeType === t);
+    }
+
+    function _fileLabel(file) {
+      return (file.name.split('.').pop() || '').toUpperCase() || 'FILE';
+    }
+
+    function attachFile(file) {
+      const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
+      if (!_isAllowedType(file.type)) {
+        showToast(
+          lang === 'en'
+            ? 'Unsupported file type. Please use an image, PDF, Word or Excel file.'
+            : 'Type de fichier non supporté. Utilise une image, un PDF, Word ou Excel.',
+          true
+        );
+        return;
+      }
+      const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+      if (file.size > MAX_BYTES) {
+        showToast(
+          lang === 'en'
+            ? 'File too large (max 2 MB).'
+            : 'Fichier trop volumineux (max 2 Mo).',
+          true
+        );
+        return;
+      }
+      const QUOTA_WARN = 4 * 1024 * 1024; // 4 MB
+      if (DemoConfig.getStorageUsageBytes() > QUOTA_WARN) {
+        const ok = confirm(
+          lang === 'en'
+            ? 'Storage is almost full. Purge attachment data from previous messages to continue?'
+            : 'Le stockage est presque plein. Supprimer les données des pièces jointes précédentes pour continuer ?'
+        );
+        if (!ok) return;
+        const n = DemoConfig.purgeMessageAttachments(DemoConfig.getCurrentAccountId());
+        showToast(
+          lang === 'en'
+            ? `${n} attachment(s) purged.`
+            : `${n} pièce(s) jointe(s) purgée(s).`,
+          false
+        );
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        const kb = (file.size / 1024).toFixed(0);
+        _pendingFile = {
+          fileData: dataUrl,
+          fileName: file.name,
+          fileSize: `${_fileLabel(file)} · ${kb} Ko`,
+          mimeType: file.type
+        };
+        const thumb = document.getElementById('fp-thumb');
+        if (file.type.startsWith('image/')) {
+          thumb.src = dataUrl;
+          thumb.style.display = '';
+        } else {
+          thumb.src = '';
+          thumb.style.display = 'none';
+        }
+        document.getElementById('fp-name').textContent = file.name;
+        document.getElementById('file-preview').style.display = 'flex';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function _cancelAttachment() {
+      _pendingFile = null;
+      document.getElementById('file-preview').style.display = 'none';
+      document.getElementById('file-input').value = '';
+    }
+
     function sendMessage(text) {
       const area = document.getElementById('compose-area');
       const msgText = text !== undefined ? text : area.value.trim();
-      if (!msgText) return;
+      if (!msgText && !_pendingFile) return;
 
-      const msg = { id: 'msg_' + Date.now(), from: 'me', text: msgText, time: getTime() };
+      let msg;
+      if (_pendingFile) {
+        msg = {
+          id: 'msg_' + Date.now(), from: 'me', type: 'file',
+          fileName: _pendingFile.fileName, fileSize: _pendingFile.fileSize,
+          mimeType: _pendingFile.mimeType, fileData: _pendingFile.fileData,
+          time: getTime()
+        };
+        _cancelAttachment();
+      } else {
+        msg = { id: 'msg_' + Date.now(), from: 'me', text: msgText, time: getTime() };
+      }
       DemoConfig.addMessage(msg);
 
       const body = document.getElementById('conv-body');
@@ -719,11 +1142,10 @@
 
       area.value = '';
       area.style.height = 'auto';
-      document.getElementById('thread-preview').textContent = msgText;
+      document.getElementById('thread-preview').textContent = msg.text || msg.fileName || '';
       document.getElementById('unread-badge').style.display = 'none';
 
-      // Execute additional JS (workitem creation etc.)
-      setTimeout(() => DemoConfig.executeAdditionalJS(), 300);
+      if (!_advisorIsPresent()) setTimeout(() => DemoConfig.executeAdditionalJS(), 300);
     }
 
     function resetMessages() {
@@ -758,7 +1180,13 @@
       document.getElementById('advisor-name').textContent = advisorName;
       document.getElementById('conv-initials').textContent = advisorInitials;
       document.getElementById('conv-name').textContent = advisorName;
-      document.getElementById('conv-role').textContent = lang === 'en' ? 'Online · your advisor' : 'En ligne · ta conseillère';
+      function _updateAdvisorStatus() {
+        const present = _advisorIsPresent();
+        document.getElementById('conv-role').textContent = present
+          ? (lang === 'en' ? 'Online · your advisor' : 'En ligne · ta conseillère')
+          : (lang === 'en' ? 'Offline' : 'Hors ligne');
+      }
+      _updateAdvisorStatus();
 
       const area = document.getElementById('compose-area');
       area.placeholder = lang === 'en' ? `Write to ${adv.split(' ')[0]}…` : `Écris ton message à ${adv.split(' ')[0]}…`;
@@ -770,10 +1198,22 @@
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
       });
 
+      setInterval(_updateAdvisorStatus, 30000);
+
+      document.getElementById('img-viewer-backdrop').addEventListener('click', closeViewer);
+      document.getElementById('img-viewer-close').addEventListener('click', closeViewer);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+
+      document.getElementById('file-input').addEventListener('change', e => {
+        if (e.target.files[0]) attachFile(e.target.files[0]);
+      });
+      document.getElementById('fp-cancel').addEventListener('click', _cancelAttachment);
+
       lucide.createIcons();
       loadMessages();
 
       window.addEventListener('storage', (event) => {
+        if (event.key === 'demobank_adv_active') { _updateAdvisorStatus(); return; }
         if (event.key !== 'demobank_v1') return;
         const body = document.getElementById('conv-body');
         const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;

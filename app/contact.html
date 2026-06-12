@@ -428,7 +428,7 @@
               message</span><span class="i18n-en">Available now · 1 new message</span></div>
         </div>
         <!-- Phone button -->
-        <div class="channel" onclick="DemoAudioCodes.call()" style="cursor:pointer;">
+        <div class="channel" onclick="DemoGenesys.call()" style="cursor:pointer;">
           <div class="icon"><i data-lucide="phone"></i></div>
           <h4><span class="i18n-fr">Appel téléphonique</span><span class="i18n-en">Phone call</span></h4>
           <div class="desc"><span class="i18n-fr">Du lundi au samedi · 8h–20h · <span
@@ -738,7 +738,7 @@
           if (key.startsWith('X-User-')) _urlHeaders.push(key + ': ' + value);
         }
         history.replaceState(null, '', location.pathname);
-        DemoAudioCodes.call(_urlHeaders.length ? _urlHeaders : undefined);
+        DemoGenesys.call(_urlHeaders.length ? _urlHeaders : undefined);
       }
 
       // Real wait times from Genesys Cloud (requires queueId to be configured)
