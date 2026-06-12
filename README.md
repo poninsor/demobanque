@@ -19,7 +19,7 @@ Application bancaire statique pour les démonstrations Genesys Cloud. Simule une
 - **Intégration Genesys Cloud** : Messenger snippet (exécuté au chargement), OAuth 2.0 Authorization Code + PKCE, JavaScript additionnel déclenché à chaque envoi de message
 - **AudioCodes WebRTC Click-to-Call** : intégration custom complète bâtie sur le SDK standalone AudioCodes (bouton flottant + panel d'appel dans la charte — pas de widget tout-fait) ; SIP over WSS avec authentification Basic ; **`extraHeaders` SIP custom (`X-User-FirstName`, `X-User-Email`, etc.) auto-générés depuis le persona et configurables dans les Paramètres** pour permettre à Architect Genesys Cloud de router sur le contexte client via l'action "Get SIP Headers" ; **les appels en cours survivent à la navigation entre pages** (état persisté dans `localStorage` sur `beforeunload` et repris via SIP REPLACES sur la page suivante, fenêtre de 20 s) ; bascule sur `tel:` si non configuré ; déclenchable via `contact.html?call=1` (cas d'usage chatbot) ; **les paramètres URL préfixés `X-User-`** (`contact.html?call=1&X-User-ParentConnID=abc123`) sont automatiquement ajoutés aux headers SIP de l'appel
 - **Bilingue FR/EN** : basculement instantané, persisté par profil
-- **Import / Export** : sauvegarde et restauration du paramétrage complet en `.json` (hors token OAuth)
+- **Import / Export** : sauvegarde et restauration du paramétrage complet en `.json`
 - **Responsive & mobile-ready** : interface adaptée aux petits écrans, navigation par bottom sheet, utilisable comme web app depuis l'écran d'accueil (PWA-like)
 
 ---
