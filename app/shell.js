@@ -2,6 +2,23 @@
  * shell.js — global app shell behaviours
  * Loaded on every page before config.js
  */
+
+// Run the Genesys Messenger snippet as early as possible so the widget
+// bootstrapper starts loading in parallel with the rest of the page.
+// Reading localStorage directly avoids waiting for DemoConfig (config.js).
+(function () {
+  try {
+    const store = JSON.parse(localStorage.getItem('demobank_v1') || '{}');
+    const current = store.current;
+    const snippet = current
+      && ((store.accounts || {})[current] || {}).genesys
+      && store.accounts[current].genesys.messengerSnippet;
+    if (snippet) (new Function(snippet))();
+  } catch (e) {
+    console.warn('[DemoShell] messengerSnippet error:', e);
+  }
+})();
+
 (function () {
   const SHEET_PAGES = ['cards', 'beneficiaries', 'credits', 'contact', 'settings'];
 
@@ -52,12 +69,5 @@
       if (e.key === 'Escape') window.closeMobileSheet();
     });
 
-    // Execute the Genesys Messenger snippet configured in Settings
-    try {
-      const snippet = ((DemoConfig.getProfile() || {}).genesys || {}).messengerSnippet || '';
-      if (snippet) new Function(snippet)();
-    } catch (e) {
-      console.warn('[DemoShell] messengerSnippet error:', e);
-    }
   });
 })();
