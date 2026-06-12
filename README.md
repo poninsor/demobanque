@@ -14,10 +14,10 @@ Application bancaire statique pour les démonstrations Genesys Cloud. Simule une
 - **White-label** : nom de marque, logo, couleur primaire, slogan — appliqués instantanément sur toutes les pages
 - **Persona configurable** : prénom/nom, email, téléphone, type de profil, conseiller(ère)
 - **Soldes & produits** : comptes courant, Livret A, PEL ; cartes Visa Premier/Classic, prêt auto, assurance-vie
-- **Messagerie sécurisée** : conversation client ↔ conseiller persistée en localStorage, synchronisation temps réel entre onglets
-- **Vue conseiller** (`advisor.html`) : interface miroir pour répondre aux clients, accessible sans authentification client
+- **Messagerie sécurisée** : conversation client ↔ conseiller persistée en localStorage, synchronisation temps réel entre onglets ; **pièces jointes** (images, PDF, Word, Excel, jusqu'à 2 Mo) avec visionneuse intégrée en plein écran (images inline, prévisualisation PDF via iframe, téléchargement direct pour les autres formats) ; indicateur de présence du conseiller en temps réel
+- **Vue conseiller** (`advisor.html`) : interface miroir pour répondre aux clients, accessible sans authentification client ; **indicateur de présence en direct** (pastille verte/grise dans `messages.html`) via un heartbeat localStorage mis à jour toutes les 15 s, synchronisé instantanément par l'API `storage`
 - **Intégration Genesys Cloud** : Messenger snippet (exécuté au chargement), OAuth 2.0 Authorization Code + PKCE, JavaScript additionnel déclenché à chaque envoi de message
-- **AudioCodes WebRTC Click-to-Call** : intégration custom complète bâtie sur le SDK standalone AudioCodes (bouton flottant + panel d'appel dans la charte — pas de widget tout-fait) ; SIP over WSS avec authentification Basic ; **`extraHeaders` SIP custom (`X-User-FirstName`, `X-User-Email`, etc.) auto-générés depuis le persona et configurables dans les Paramètres** pour permettre à Architect Genesys Cloud de router sur le contexte client via l'action "Get SIP Headers" ; **les appels en cours survivent à la navigation entre pages** (état persisté dans `localStorage` sur `beforeunload` et repris via SIP REPLACES sur la page suivante, fenêtre de 20 s) ; bascule sur `tel:` si non configuré ; déclenchable via `contact.html?call=1` (cas d'usage chatbot) ; **les paramètres URL préfixés `X-User-`** (`contact.html?call=1&X-User-ParentConnID=abc123`) sont automatiquement ajoutés aux headers SIP de l'appel
+- **AudioCodes WebRTC Click-to-Call** : intégration custom complète bâtie sur le SDK standalone AudioCodes (bouton flottant + panel d'appel dans la charte — pas de widget tout-fait) ; SIP over WSS avec authentification Basic ; **`extraHeaders` SIP custom (`X-User-FirstName`, `X-User-Email`, etc.) auto-générés depuis le persona et configurables dans les Paramètres** pour permettre à Architect Genesys Cloud de router sur le contexte client via l'action "Get SIP Headers" ; **les appels en cours survivent à la navigation entre pages** (état persisté dans `localStorage` sur `beforeunload` et repris via SIP REPLACES sur la page suivante, fenêtre de 20 s) ; bascule sur `tel:` si non configuré ; déclenchable via `contact.html?call=1` (cas d'usage chatbot) ; **les paramètres URL préfixés `X-User-`** (`contact.html?call=1&X-User-ParentConnID=abc123`) sont automatiquement ajoutés aux headers SIP de l'appel ; **point d'entrée unifié** : tous les boutons d'appel passent par `DemoGenesys.call()` qui délègue à AudioCodes ou `tel:` selon la configuration
 - **Bilingue FR/EN** : basculement instantané, persisté par profil
 - **Import / Export** : sauvegarde et restauration du paramétrage complet en `.json`
 - **Responsive & mobile-ready** : interface adaptée aux petits écrans, navigation par bottom sheet, utilisable comme web app depuis l'écran d'accueil (PWA-like)
@@ -92,7 +92,9 @@ Paramètre URL optionnel pour ouvrir directement une conversation :
 advisor.html?account=12345678
 ```
 
-Les messages sont synchronisés en temps réel entre `messages.html` (client) et `advisor.html` (conseiller) via l'API `storage` du navigateur.
+Les messages sont synchronisés en temps réel entre `messages.html` (client) et `advisor.html` (conseiller) via l'API `storage` du navigateur. Dans `messages.html`, une pastille indique si le conseiller est actuellement connecté sur `advisor.html` — le statut est mis à jour instantanément via l'API `storage` et vérifié toutes les 30 s en filet de sécurité.
+
+Pour désélectionner un compte dans `advisor.html`, cliquer dans une zone vide de la liste des conversations.
 
 ---
 
@@ -136,6 +138,15 @@ app/
     └── audiocodes/     # SDK AudioCodes — fichiers vendor (ne pas modifier)
         └── click-to-call.js   # SDK standalone (AudioCodesUA + JsSIP) — chargé au runtime
 ```
+
+### Clés localStorage globales
+
+| Clé | Contenu |
+|---|---|
+| `demobank_v1` | Objet principal — profils, config, messages |
+| `demobank_gc_token` | Cache token OAuth `{ token, expiry, clientId }` |
+| `demobank_adv_active` | Heartbeat conseiller `{ accountId, ts }` — présent si `advisor.html` est ouvert |
+| `demobank_ac_restore` | Snapshot d'appel AudioCodes pour restauration après navigation |
 
 ### Schéma localStorage (`demobank_v1`)
 
@@ -205,6 +216,8 @@ app/
 | `getGenesys()` | Retourne la config Genesys du compte actif |
 | `getAudiocodes()` | Retourne la config AudioCodes du compte actif |
 | `executeAdditionalJS()` | Exécute le snippet `additionalJS` du profil |
+| `getStorageUsageBytes()` | Estime l'usage total du localStorage en octets (UTF-16, 2 octets/char) |
+| `purgeMessageAttachments(accountId)` | Supprime `fileData` des messages d'un compte ; retourne le nombre purgé |
 
 ---
 
