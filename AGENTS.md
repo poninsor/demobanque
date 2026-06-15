@@ -429,11 +429,10 @@ returns **without** wiping the URL, leaving the `?code=` for the other provider'
 ### REST API
 
 ```js
-DemoSalesforce.createTask(fields)          // POST   /sobjects/Task        → { id, success }
-DemoSalesforce.getTask(id, fields?)        // GET    /sobjects/Task/{id}   → record
-DemoSalesforce.updateTask(id, fields)      // PATCH  /sobjects/Task/{id}   → true (204)
-// …Contact and …Case: identical three methods
-DemoSalesforce.query(soql)                 // GET    /query?q=…            → { totalSize, records }
+DemoSalesforce.create(sobject, fields)     // POST   /sobjects/{sobject}        → { id, success }
+DemoSalesforce.get(sobject, id, fields?)   // GET    /sobjects/{sobject}/{id}   → record
+DemoSalesforce.update(sobject, id, fields) // PATCH  /sobjects/{sobject}/{id}   → true (204)
+DemoSalesforce.query(soql)                 // GET    /query?q=…                 → { totalSize, records }
 DemoSalesforce.sfFetch(path, init)         // low-level fetch (auto Bearer, JSON body)
 DemoSalesforce.sfFetchJSON(path, init)     // same, throws on non-2xx, parses JSON
 DemoSalesforce.isEnabled()                 // config.enabled && clientId
@@ -442,8 +441,9 @@ DemoSalesforce.clearToken()
 DemoSalesforce.redirectForAuth(sf, redirectUri)
 ```
 
-`update*` is PATCH (HTTP 204, returns `true`). Keep the public naming `create`/`get`/
-`update` — not `set`. The full reference and examples live in `js-api.html`.
+`sobject` accepts any standard or custom API name: `'Case'`, `'Opportunity'`, `'Contact'`,
+`'Task'`, `'Custom_Object__c'`, etc. `update` is PATCH (HTTP 204, returns `true`).
+The full reference and examples live in `js-api.html`.
 
 ---
 

@@ -337,26 +337,14 @@
             a valid OAuth token is cached. All methods return a promise.</span></p>
         <table>
           <tbody>
-            <tr><td><code>Salesforce.createTask(fields)</code></td><td><span class="i18n-fr">Crée une Task. Renvoie
-                  <code>{ id, success }</code>.</span><span class="i18n-en">Creates a Task. Returns <code>{ id, success
-                    }</code>.</span></td></tr>
-            <tr><td><code>Salesforce.getTask(id, fields?)</code></td><td><span class="i18n-fr">Lit une Task par Id
-                  (sous-ensemble de champs optionnel).</span><span class="i18n-en">Reads a Task by Id (optional field
-                  subset).</span></td></tr>
-            <tr><td><code>Salesforce.updateTask(id, fields)</code></td><td><span class="i18n-fr">Met à jour une Task
-                  (PATCH). Renvoie <code>true</code>.</span><span class="i18n-en">Updates a Task (PATCH). Returns
-                  <code>true</code>.</span></td></tr>
-            <tr><td><code>…Contact(…)</code> / <code>…Case(…)</code></td><td><span class="i18n-fr">Mêmes trois méthodes
-                  pour <code>Contact</code> et <code>Case</code>.</span><span class="i18n-en">Same three methods for
-                  <code>Contact</code> and <code>Case</code>.</span></td></tr>
-            <tr><td><code>Salesforce.query(soql)</code></td><td><span class="i18n-fr">Exécute une requête SOQL. Renvoie
-                  <code>{ totalSize, records }</code>.</span><span class="i18n-en">Runs a SOQL query. Returns <code>{
-                    totalSize, records }</code>.</span></td></tr>
-            <tr><td><code>Salesforce.sfFetch(path, init)</code></td><td><span class="i18n-fr">Échappatoire bas niveau
-                  vers l'API REST Salesforce.</span><span class="i18n-en">Low-level escape hatch to the Salesforce REST
-                  API.</span></td></tr>
+            <tr><td><code>Salesforce.create(sobject, fields)</code></td><td><span class="i18n-fr">Crée un enregistrement du type <code>sobject</code> (<code>'Case'</code>, <code>'Opportunity'</code>, <code>'Contact'</code>, tout objet standard ou custom). Renvoie <code>{ id, success }</code>.</span><span class="i18n-en">Creates a record of type <code>sobject</code> (<code>'Case'</code>, <code>'Opportunity'</code>, <code>'Contact'</code>, any standard or custom object). Returns <code>{ id, success }</code>.</span></td></tr>
+            <tr><td><code>Salesforce.get(sobject, id, fields?)</code></td><td><span class="i18n-fr">Lit un enregistrement par Id. Le troisième argument est un tableau de champs optionnel ; sans lui, tous les champs sont renvoyés.</span><span class="i18n-en">Reads a record by Id. The third argument is an optional field array; omit it to return all fields.</span></td></tr>
+            <tr><td><code>Salesforce.update(sobject, id, fields)</code></td><td><span class="i18n-fr">Met à jour un enregistrement (PATCH) — seuls les champs fournis sont modifiés. Renvoie <code>true</code>.</span><span class="i18n-en">Updates a record (PATCH) — only the provided fields are changed. Returns <code>true</code>.</span></td></tr>
+            <tr><td><code>Salesforce.query(soql)</code></td><td><span class="i18n-fr">Exécute une requête SOQL. Renvoie <code>{ totalSize, records }</code>.</span><span class="i18n-en">Runs a SOQL query. Returns <code>{ totalSize, records }</code>.</span></td></tr>
+            <tr><td><code>Salesforce.sfFetch(path, init)</code></td><td><span class="i18n-fr">Échappatoire bas niveau vers l'API REST Salesforce.</span><span class="i18n-en">Low-level escape hatch to the Salesforce REST API.</span></td></tr>
           </tbody>
         </table>
+
         <div class="callout">
           <i data-lucide="shield-alert"></i>
           <div><span class="i18n-fr"><strong>CORS requis.</strong> Les appels partent du navigateur : ajoute l'origine de
@@ -390,7 +378,7 @@
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>https://poninsor.github.io/demobanque/app/settings.html
-http://localhost:3000/settings.html</code></pre>
+http://localhost:5500/settings.html</code></pre>
         </div>
         <ol start="5" style="color:var(--fg-muted); font-size:14px; line-height:1.7;">
           <li><span class="i18n-fr"><strong>Selected OAuth Scopes</strong> : au minimum <strong>Manage user data via
@@ -421,7 +409,7 @@ http://localhost:3000/settings.html</code></pre>
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>https://poninsor.github.io
-http://localhost:3000</code></pre>
+http://localhost:5500</code></pre>
         </div>
         <ol start="11" style="color:var(--fg-muted); font-size:14px; line-height:1.7;">
           <li><span class="i18n-fr">Dans <a href="settings.html#salesforce">Paramètres → Salesforce</a> : choisir
@@ -446,26 +434,26 @@ http://localhost:3000</code></pre>
 
         <h3><span class="i18n-fr">1. Créer un Case Salesforce à la réception d'un message client</span><span
             class="i18n-en">1. Create a Salesforce Case when a client message arrives</span></h3>
-        <p style="font-size:13px;color:var(--fg-muted);"><span class="i18n-fr"><code>ExternalID__c</code> contient l'URL
+        <p style="font-size:13px;color:var(--fg-muted);"><span class="i18n-fr"><code>SuppliedName</code> contient l'URL
             directe vers le thread dans la vue conseiller — le conseiller Salesforce peut ouvrir la conversation en un
             clic. <code>accountId</code> et <code>threadId</code> sont injectés automatiquement dans le
-            contexte.</span><span class="i18n-en"><code>ExternalID__c</code> holds the direct URL to the thread in the
+            contexte.</span><span class="i18n-en"><code>SuppliedName</code> holds the direct URL to the thread in the
             advisor view — the Salesforce agent can open the conversation in one click. <code>accountId</code> and
             <code>threadId</code> are automatically injected into the context.</span></p>
         <div class="code-block">
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>// Create a Case to notify a new message from the customer when the advisor is offline.
-// ExternalID__c carries the URL.
 if (Salesforce) {
-  await Salesforce.createCase({
+  await Salesforce.create('Case', {
     Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,
     Description: messageText,
     Origin: "Web",
     Status: "New",
     Priority: "Medium",
-    ExternalID__c: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,
+    SuppliedName: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,
     Routed__c: true,
+    RecordTypeId: "012ao000005PUMbAAO",
     ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})
   });
 }</code></pre>
@@ -483,7 +471,7 @@ const found = await Salesforce.query(
 const contactId = found.records[0]?.Id;
 
 if (Salesforce) {
-  await Salesforce.createCase({
+  await Salesforce.create('Case', {
     Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,
     Description: messageText,
     Origin: "Web",

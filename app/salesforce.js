@@ -251,22 +251,6 @@ const DemoSalesforce = (() => {
   // ── Public API ───────────────────────────────────────────────────────────────
 
   return {
-    // Task
-    createTask: (fields) => create('Task', fields),
-    getTask: (id, fields) => get('Task', id, fields),
-    updateTask: (id, fields) => update('Task', id, fields),
-
-    // Contact
-    createContact: (fields) => create('Contact', fields),
-    getContact: (id, fields) => get('Contact', id, fields),
-    updateContact: (id, fields) => update('Contact', id, fields),
-
-    // Case
-    createCase: (fields) => create('Case', fields),
-    getCase: (id, fields) => get('Case', id, fields),
-    updateCase: (id, fields) => update('Case', id, fields),
-
-    // Generic escape hatches
     create, get, update, query, sfFetch, sfFetchJSON,
 
     /** True when the integration is enabled and a Consumer Key is configured. */
