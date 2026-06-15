@@ -14,7 +14,7 @@ const DemoConfig = (() => {
     '    Origin: "Web",',
     '    Status: "New",',
     '    Priority: "Medium",',
-    '    SuppliedName: `account=${accountId}&thread=${threadId}`,',
+    '    ExternalID__c: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,',
     '    Routed__c: true,',
     '    RecordTypeId: "012ao000005PUMbAAO",',
     '    ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})',

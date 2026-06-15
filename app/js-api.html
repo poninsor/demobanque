@@ -271,9 +271,9 @@
             <tr><td><code>accountId</code></td><td><span class="i18n-fr">Numéro de compte (8 chiffres) du
                   client.</span><span class="i18n-en">Customer account number (8 digits).</span></td></tr>
             <tr><td><code>threadId</code></td><td><span class="i18n-fr">Identifiant du fil de conversation actif (ex.
-                  <code>thr_1234_abc</code>) — à utiliser dans <code>SuppliedName</code> pour pointer directement vers
+                  <code>thr_1234_abc</code>) — à utiliser dans <code>ExternalID__c</code> pour pointer directement vers
                   le thread dans la vue conseiller.</span><span class="i18n-en">Active conversation thread ID (e.g.
-                  <code>thr_1234_abc</code>) — use it in <code>SuppliedName</code> to link directly to the thread in
+                  <code>thr_1234_abc</code>) — use it in <code>ExternalID__c</code> to link directly to the thread in
                   the advisor view.</span></td></tr>
             <tr><td><code>message</code> / <code>messageText</code></td><td><span class="i18n-fr">Message envoyé (objet)
                   et son texte.</span><span class="i18n-en">Sent message (object) and its text.</span></td></tr>
@@ -423,17 +423,17 @@ http://localhost:3000</code></pre>
 
         <h3><span class="i18n-fr">1. Créer un Case Salesforce à la réception d'un message client</span><span
             class="i18n-en">1. Create a Salesforce Case when a client message arrives</span></h3>
-        <p style="font-size:13px;color:var(--fg-muted);"><span class="i18n-fr"><code>SuppliedName</code> contient l'URL
+        <p style="font-size:13px;color:var(--fg-muted);"><span class="i18n-fr"><code>ExternalID__c</code> contient l'URL
             directe vers le thread dans la vue conseiller — le conseiller Salesforce peut ouvrir la conversation en un
             clic. <code>accountId</code> et <code>threadId</code> sont injectés automatiquement dans le
-            contexte.</span><span class="i18n-en"><code>SuppliedName</code> holds the direct URL to the thread in the
+            contexte.</span><span class="i18n-en"><code>ExternalID__c</code> holds the direct URL to the thread in the
             advisor view — the Salesforce agent can open the conversation in one click. <code>accountId</code> and
             <code>threadId</code> are automatically injected into the context.</span></p>
         <div class="code-block">
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>// Create a Case to notify a new message from the customer when the advisor is offline.
-// SuppliedName carries the account+thread identifiers (fits within the 80-char limit).
+// ExternalID__c carries the URL.
 if (Salesforce) {
   await Salesforce.createCase({
     Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,
@@ -441,7 +441,7 @@ if (Salesforce) {
     Origin: "Web",
     Status: "New",
     Priority: "Medium",
-    SuppliedName: `account=${accountId}&thread=${threadId}`,
+    ExternalID__c: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,
     Routed__c: true,
     ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})
   });
