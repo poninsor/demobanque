@@ -4,6 +4,24 @@
 const DemoConfig = (() => {
   const STORAGE_KEY = 'demobank_v1';
   const LANG_KEY = 'demobank_lang';
+  const GC_TOKEN_KEY = 'demobank_gc_token';
+  const DEFAULT_CLIENT_ADDITIONAL_JS = 'alert("création d\\\'un workitem");';
+  const DEFAULT_ADVISOR_ADDITIONAL_JS = [
+    '// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.',
+    '// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant',
+    '// and is rejected with the Authorization Code + PKCE token used here. Use a Workflow instead.',
+    '// await fetchGenesysJSON("/api/v2/flows/executions", {',
+    '//   method: "POST",',
+    '//   body: {',
+    '//     flowId: "YOUR_WORKFLOW_ID",',
+    '//     inputData: {',
+    '//       "Flow.from": "+33644603451",',
+    '//       "Flow.to": persona.phone,',
+    '//       "Flow.message": `Bonjour ${persona.firstName}, votre conseiller vous a repondu dans la messagerie securisee.`',
+    '//     }',
+    '//   }',
+    '// });'
+  ].join('\n');
 
   const DEFAULT_MESSAGES = {
     fr: [
@@ -55,7 +73,15 @@ const DemoConfig = (() => {
       password: '',
       extraHeaders: ''
     },
-    additionalJS: 'alert("création d\'un workitem");',
+    salesforce: {
+      enabled: false,
+      loginUrl: 'https://login.salesforce.com',
+      clientId: '',
+      apiVersion: 'v60.0',
+      contactId: ''
+    },
+    additionalJS: DEFAULT_CLIENT_ADDITIONAL_JS,
+    advisorAdditionalJS: DEFAULT_ADVISOR_ADDITIONAL_JS,
     language: null,
     tutoiement: true,
     messages: null
@@ -217,6 +243,16 @@ const DemoConfig = (() => {
   }
 
   /**
+   * Returns the full profile object for a given account ID, or null.
+   * @param {string} accountId
+   * @returns {object | null}
+   */
+  function getProfileByAccountId(accountId) {
+    const d = getData();
+    return accountId && d.accounts[accountId] ? d.accounts[accountId] : null;
+  }
+
+  /**
    * Shallow-merges `updates` into the current account's profile and persists it.
    * Top-level keys in `updates` overwrite existing ones; nested objects are replaced entirely.
    * Use `deepUpdateProfile` to merge into a nested key instead.
@@ -273,7 +309,7 @@ const DemoConfig = (() => {
     const initials = ((p.firstName || 'S')[0] + (p.lastName || 'M')[0]).toUpperCase();
 
     document.querySelectorAll('[data-brand]').forEach(el => el.textContent = brand);
-    document.querySelectorAll('[data-persona-full]').forEach(el => el.textContent = `${p.firstName} ${p.lastName}`);
+    document.querySelectorAll('[data-persona-full]').forEach(el => el.textContent = `${p.firstName || ''} ${p.lastName || ''}`);
     document.querySelectorAll('[data-persona-first]').forEach(el => el.textContent = p.firstName);
     document.querySelectorAll('[data-persona-initials]').forEach(el => el.textContent = initials);
 
@@ -356,32 +392,161 @@ const DemoConfig = (() => {
   /**
    * Removes fileData (base64) from all messages of a given account to reclaim storage.
    * The message card (fileName, fileSize) is preserved; the image is no longer displayable.
+   * Works across both the thread model and the legacy flat messages array.
    * @param {string} accountId
    * @returns {number} number of attachments purged
    */
   function purgeMessageAttachments(accountId) {
     const d = getData();
     const p = (d.accounts || {})[accountId];
-    if (!p || !p.messages) return 0;
+    if (!p) return 0;
     let count = 0;
-    p.messages.forEach(msg => {
-      if (msg.fileData) { delete msg.fileData; count++; }
-    });
+    const purge = msg => { if (msg.fileData) { delete msg.fileData; count++; } };
+    if (p.threads) {
+      p.threads.forEach(thread => (thread.messages || []).forEach(purge));
+    } else if (p.messages) {
+      p.messages.forEach(purge);
+    }
     if (count > 0) saveData(d);
     return count;
   }
 
   // ── Additional JS executor ──────────────────────────────────────────────────
 
+  function regionDomain(raw) {
+    return (raw || 'mypurecloud.ie')
+      .replace(/^https?:\/\/(login\.|api\.)?/, '')
+      .replace(/\/$/, '');
+  }
+
+  function loadGenesysToken(clientId) {
+    try {
+      const stored = JSON.parse(localStorage.getItem(GC_TOKEN_KEY) || 'null');
+      if (!stored || !stored.token || !stored.expiry || !clientId) return null;
+      if (stored.clientId !== clientId) return null;
+      if (Date.now() >= stored.expiry) return null;
+      return stored.token;
+    } catch {
+      return null;
+    }
+  }
+
+  async function runConfiguredJS(code, profile, runtime) {
+    if (!code || !code.trim()) return;
+
+    const gc = profile.genesys || DEFAULT_PROFILE.genesys;
+    const clientId = gc.clientId || '';
+    const token = loadGenesysToken(clientId);
+    const apiBaseUrl = clientId ? `https://api.${regionDomain(gc.region)}` : '';
+    const apiUrl = path => /^https?:\/\//.test(path) ? path : `${apiBaseUrl}${path}`;
+    const accountId = runtime.accountId || getCurrentAccountId();
+    const message = runtime.message || null;
+    const messageText = runtime.messageText || (message && (message.text || message.fileName)) || '';
+
+    const fetchGenesys = async (path, init) => {
+      if (!apiBaseUrl) throw new Error('Genesys Cloud is not configured.');
+      if (!token) throw new Error('No valid Genesys OAuth token found.');
+
+      const opts = Object.assign({}, init || {});
+      const headers = new Headers(opts.headers || {});
+      headers.set('Authorization', `Bearer ${token}`);
+
+      const body = opts.body;
+      const isJsonBody = body
+        && typeof body === 'object'
+        && !(body instanceof FormData)
+        && !(body instanceof Blob)
+        && !(body instanceof URLSearchParams)
+        && !(body instanceof ArrayBuffer);
+
+      if (isJsonBody) {
+        if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+        opts.body = JSON.stringify(body);
+      }
+
+      opts.headers = headers;
+      return fetch(apiUrl(path), opts);
+    };
+
+    const fetchGenesysJSON = async (path, init) => {
+      const res = await fetchGenesys(path, init);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`API ${res.status}: ${errText}`);
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    };
+
+    const context = {
+      DemoConfig,
+      accountId,
+      profile,
+      settings: profile,
+      persona: profile.persona || {},
+      balances: profile.balances || {},
+      products: profile.products || {},
+      genesys: gc,
+      audiocodes: profile.audiocodes || DEFAULT_PROFILE.audiocodes,
+      salesforce: profile.salesforce || DEFAULT_PROFILE.salesforce,
+      Salesforce: (typeof DemoSalesforce !== 'undefined') ? DemoSalesforce : null,
+      threadId: runtime.threadId || null,
+      language: profile.language || getGlobalLang(),
+      tutoiement: !!profile.tutoiement,
+      message,
+      messageText,
+      token,
+      apiBaseUrl,
+      apiUrl,
+      fetchGenesys,
+      fetchGenesysJSON,
+      role: runtime.role || 'client',
+      isClientMessage: !!runtime.isClientMessage,
+      isAdvisorMessage: !!runtime.isAdvisorMessage,
+      console
+    };
+
+    try {
+      const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+      const fn = new AsyncFunction(...Object.keys(context), code);
+      await fn(...Object.values(context));
+    } catch (e) {
+      console.error(`[DemoConfig] ${runtime.logLabel || 'additionalJS'} error:`, e);
+    }
+  }
+
   /**
    * Executes the `additionalJS` snippet stored in the current profile.
    * Used to trigger custom Genesys Cloud actions (e.g. workitem creation) after a message is sent.
    * Errors are caught and logged; they do not propagate.
    */
-  function executeAdditionalJS() {
+  function executeAdditionalJS(runtime) {
     const p = getProfile() || DEFAULT_PROFILE;
-    const code = p.additionalJS || 'alert("création d\'un workitem");';
-    try { new Function(code)(); } catch (e) { console.error('AdditionalJS error:', e); }
+    const code = p.additionalJS || DEFAULT_CLIENT_ADDITIONAL_JS;
+    return runConfiguredJS(code, p, Object.assign({
+      role: 'client',
+      isClientMessage: true,
+      logLabel: 'additionalJS'
+    }, runtime || {}));
+  }
+
+  /**
+   * Executes the `advisorAdditionalJS` snippet stored in a target profile.
+   * Used to trigger advisor-side custom actions (e.g. sending an SMS to the customer)
+   * after a reply is sent while the customer is offline.
+   * Errors are caught and logged; they do not propagate.
+   * @param {string} accountId
+   * @param {object} [runtime]
+   */
+  function executeAdvisorAdditionalJS(accountId, runtime) {
+    const p = getProfileByAccountId(accountId) || DEFAULT_PROFILE;
+    const code = p.advisorAdditionalJS || DEFAULT_ADVISOR_ADDITIONAL_JS;
+    return runConfiguredJS(code, p, Object.assign({
+      accountId,
+      role: 'advisor',
+      isAdvisorMessage: true,
+      logLabel: 'advisorAdditionalJS'
+    }, runtime || {}));
   }
 
   /**
@@ -400,6 +565,11 @@ const DemoConfig = (() => {
     return p.audiocodes || DEFAULT_PROFILE.audiocodes;
   }
 
+  function getSalesforce() {
+    const p = getProfile() || DEFAULT_PROFILE;
+    return p.salesforce || DEFAULT_PROFILE.salesforce;
+  }
+
   /**
    * Returns the 8-digit account ID of the currently logged-in user, or null.
    * @returns {string | null}
@@ -408,19 +578,159 @@ const DemoConfig = (() => {
     return getData().current;
   }
 
+  // ── Thread system ───────────────────────────────────────────────────────────
+
+  /**
+   * Conversation topic descriptors used for thread creation.
+   * Exposed as DemoConfig.MOTIFS for use in messages.html and advisor.html.
+   */
+  const MOTIFS = [
+    { key: 'rdv',             fr: 'Rendez-vous',            en: 'Appointment',     color: '#6366f1' },
+    { key: 'epargne',         fr: 'Épargne',                en: 'Savings',         color: '#0ea5e9' },
+    { key: 'pret-immo',       fr: 'Prêt immobilier',        en: 'Home loan',       color: '#10b981' },
+    { key: 'credit-conso',    fr: 'Crédit à la conso',      en: 'Consumer credit', color: '#f59e0b' },
+    { key: 'assurance',       fr: 'Assurance & prévoyance', en: 'Insurance',       color: '#8b5cf6' },
+    { key: 'reclamation',     fr: 'Réclamation',            en: 'Complaint',       color: '#ef4444' },
+    { key: 'banque-distance', fr: 'Banque à distance',      en: 'Digital banking', color: '#3b82f6' },
+    { key: 'compte',          fr: 'Compte bancaire',        en: 'Bank account',    color: '#64748b' },
+    { key: 'paiement',        fr: 'Moyen de paiement',      en: 'Payment method',  color: '#ec4899' },
+    { key: 'autre',           fr: 'Autre',                  en: 'Other',           color: '#94a3b8' },
+  ];
+
+  function _motifLabel(key, lang) {
+    const m = MOTIFS.find(x => x.key === key) || MOTIFS[MOTIFS.length - 1];
+    return lang === 'en' ? m.en : m.fr;
+  }
+
+  function _motifColor(key) {
+    return (MOTIFS.find(x => x.key === key) || MOTIFS[MOTIFS.length - 1]).color;
+  }
+
+  function _generateThreadId() {
+    return 'thr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
+  }
+
+  function _nowHHMM() {
+    const n = new Date();
+    return `${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}`;
+  }
+
+  // Ensures p.threads exists, migrating from legacy p.messages if needed.
+  // Mutates p in-place; caller must saveData() after.
+  function _ensureThreads(p) {
+    if (p.threads && p.threads.length > 0) return;
+    const lang = p.language || 'fr';
+    const msgs = p.messages && p.messages.length > 0
+      ? p.messages
+      : JSON.parse(JSON.stringify(DEFAULT_MESSAGES[lang] || DEFAULT_MESSAGES.fr));
+    p.threads = [{ id: 'thr_legacy', motif: 'autre', createdAt: msgs[0]?.time || '10:42', messages: msgs }];
+  }
+
+  /**
+   * Returns the threads array for the currently logged-in account.
+   * Migrates from the legacy flat messages array on first call if needed.
+   * @returns {Array<{id:string, motif:string, createdAt:string, messages:Array}>}
+   */
+  function getThreads() {
+    const d = getData();
+    if (!d.current || !d.accounts[d.current]) return [];
+    const p = d.accounts[d.current];
+    const migrated = !p.threads || p.threads.length === 0;
+    _ensureThreads(p);
+    if (migrated) saveData(d);
+    return p.threads;
+  }
+
+  /**
+   * Returns a single thread by id for the current account, or null.
+   * @param {string} threadId
+   */
+  function getThread(threadId) {
+    return getThreads().find(t => t.id === threadId) || null;
+  }
+
+  /**
+   * Creates a new thread for the current account and persists it.
+   * @param {string} motif  - One of MOTIFS[].key
+   * @returns {{ id, motif, createdAt, messages }}
+   */
+  function createThread(motif) {
+    const d = getData();
+    if (!d.current) return null;
+    const p = d.accounts[d.current];
+    _ensureThreads(p);
+    const thread = { id: _generateThreadId(), motif: motif || 'autre', createdAt: _nowHHMM(), messages: [] };
+    p.threads.push(thread);
+    saveData(d);
+    return thread;
+  }
+
+  /**
+   * Appends a message to a specific thread of the current account.
+   * @param {string} threadId
+   * @param {object} msg
+   */
+  function addMessageToThread(threadId, msg) {
+    const d = getData();
+    if (!d.current) return;
+    const p = d.accounts[d.current];
+    _ensureThreads(p);
+    const thread = p.threads.find(t => t.id === threadId);
+    if (!thread) return;
+    thread.messages.push(msg);
+    saveData(d);
+  }
+
+  /**
+   * Returns threads for any account by ID (used by advisor.html).
+   * Migrates from legacy messages if needed.
+   * @param {string} accountId
+   */
+  function getThreadsByAccountId(accountId) {
+    const d = getData();
+    const p = (d.accounts || {})[accountId];
+    if (!p) return [];
+    const migrated = !p.threads || p.threads.length === 0;
+    _ensureThreads(p);
+    if (migrated) saveData(d);
+    return p.threads;
+  }
+
+  /**
+   * Appends a message to a specific thread of any account (used by advisor.html).
+   * @param {string} accountId
+   * @param {string} threadId
+   * @param {object} msg
+   */
+  function addMessageToThreadByAccountId(accountId, threadId, msg) {
+    const d = getData();
+    const p = (d.accounts || {})[accountId];
+    if (!p) return;
+    _ensureThreads(p);
+    const thread = p.threads.find(t => t.id === threadId);
+    if (!thread) return;
+    thread.messages.push(msg);
+    saveData(d);
+  }
+
   return {
     DEFAULT_PROFILE,
     DEFAULT_MESSAGES,
+    MOTIFS,
     generatePalette,
     getGlobalLang, setGlobalLang,
     login, logout, requireAuth,
-    getProfile, updateProfile, deepUpdateProfile,
+    getProfile, getProfileByAccountId, updateProfile, deepUpdateProfile,
     applyBranding, setLanguage,
     getMessages, addMessage,
+    getThreads, getThread, createThread, addMessageToThread,
+    getThreadsByAccountId, addMessageToThreadByAccountId,
+    _motifLabel, _motifColor,
     getStorageUsageBytes, purgeMessageAttachments,
-    executeAdditionalJS,
+    executeAdditionalJS, executeAdvisorAdditionalJS,
     getGenesys,
     getAudiocodes,
+    getSalesforce,
     getCurrentAccountId
   };
 })();

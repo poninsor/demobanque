@@ -83,6 +83,54 @@
       gap: 14px;
     }
 
+    .panel-head.foldable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .panel-fold {
+      margin-left: auto;
+      align-self: center;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: none;
+      border-radius: 8px;
+      background: none;
+      color: var(--fg-muted);
+      cursor: pointer;
+    }
+
+    .panel-head.foldable:hover .panel-fold {
+      color: var(--fg);
+    }
+
+    .panel-fold:hover {
+      background: var(--bg-sunken);
+    }
+
+    .panel-fold svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 180ms var(--ease-out);
+    }
+
+    .panel.collapsed .panel-fold svg {
+      transform: rotate(-90deg);
+    }
+
+    .panel.collapsed .panel-head {
+      border-bottom: none;
+    }
+
+    .panel.collapsed .panel-body {
+      display: none;
+    }
+
     .panel-head-icon {
       width: 40px;
       height: 40px;
@@ -127,6 +175,89 @@
 
     .panel-body>*+* {
       margin-top: 14px;
+    }
+
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .field-label-row label {
+      margin: 0;
+    }
+
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      background: var(--bg-elev);
+      color: var(--fg-muted);
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .info-tip:hover,
+    .info-tip:focus-visible {
+      color: var(--fg);
+      border-color: var(--brand);
+      outline: none;
+    }
+
+    .info-bubble {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      width: min(520px, calc(100vw - 64px));
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-elev);
+      box-shadow: var(--shadow-lg);
+      color: var(--fg);
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: left;
+      white-space: normal;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+      transition: opacity 140ms var(--ease-out), transform 140ms var(--ease-out);
+      z-index: 20;
+    }
+
+    .info-tip:hover .info-bubble,
+    .info-tip:focus-visible .info-bubble {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .info-bubble code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--bg-sunken);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .info-bubble .tip-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .info-bubble .tip-line+.tip-line {
+      margin-top: 4px;
     }
 
     .form-2col {
@@ -531,6 +662,7 @@
           <div class="nav-sect"><span class="i18n-fr">Intégration</span><span class="i18n-en">Integration</span></div>
           <a href="#genesys"><i data-lucide="cloud"></i>Genesys Cloud</a>
           <a href="#audiocodes"><i data-lucide="phone-call"></i>AudioCodes WebRTC</a>
+          <a href="#salesforce"><i data-lucide="database"></i>Salesforce</a>
 
         </nav>
 
@@ -955,14 +1087,60 @@
 
               <!-- Additional JS field -->
               <div class="field" style="margin-top:8px;">
-                <label><span class="i18n-fr">JavaScript additionnel — envoi de message</span><span
-                    class="i18n-en">Additional JavaScript — on message send</span></label>
+                <div class="field-label-row">
+                  <label for="gc-additional-js"><span class="i18n-fr">JavaScript additionnel — envoi de message par le client</span><span
+                      class="i18n-en">Additional JavaScript — client message send</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation du JavaScript personnalisé">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>apiBaseUrl</code>, <code>apiUrl(path)</code>, <code>fetchGenesys(path, init)</code>, <code>fetchGenesysJSON(path, init)</code></div>
+                      <div class="tip-line"><code>profile</code>, <code>settings</code>, <code>persona</code>, <code>genesys</code>, <code>balances</code>, <code>products</code>, <code>audiocodes</code>, <code>salesforce</code></div>
+                      <div class="tip-line"><code>Salesforce.createTask/getTask/updateTask</code> (idem <code>Contact</code>, <code>Case</code>), <code>Salesforce.query(soql)</code></div>
+                      <div class="tip-line"><code>accountId</code>, <code>message</code>, <code>messageText</code>, <code>language</code>, <code>tutoiement</code>, <code>role</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Clique sur l'icône <strong>(i)</strong> pour ouvrir la documentation complète et des exemples.</span><span class="i18n-en">Click the <strong>(i)</strong> icon to open the full documentation and examples.</span></div>
+                      <div class="tip-line"><span class="i18n-fr">Déclenché seulement si le conseiller n'est pas en ligne. Utilise <code>fetchGenesys</code> pour appeler une API Genesys Cloud avec le token OAuth en cache.</span><span class="i18n-en">Triggered only when the advisor is offline. Use <code>fetchGenesys</code> to call a Genesys Cloud API with the cached OAuth token.</span></div>
+                    </span>
+                  </a>
+                </div>
                 <textarea id="gc-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;"
                   placeholder="// Code exécuté lors de l'envoi… / Code executed on each message send…">alert("création d'un workitem");</textarea>
                 <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Ce code est
-                    exécuté à chaque envoi de message dans la messagerie. Remplacez l'alert par l'appel Genesys Web
-                    Messaging.</span><span class="i18n-en">This code runs on every message send in the inbox. Replace
-                    the alert with your Genesys Web Messaging call.</span></div>
+                    exécuté quand le client envoie un message et que le conseiller n'est pas en ligne.</span><span class="i18n-en">This code runs when the client sends a message and the advisor is offline.</span></div>
+              </div>
+
+              <div class="field" style="margin-top:8px;">
+                <div class="field-label-row">
+                  <label for="gc-advisor-additional-js"><span class="i18n-fr">JavaScript additionnel — envoi de message par le conseiller</span><span
+                      class="i18n-en">Additional JavaScript — advisor message send</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation du JavaScript personnalisé">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>apiBaseUrl</code>, <code>apiUrl(path)</code>, <code>fetchGenesys(path, init)</code>, <code>fetchGenesysJSON(path, init)</code></div>
+                      <div class="tip-line"><code>profile</code>, <code>settings</code>, <code>persona</code>, <code>genesys</code>, <code>balances</code>, <code>products</code>, <code>audiocodes</code>, <code>salesforce</code></div>
+                      <div class="tip-line"><code>Salesforce.createTask/getTask/updateTask</code> (idem <code>Contact</code>, <code>Case</code>), <code>Salesforce.query(soql)</code></div>
+                      <div class="tip-line"><code>accountId</code>, <code>message</code>, <code>messageText</code>, <code>language</code>, <code>tutoiement</code>, <code>role</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Clique sur l'icône <strong>(i)</strong> pour ouvrir la documentation complète et des exemples.</span><span class="i18n-en">Click the <strong>(i)</strong> icon to open the full documentation and examples.</span></div>
+                      <div class="tip-line"><span class="i18n-fr">Déclenché seulement si le client n'est pas en ligne. Exemple ci-dessous: envoi d'un SMS via <code>/api/v2/conversations/messages/agentless</code>.</span><span class="i18n-en">Triggered only when the client is offline. Example below: send an SMS via <code>/api/v2/conversations/messages/agentless</code>.</span></div>
+                    </span>
+                  </a>
+                </div>
+                <textarea id="gc-advisor-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:132px;"
+                  placeholder="// Code exécuté lors de l'envoi conseiller… / Code executed on advisor send…">// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.
+// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant
+// and is rejected with the Authorization Code + PKCE token used here. Use a Workflow instead.
+// await fetchGenesysJSON("/api/v2/flows/executions", {
+//   method: "POST",
+//   body: {
+//     flowId: "YOUR_WORKFLOW_ID",
+//     inputData: {
+//       "Flow.from": "+33644603451",
+//       "Flow.to": persona.phone,
+//       "Flow.message": `Bonjour ${persona.firstName}, votre conseiller vous a repondu dans la messagerie securisee.`
+//     }
+//   }
+// });</textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Ce code est
+                    exécuté quand le conseiller envoie un message et que le client n'est pas en ligne.</span><span class="i18n-en">This code runs when the advisor sends a message and the client is offline.</span></div>
               </div>
             </div>
           </div>
@@ -1045,6 +1223,104 @@
             </div>
           </div>
 
+          <!-- SALESFORCE INTEGRATION -->
+          <div class="panel" id="salesforce">
+            <div class="panel-head">
+              <div class="panel-head-icon"><i data-lucide="database"></i></div>
+              <div class="panel-head-text">
+                <h3><span class="i18n-fr">Intégration Salesforce</span><span class="i18n-en">Salesforce
+                    Integration</span></h3>
+                <div class="sub"><span class="i18n-fr">Connecte cette démo à ton org Salesforce pour créer et mettre à
+                    jour des objets Task, Contact et Case depuis le JavaScript personnalisé.</span><span
+                    class="i18n-en">Connect this demo to your Salesforce org to create and update Task, Contact and Case
+                    objects from custom JavaScript.</span></div>
+              </div>
+              <span id="sf-connected-badge" class="badge-connected disconnected"><span class="i18n-fr">Non
+                  connecté</span><span class="i18n-en">Not connected</span></span>
+            </div>
+            <div class="panel-body">
+
+              <div class="row-setting">
+                <div>
+                  <div style="font-weight:600;"><span class="i18n-fr">Activer Salesforce</span><span
+                      class="i18n-en">Enable Salesforce</span></div>
+                  <div style="font-size:12px;color:var(--fg-muted);"><span class="i18n-fr">Expose l'objet
+                      <code>Salesforce</code> dans le JavaScript personnalisé.</span><span class="i18n-en">Exposes the
+                      <code>Salesforce</code> object in custom JavaScript.</span></div>
+                </div>
+                <button class="toggle off" id="sf-enabled"></button>
+              </div>
+
+              <div class="field">
+                <label><span class="i18n-fr">URL de login</span><span class="i18n-en">Login URL</span></label>
+                <input id="sf-login-url" style="font-family:var(--font-mono); font-size:13px;"
+                  placeholder="https://login.salesforce.com">
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">URL de
+                    connexion OAuth de votre org. Production :
+                    <code>https://login.salesforce.com</code> · Sandbox :
+                    <code>https://test.salesforce.com</code> · My Domain :
+                    <code>https://monorg.my.salesforce.com</code></span><span class="i18n-en">Your org's OAuth login
+                    URL. Production: <code>https://login.salesforce.com</code> · Sandbox:
+                    <code>https://test.salesforce.com</code> · My Domain:
+                    <code>https://myorg.my.salesforce.com</code></span></div>
+              </div>
+
+              <div class="gc-2col">
+                <div class="field">
+                  <label>Consumer Key (Client ID)</label>
+                  <input id="sf-client" style="font-family:var(--font-mono); font-size:13px;"
+                    placeholder="3MVG9...xxxx" autocomplete="off">
+                </div>
+                <div class="field">
+                  <label><span class="i18n-fr">Version API</span><span class="i18n-en">API version</span></label>
+                  <input id="sf-api-version" style="font-family:var(--font-mono); font-size:13px;" placeholder="v60.0">
+                </div>
+                <div class="field" style="grid-column:span 2;">
+                  <label>Contact ID <span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
+                        class="i18n-fr">— persona rattaché à ce Contact Salesforce</span><span class="i18n-en">— persona
+                        linked to this Salesforce Contact</span></span></label>
+                  <input id="sf-contact-id" style="font-family:var(--font-mono); font-size:13px;"
+                    placeholder="0035g00000XXXXXXAAA" autocomplete="off">
+                  <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;"><span class="i18n-fr">Disponible dans le JavaScript personnalisé via <code>salesforce.contactId</code> — utilisé comme <code>WhoId</code> pour rattacher les Tasks et Cases à ce Contact.</span><span class="i18n-en">Available in custom JavaScript as <code>salesforce.contactId</code> — used as <code>WhoId</code> to link Tasks and Cases to this Contact.</span></div>
+                </div>
+                <div style="grid-column:span 2; font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
+                    class="i18n-fr">Crée une Connected App (OAuth) avec <strong>PKCE requis</strong> et sans secret.
+                    Ajoute l'URL de cette page comme <em>Callback URL</em>, et l'origine de l'app à l'allowlist
+                    <strong>CORS</strong> (Configuration → CORS) — indispensable pour les appels navigateur.</span><span
+                    class="i18n-en">Create an OAuth Connected App with <strong>PKCE required</strong> and no secret. Add
+                    this page's URL as the <em>Callback URL</em>, and add the app origin to the <strong>CORS</strong>
+                    allowlist (Setup → CORS) — required for browser calls.</span>
+                  <a href="js-api.html#sf-setup"><span class="i18n-fr">Guide pas à pas de création de la Connected App
+                      →</span><span class="i18n-en">Step-by-step Connected App guide →</span></a></div>
+              </div>
+
+              <div
+                style="padding:14px 16px; background:var(--bg-sunken); border-radius:12px; display:flex; gap:10px; align-items:center; font-size:13px;">
+                <span id="sf-oauth-icon" style="flex-shrink:0; display:flex; align-items:center;"><i
+                    data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i></span>
+                <span id="sf-oauth-text" style="flex:1; color:var(--fg-muted);">—</span>
+                <button class="btn btn-secondary btn-sm" id="sf-test-btn" onclick="testSalesforceConnection()"><i
+                    data-lucide="refresh-cw"></i><span class="i18n-fr">Tester</span><span
+                    class="i18n-en">Test</span></button>
+                <button class="btn btn-secondary btn-sm" id="sf-renew-btn" onclick="renewSalesforceToken()"><i
+                    data-lucide="rotate-ccw"></i><span class="i18n-fr">Renouveler</span><span
+                    class="i18n-en">Renew</span></button>
+              </div>
+
+              <div style="font-size:12px; color:var(--fg-muted);">
+                <span class="i18n-fr">Fonctions disponibles dans le JavaScript personnalisé :
+                  <code>Salesforce.createTask</code>, <code>getTask</code>, <code>updateTask</code> (idem
+                  <code>Contact</code> et <code>Case</code>), <code>Salesforce.query(soql)</code>. </span><span
+                  class="i18n-en">Functions available in custom JavaScript: <code>Salesforce.createTask</code>,
+                  <code>getTask</code>, <code>updateTask</code> (same for <code>Contact</code> and <code>Case</code>),
+                  <code>Salesforce.query(soql)</code>. </span>
+                <a href="js-api.html"><span class="i18n-fr">Voir la documentation et des exemples →</span><span
+                    class="i18n-en">See the documentation and examples →</span></a>
+              </div>
+
+            </div>
+          </div>
+
         </div><!-- end panels-container -->
       </div>
     </div>
@@ -1091,9 +1367,25 @@
   <script src="shell.js"></script>
   <script src="config.js"></script>
   <script src="genesys.js"></script>
+  <script src="salesforce.js"></script>
   <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
+
+    // Registered synchronously so it is ready before salesforce.js resolves its async
+    // token exchange on return from the OAuth redirect.
+    window.addEventListener('demobank-sf-auth', (e) => {
+      if (sessionStorage.getItem('_sf_pending') === 'testConnection') {
+        sessionStorage.removeItem('_sf_pending');
+        const lang = document.documentElement.lang;
+        if (e.detail && e.detail.ok) {
+          showToast(lang === 'en' ? '✓ Connected to Salesforce' : '✓ Connecté à Salesforce');
+        } else {
+          showToast(lang === 'en' ? 'Salesforce connection failed.' : 'Échec de la connexion Salesforce.', true);
+        }
+      }
+      updateSalesforceOAuthStatus();
+    });
 
     function exportProfile() {
       const p = DemoConfig.getProfile();
@@ -1169,6 +1461,128 @@
         }
       }
       lucide.createIcons();
+    }
+
+    function readSalesforceConfig() {
+      return {
+        loginUrl: document.getElementById('sf-login-url').value,
+        clientId: document.getElementById('sf-client').value.trim(),
+        apiVersion: document.getElementById('sf-api-version').value.trim() || 'v60.0',
+      };
+    }
+
+    async function testSalesforceConnection() {
+      const lang = document.documentElement.lang;
+      const sf = readSalesforceConfig();
+      if (!sf.clientId) {
+        showToast(lang === 'en' ? 'Consumer Key is required.' : 'Consumer Key requis.', true);
+        return;
+      }
+      if (DemoSalesforce.getTokenStatus().connected) {
+        showToast(lang === 'en' ? '✓ Salesforce token is still valid' : '✓ Token Salesforce toujours valide');
+        updateSalesforceOAuthStatus();
+        return;
+      }
+      // Persist the config before leaving the page so the callback handler uses fresh values.
+      DemoConfig.deepUpdateProfile('salesforce', sf);
+      sessionStorage.setItem('_sf_pending', 'testConnection');
+      await DemoSalesforce.redirectForAuth(sf, window.location.origin + window.location.pathname);
+    }
+
+    async function renewSalesforceToken() {
+      const lang = document.documentElement.lang;
+      const sf = readSalesforceConfig();
+      if (!sf.clientId) {
+        showToast(lang === 'en' ? 'Consumer Key is required.' : 'Consumer Key requis.', true);
+        return;
+      }
+      DemoSalesforce.clearToken();
+      DemoConfig.deepUpdateProfile('salesforce', sf);
+      sessionStorage.setItem('_sf_pending', 'testConnection');
+      await DemoSalesforce.redirectForAuth(sf, window.location.origin + window.location.pathname);
+    }
+
+    function updateSalesforceOAuthStatus() {
+      const status = DemoSalesforce.getTokenStatus();
+      const iconWrap = document.getElementById('sf-oauth-icon');
+      const text = document.getElementById('sf-oauth-text');
+      const badge = document.getElementById('sf-connected-badge');
+      if (!iconWrap || !text) return;
+      const lang = document.documentElement.lang;
+      if (status.connected) {
+        iconWrap.innerHTML = `<i data-lucide="shield-check" style="width:18px;height:18px; color:var(--success-700);"></i>`;
+        text.style.color = '';
+        text.textContent = lang === 'en'
+          ? `Connected to ${status.instanceUrl}.`
+          : `Connecté à ${status.instanceUrl}.`;
+        if (badge) {
+          badge.classList.remove('disconnected');
+          badge.innerHTML = `<span class="i18n-fr">Connecté</span><span class="i18n-en">Connected</span>`;
+        }
+      } else {
+        iconWrap.innerHTML = `<i data-lucide="shield-off" style="width:18px;height:18px; color:var(--fg-muted);"></i>`;
+        text.style.color = 'var(--fg-muted)';
+        text.textContent = lang === 'en'
+          ? 'Not connected · click Test to authenticate with Salesforce.'
+          : 'Non connecté · cliquez sur Tester pour vous authentifier avec Salesforce.';
+        if (badge) {
+          badge.classList.add('disconnected');
+          badge.innerHTML = `<span class="i18n-fr">Non connecté</span><span class="i18n-en">Not connected</span>`;
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // ── Collapsible settings panels ─────────────────────────────────────────────
+    const COLLAPSE_KEY = 'demobank_settings_collapsed';
+
+    function loadCollapsed() {
+      try { return new Set(JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || []); }
+      catch { return new Set(); }
+    }
+
+    function saveCollapsed(set) {
+      localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...set]));
+    }
+
+    function setPanelCollapsed(panel, collapsed) {
+      panel.classList.toggle('collapsed', collapsed);
+      const head = panel.querySelector('.panel-head');
+      if (head) head.setAttribute('aria-expanded', String(!collapsed));
+      const set = loadCollapsed();
+      if (collapsed) set.add(panel.id); else set.delete(panel.id);
+      saveCollapsed(set);
+    }
+
+    function setupPanelFolding() {
+      const panels = document.querySelectorAll('.panel[id]');
+      // First visit (no stored preference): start with every panel collapsed.
+      const hasPref = localStorage.getItem(COLLAPSE_KEY) !== null;
+      const collapsed = hasPref ? loadCollapsed() : new Set([...panels].map(p => p.id));
+      if (!hasPref) saveCollapsed(collapsed);
+      panels.forEach(panel => {
+        const head = panel.querySelector('.panel-head');
+        if (!head) return;
+
+        const chev = document.createElement('button');
+        chev.type = 'button';
+        chev.className = 'panel-fold';
+        chev.setAttribute('aria-label', 'Replier / déplier');
+        chev.setAttribute('tabindex', '-1');
+        chev.innerHTML = '<i data-lucide="chevron-down"></i>';
+        head.appendChild(chev);
+
+        head.classList.add('foldable');
+        head.setAttribute('role', 'button');
+        if (collapsed.has(panel.id)) panel.classList.add('collapsed');
+        head.setAttribute('aria-expanded', String(!panel.classList.contains('collapsed')));
+
+        head.addEventListener('click', e => {
+          // Ignore clicks on interactive controls that may live in the head
+          if (e.target.closest('a, input, select, textarea, button:not(.panel-fold)')) return;
+          setPanelCollapsed(panel, !panel.classList.contains('collapsed'));
+        });
+      });
     }
 
     let currentColor = '#FF4515';
@@ -1247,7 +1661,8 @@
       document.getElementById('gc-script').value = g.scriptId || '';
       document.getElementById('gc-call-number').value = g.callNumber || '';
       document.getElementById('gc-internal-call-number').value = g.internalCallNumber || '';
-      document.getElementById('gc-additional-js').value = p.additionalJS || "alert(\"création d'un workitem\");";
+      document.getElementById('gc-additional-js').value = p.additionalJS || DemoConfig.DEFAULT_PROFILE.additionalJS;
+      document.getElementById('gc-advisor-additional-js').value = p.advisorAdditionalJS || DemoConfig.DEFAULT_PROFILE.advisorAdditionalJS;
 
       // AudioCodes
       const ac = p.audiocodes || {};
@@ -1257,6 +1672,14 @@
       document.getElementById('ac-caller').value = ac.caller || '';
       document.getElementById('ac-password').value = ac.password || '';
       document.getElementById('ac-extra-headers').value = ac.extraHeaders || '';
+
+      // Salesforce
+      const sf = p.salesforce || {};
+      setToggle('sf-enabled', !!sf.enabled);
+      document.getElementById('sf-login-url').value = sf.loginUrl || 'https://login.salesforce.com';
+      document.getElementById('sf-client').value = sf.clientId || '';
+      document.getElementById('sf-api-version').value = sf.apiVersion || 'v60.0';
+      document.getElementById('sf-contact-id').value = sf.contactId || '';
 
       updatePreview();
     }
@@ -1343,6 +1766,7 @@
           internalCallNumber: document.getElementById('gc-internal-call-number').value.trim(),
         },
         additionalJS: document.getElementById('gc-additional-js').value,
+        advisorAdditionalJS: document.getElementById('gc-advisor-additional-js').value,
         audiocodes: {
           enabled: getToggle('ac-enabled'),
           domain: document.getElementById('ac-domain').value.trim(),
@@ -1350,6 +1774,13 @@
           caller: document.getElementById('ac-caller').value.trim(),
           password: document.getElementById('ac-password').value.trim(),
           extraHeaders: document.getElementById('ac-extra-headers').value,
+        },
+        salesforce: {
+          enabled: getToggle('sf-enabled'),
+          loginUrl: document.getElementById('sf-login-url').value,
+          clientId: document.getElementById('sf-client').value.trim(),
+          apiVersion: document.getElementById('sf-api-version').value.trim() || 'v60.0',
+          contactId: document.getElementById('sf-contact-id').value.trim(),
         },
         tutoiement: getToggle('toggle-tutoiement'),
         language: currentLang,
@@ -1382,9 +1813,11 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       DemoConfig.applyBranding();
+      setupPanelFolding();
       lucide.createIcons();
       loadProfile();
       updateOAuthStatus();
+      updateSalesforceOAuthStatus();
       syncI18nInputs();
       new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
@@ -1392,6 +1825,12 @@
       document.getElementById('gc-client').addEventListener('input', () => {
         DemoGenesys.clearToken();
         updateOAuthStatus();
+      });
+
+      // Clear the Salesforce token when the Consumer Key changes
+      document.getElementById('sf-client').addEventListener('input', () => {
+        DemoSalesforce.clearToken();
+        updateSalesforceOAuthStatus();
       });
 
       // Save / Reset buttons
@@ -1482,6 +1921,14 @@
       ['new-pin', 'confirm-pin'].forEach(id => {
         document.getElementById(id).addEventListener('input', e => {
           e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        });
+      });
+
+      // Expand the target panel when navigating via the side nav
+      document.querySelectorAll('.settings-nav a[href^="#"]').forEach(a => {
+        a.addEventListener('click', () => {
+          const panel = document.getElementById(a.getAttribute('href').slice(1));
+          if (panel && panel.classList.contains('collapsed')) setPanelCollapsed(panel, false);
         });
       });
 

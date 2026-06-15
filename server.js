@@ -1,12 +1,12 @@
 /**
  * server.js — zero-dependency static dev server
- * Usage: node server.js  (or: PORT=5000 node server.js)
+ * Usage: node server.js  (or: PORT=5500 node server.js)
  */
 const http = require('node:http');
 const fs   = require('node:fs');
 const path = require('node:path');
 
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || '5500', 10);
 const ROOT = path.join(__dirname, 'app');
 
 const MIME = {

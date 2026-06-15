@@ -354,12 +354,6 @@
       background: white;
     }
 
-    #img-viewer-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
     #img-viewer-close {
       position: absolute;
       top: -14px;
@@ -506,6 +500,60 @@
       width: 18px;
       height: 18px;
     }
+
+    /* ── Motif picker modal ───────────────────────────────────────────────── */
+    .motif-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .motif-modal.open { display: flex; }
+    .motif-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+    }
+    .motif-modal-inner {
+      position: relative;
+      width: min(480px, 100vw);
+      background: var(--bg-elev);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 32px;
+      z-index: 1;
+    }
+    @media (min-width: 480px) {
+      .motif-modal { align-items: center; }
+      .motif-modal-inner { border-radius: 20px; }
+    }
+    .motif-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .motif-modal-head span { font-size: 16px; font-weight: 700; }
+    .motif-modal-head button {
+      width: 32px; height: 32px;
+      border-radius: 8px; border: none;
+      background: var(--bg-sunken); color: var(--fg-muted);
+      cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .motif-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .motif-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 14px; border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--bg-elev);
+      cursor: pointer; text-align: left;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      transition: all 140ms;
+    }
+    .motif-btn:hover { border-color: var(--brand); background: var(--brand-50); color: var(--brand-700); }
+    .motif-dot { width: 10px; height: 10px; border-radius: 999px; flex-shrink: 0; }
 
     .composer {
       padding: 12px 24px;
@@ -708,67 +756,24 @@
       <section class="threads">
         <div class="threads-head">
           <h2><span class="i18n-fr">Messagerie sécurisée</span><span class="i18n-en">Secure inbox</span></h2>
-          <button class="icon-btn" style="width:36px;height:36px;"><i data-lucide="edit-3"></i></button>
+          <button class="icon-btn" id="new-thread-btn" style="width:36px;height:36px;" title="Nouvelle conversation" aria-label="Nouvelle conversation"><i data-lucide="edit-3"></i></button>
         </div>
-        <div class="threads-list">
-          <div class="thread active" id="thread-advisor">
-            <div class="av" id="advisor-av"
-              style="background: linear-gradient(135deg, var(--brand-400), var(--brand-700));"><span
-                id="advisor-initials">CL</span></div>
-            <div>
-              <div class="t-name" id="advisor-name">Camille Lefebvre</div>
-              <div class="t-last" id="thread-preview"><span class="i18n-fr">D'accord, je prépare l'attestation pour ce
-                  soir.</span><span class="i18n-en">Ok, I will prepare the document for this evening.</span></div>
-            </div>
-            <div style="text-align:right;">
-              <div class="when">14:21</div>
-              <div class="unread" id="unread-badge">2</div>
-            </div>
-          </div>
-          <div class="thread">
-            <div class="av" style="background: linear-gradient(135deg, #6366f1, #4338ca);">FR</div>
-            <div>
-              <div class="t-name"><span class="i18n-fr">Service crédits</span><span class="i18n-en">Loans
-                  department</span></div>
-              <div class="t-last"><span class="i18n-fr">Ton dossier prêt travaux a été validé.</span><span
-                  class="i18n-en">Your home improvement loan has been approved.</span></div>
-            </div>
-            <div style="text-align:right;">
-              <div class="when">Hier</div>
-            </div>
-          </div>
-          <div class="thread">
-            <div class="av" style="background: linear-gradient(135deg, #1c1d22, #0d0e12);" data-logo-av><span
-                data-brand>DB</span></div>
-            <div>
-              <div class="t-name" data-brand>Démo banque</div>
-              <div class="t-last"><span class="i18n-fr">Ton relevé de mai est disponible.</span><span
-                  class="i18n-en">Your May statement is available.</span></div>
-            </div>
-            <div style="text-align:right;">
-              <div class="when">8 mai</div>
-            </div>
-          </div>
-          <div class="thread">
-            <div class="av" style="background: linear-gradient(135deg, #00a35a, #00723f);">SF</div>
-            <div>
-              <div class="t-name"><span class="i18n-fr">Sécurité & Fraude</span><span class="i18n-en">Security &
-                  Fraud</span></div>
-              <div class="t-last"><span class="i18n-fr">Une connexion a été détectée à Lyon…</span><span
-                  class="i18n-en">A login was detected in Lyon…</span></div>
-            </div>
-            <div style="text-align:right;">
-              <div class="when">2 mai</div>
-            </div>
-          </div>
-          <div class="thread" style="position:absolute; bottom:0;"><a href="#"
-              onclick="event.preventDefault(); resetMessages();"
-              style="margin-left:auto; font-size:12px; color:var(--fg-faint); text-decoration:none;"
-              onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--fg-faint)'">Reset</a>
-          </div>
+        <div class="threads-list" id="threads-list">
+          <!-- Rendered dynamically by renderThreadList() -->
         </div>
-
       </section>
+
+      <!-- Motif picker modal -->
+      <div class="motif-modal" id="motif-modal" role="dialog" aria-modal="true">
+        <div class="motif-modal-backdrop" id="motif-modal-backdrop"></div>
+        <div class="motif-modal-inner">
+          <div class="motif-modal-head">
+            <span><span class="i18n-fr">Nouveau sujet</span><span class="i18n-en">New topic</span></span>
+            <button id="motif-modal-close" aria-label="Fermer">✕</button>
+          </div>
+          <div class="motif-grid" id="motif-grid"><!-- Rendered by JS --></div>
+        </div>
+      </div>
 
       <section class="conversation">
         <div class="conv-head">
@@ -876,12 +881,14 @@
   <script src="shell.js"></script>
   <script src="config.js"></script>
   <script src="genesys.js"></script>
+  <script src="salesforce.js"></script>
   <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
 
     let advisorName = 'Camille Lefebvre';
     let advisorInitials = 'CL';
+    let _activeThreadId = null;
 
     function getTime() {
       const n = new Date();
@@ -939,11 +946,19 @@
       const div = document.createElement('div');
       div.className = `msg ${msg.from}`;
       const av = msg.from === 'them'
-        ? `<div class="m-av">${msg.initials || advisorInitials}</div>` : '';
+        ? `<div class="m-av">${escapeHtml(msg.initials || advisorInitials)}</div>` : '';
       if (msg.type === 'file') {
         const wrapper = document.createElement('div');
         wrapper.innerHTML = av;
         const inner = document.createElement('div');
+        // Optional text caption sent together with the file
+        if (msg.text) {
+          const caption = document.createElement('div');
+          caption.className = 'bubble';
+          caption.style.marginBottom = '6px';
+          caption.textContent = msg.text;
+          inner.appendChild(caption);
+        }
         const isImage = msg.mimeType && msg.mimeType.startsWith('image/');
         const isPdf = msg.mimeType === 'application/pdf';
 
@@ -1005,32 +1020,164 @@
       return div;
     }
 
+    // Renders a file message that also carries an optional text caption.
+    function _appendFileWithCaption(inner, msg) {
+      if (msg.text) {
+        const caption = document.createElement('div');
+        caption.className = 'bubble';
+        caption.style.marginBottom = '6px';
+        caption.textContent = msg.text;
+        inner.appendChild(caption);
+      }
+    }
+
     function escapeHtml(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
+
+    // ── Thread list ─────────────────────────────────────────────────────────
+
+    function renderThreadList() {
+      const lang = document.documentElement.lang || 'fr';
+      const threads = DemoConfig.getThreads();
+      const list = document.getElementById('threads-list');
+      list.replaceChildren();
+
+      threads.forEach(thread => {
+        const last = thread.messages[thread.messages.length - 1];
+        const label = DemoConfig._motifLabel(thread.motif, lang);
+        const color = DemoConfig._motifColor(thread.motif);
+        const preview = last ? (last.text || last.fileName || '') : '';
+        const isActive = thread.id === _activeThreadId;
+
+        const div = document.createElement('div');
+        div.className = `thread${isActive ? ' active' : ''}`;
+        div.dataset.threadId = thread.id;
+
+        const av = document.createElement('div');
+        av.className = 'av';
+        av.style.background = color;
+        av.textContent = label.slice(0, 2).toUpperCase();
+
+        const mid = document.createElement('div');
+        const name = document.createElement('div');
+        name.className = 't-name';
+        name.textContent = label;
+        const prev = document.createElement('div');
+        prev.className = 't-last';
+        prev.textContent = preview;
+        mid.append(name, prev);
+
+        const right = document.createElement('div');
+        right.style.textAlign = 'right';
+        const when = document.createElement('div');
+        when.className = 'when';
+        when.textContent = last?.time || thread.createdAt || '';
+        right.appendChild(when);
+
+        div.append(av, mid, right);
+        div.addEventListener('click', () => selectThread(thread.id));
+        list.appendChild(div);
+      });
+
+      // Reset link at the bottom
+      const resetDiv = document.createElement('div');
+      resetDiv.className = 'thread';
+      resetDiv.style.cssText = 'justify-content:flex-end; padding:8px 20px;';
+      const resetA = document.createElement('a');
+      resetA.href = '#';
+      resetA.style.cssText = 'font-size:12px; color:var(--fg-faint); text-decoration:none;';
+      resetA.textContent = 'Reset';
+      resetA.addEventListener('mouseover', () => resetA.style.color = 'var(--danger)');
+      resetA.addEventListener('mouseout', () => resetA.style.color = 'var(--fg-faint)');
+      resetA.addEventListener('click', e => { e.preventDefault(); resetThread(); });
+      resetDiv.appendChild(resetA);
+      list.appendChild(resetDiv);
+    }
+
+    function selectThread(threadId, pushState = true) {
+      _activeThreadId = threadId;
+      renderThreadList();
+      loadMessages();
+
+      if (pushState) {
+        const url = new URL(location.href);
+        url.searchParams.set('thread', threadId);
+        history.pushState({}, '', url);
+      }
+
+      const messenger = document.querySelector('.messenger');
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        messenger.classList.add('show-conversation');
+      }
+    }
+
+    // ── Motif picker ────────────────────────────────────────────────────────
+
+    function openMotifModal() {
+      const lang = document.documentElement.lang || 'fr';
+      const grid = document.getElementById('motif-grid');
+      grid.replaceChildren();
+      DemoConfig.MOTIFS.forEach(m => {
+        const btn = document.createElement('button');
+        btn.className = 'motif-btn';
+        const dot = document.createElement('span');
+        dot.className = 'motif-dot';
+        dot.style.background = m.color;
+        const label = document.createElement('span');
+        label.textContent = lang === 'en' ? m.en : m.fr;
+        btn.append(dot, label);
+        btn.addEventListener('click', () => {
+          closeMotifModal();
+          const thread = DemoConfig.createThread(m.key);
+          selectThread(thread.id);
+        });
+        grid.appendChild(btn);
+      });
+      document.getElementById('motif-modal').classList.add('open');
+    }
+
+    function closeMotifModal() {
+      document.getElementById('motif-modal').classList.remove('open');
+    }
+
+    // ── Messages ─────────────────────────────────────────────────────────────
 
     function loadMessages() {
       const body = document.getElementById('conv-body');
       const lang = document.documentElement.lang || 'fr';
       body.innerHTML = '<div class="day-divider">' + (lang === 'en' ? 'Today' : "Aujourd\'hui") + '</div>';
-      const msgs = DemoConfig.getMessages();
+      const thread = _activeThreadId ? DemoConfig.getThread(_activeThreadId) : null;
+      const msgs = thread ? thread.messages : DemoConfig.getThreads()[0]?.messages || [];
       msgs.forEach(m => body.appendChild(renderMessage(m)));
       body.scrollTop = body.scrollHeight;
-      // Update thread preview
-      if (msgs.length > 0) {
-        const last = msgs[msgs.length - 1];
-        const preview = last.text || last.fileName || '';
-        document.getElementById('thread-preview').textContent = preview;
-      }
     }
 
     let _pendingFile = null; // { fileData, fileName, fileSize, mimeType }
+    let _clientHeartbeatTimer = null;
 
     function _advisorIsPresent() {
       try {
         const d = JSON.parse(localStorage.getItem('demobank_adv_active') || 'null');
         return d && d.accountId === DemoConfig.getCurrentAccountId() && (Date.now() - d.ts < 30000);
       } catch { return false; }
+    }
+
+    function _writeClientActive() {
+      try {
+        const accountId = DemoConfig.getCurrentAccountId();
+        if (!accountId) return;
+        localStorage.setItem('demobank_client_active', JSON.stringify({ accountId, ts: Date.now() }));
+      } catch { /* noop */ }
+    }
+
+    function _clearClientActive() {
+      try {
+        const d = JSON.parse(localStorage.getItem('demobank_client_active') || 'null');
+        if (d && d.accountId === DemoConfig.getCurrentAccountId()) {
+          localStorage.removeItem('demobank_client_active');
+        }
+      } catch { /* noop */ }
     }
 
     const _ALLOWED_TYPES = [
@@ -1118,6 +1265,7 @@
     }
 
     function sendMessage(text) {
+      if (!_activeThreadId) return;
       const area = document.getElementById('compose-area');
       const msgText = text !== undefined ? text : area.value.trim();
       if (!msgText && !_pendingFile) return;
@@ -1126,6 +1274,7 @@
       if (_pendingFile) {
         msg = {
           id: 'msg_' + Date.now(), from: 'me', type: 'file',
+          text: msgText || undefined,
           fileName: _pendingFile.fileName, fileSize: _pendingFile.fileSize,
           mimeType: _pendingFile.mimeType, fileData: _pendingFile.fileData,
           time: getTime()
@@ -1134,7 +1283,7 @@
       } else {
         msg = { id: 'msg_' + Date.now(), from: 'me', text: msgText, time: getTime() };
       }
-      DemoConfig.addMessage(msg);
+      DemoConfig.addMessageToThread(_activeThreadId, msg);
 
       const body = document.getElementById('conv-body');
       body.appendChild(renderMessage(msg));
@@ -1142,44 +1291,46 @@
 
       area.value = '';
       area.style.height = 'auto';
-      document.getElementById('thread-preview').textContent = msg.text || msg.fileName || '';
-      document.getElementById('unread-badge').style.display = 'none';
+      renderThreadList();
 
-      if (!_advisorIsPresent()) setTimeout(() => DemoConfig.executeAdditionalJS(), 300);
+      if (!_advisorIsPresent()) {
+        setTimeout(() => DemoConfig.executeAdditionalJS({
+          message: msg,
+          messageText: msg.text || msg.fileName || '',
+          threadId: _activeThreadId
+        }), 300);
+      }
     }
 
-    function resetMessages() {
+    function resetThread() {
       const lang = document.documentElement.lang || 'fr';
-      const msg = lang === 'en'
-        ? 'Reset the conversation to default messages?'
-        : 'Réinitialiser la conversation avec les messages par défaut ?';
-      if (!confirm(msg)) return;
-      DemoConfig.updateProfile({ messages: null });
-      loadMessages();
+      if (!confirm(lang === 'en' ? 'Delete all threads and reset to default?' : 'Supprimer tous les fils et réinitialiser ?')) return;
+      DemoConfig.updateProfile({ threads: null, messages: null });
+      _activeThreadId = null;
+      const threads = DemoConfig.getThreads();
+      if (threads.length > 0) selectThread(threads[0].id, false);
+      renderThreadList();
     }
 
     function sendQuickReply(btn) {
+      if (!_activeThreadId) { openMotifModal(); return; }
       const lang = document.documentElement.lang || 'fr';
       const span = btn.querySelector(lang === 'en' ? '.i18n-en' : '.i18n-fr');
       sendMessage((span ? span.textContent : btn.textContent).trim());
     }
 
-    // Auto-resize textarea
     document.addEventListener('DOMContentLoaded', () => {
       DemoConfig.applyBranding();
 
       const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
       const lang = document.documentElement.lang || 'fr';
-      // Parse advisor name to get initials
-      const adv = (p.persona.advisor || 'Camille Lefebvre — Paris 11').split('—')[0].trim();
+      const adv = (p.persona?.advisor || 'Camille Lefebvre — Paris 11').split('—')[0].trim();
       advisorName = adv;
-      const parts = adv.split(' ');
-      advisorInitials = parts.map(x => x[0]).join('').slice(0, 2).toUpperCase();
+      advisorInitials = adv.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase();
 
-      document.getElementById('advisor-initials').textContent = advisorInitials;
-      document.getElementById('advisor-name').textContent = advisorName;
       document.getElementById('conv-initials').textContent = advisorInitials;
       document.getElementById('conv-name').textContent = advisorName;
+
       function _updateAdvisorStatus() {
         const present = _advisorIsPresent();
         document.getElementById('conv-role').textContent = present
@@ -1187,6 +1338,8 @@
           : (lang === 'en' ? 'Offline' : 'Hors ligne');
       }
       _updateAdvisorStatus();
+      _writeClientActive();
+      _clientHeartbeatTimer = setInterval(_writeClientActive, 15000);
 
       const area = document.getElementById('compose-area');
       area.placeholder = lang === 'en' ? `Write to ${adv.split(' ')[0]}…` : `Écris ton message à ${adv.split(' ')[0]}…`;
@@ -1197,61 +1350,63 @@
       area.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
       });
-
       setInterval(_updateAdvisorStatus, 30000);
 
       document.getElementById('img-viewer-backdrop').addEventListener('click', closeViewer);
       document.getElementById('img-viewer-close').addEventListener('click', closeViewer);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeViewer(); closeMotifModal(); }
+      });
 
       document.getElementById('file-input').addEventListener('change', e => {
         if (e.target.files[0]) attachFile(e.target.files[0]);
       });
       document.getElementById('fp-cancel').addEventListener('click', _cancelAttachment);
 
-      lucide.createIcons();
-      loadMessages();
+      // New thread / motif modal
+      document.getElementById('new-thread-btn').addEventListener('click', openMotifModal);
+      document.getElementById('motif-modal-backdrop').addEventListener('click', closeMotifModal);
+      document.getElementById('motif-modal-close').addEventListener('click', closeMotifModal);
 
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'demobank_adv_active') { _updateAdvisorStatus(); return; }
-        if (event.key !== 'demobank_v1') return;
-        const body = document.getElementById('conv-body');
-        const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;
-        const msgs = DemoConfig.getMessages();
-        const lang = document.documentElement.lang || 'fr';
-        body.innerHTML = '<div class="day-divider">' + (lang === 'en' ? 'Today' : "Aujourd\'hui") + '</div>';
-        msgs.forEach(m => body.appendChild(renderMessage(m)));
-        if (atBottom) body.scrollTop = body.scrollHeight;
-        if (msgs.length > 0) {
-          const last = msgs[msgs.length - 1];
-          document.getElementById('thread-preview').textContent = last.text || last.fileName || '';
-        }
+      // Mobile back button
+      document.getElementById('back-to-threads').addEventListener('click', () => {
+        document.querySelector('.messenger').classList.remove('show-conversation');
       });
 
+      // Profile card dropdown
       const card = document.getElementById('profile-card');
       card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
       document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });
 
-      // Navigation mobile : slide entre liste des fils et conversation
-      const messenger = document.querySelector('.messenger');
-      const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+      // Initialise thread list and open thread from URL or first available
+      renderThreadList();
+      const urlThread = new URLSearchParams(location.search).get('thread');
+      const threads = DemoConfig.getThreads();
+      const initialId = (urlThread && threads.find(t => t.id === urlThread))
+        ? urlThread
+        : threads[0]?.id || null;
+      if (initialId) selectThread(initialId, !urlThread);
 
-      function showConversation() {
-        messenger.classList.add('show-conversation');
-      }
-      function showThreadsList() {
-        messenger.classList.remove('show-conversation');
-      }
+      lucide.createIcons();
 
-      document.getElementById('back-to-threads').addEventListener('click', showThreadsList);
+      // Real-time sync: advisor sends a message in another tab
+      window.addEventListener('storage', event => {
+        if (event.key === 'demobank_adv_active') { _updateAdvisorStatus(); return; }
+        if (event.key !== 'demobank_v1') return;
+        renderThreadList();
+        if (!_activeThreadId) return;
+        const thread = DemoConfig.getThread(_activeThreadId);
+        if (!thread) return;
+        const body = document.getElementById('conv-body');
+        const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 60;
+        body.innerHTML = '<div class="day-divider">' + (lang === 'en' ? 'Today' : "Aujourd\'hui") + '</div>';
+        thread.messages.forEach(m => body.appendChild(renderMessage(m)));
+        if (atBottom) body.scrollTop = body.scrollHeight;
+      });
 
-      document.querySelectorAll('.thread').forEach(t => {
-        t.addEventListener('click', () => {
-          if (!isMobile()) return;
-          document.querySelectorAll('.thread').forEach(x => x.classList.remove('active'));
-          t.classList.add('active');
-          showConversation();
-        });
+      window.addEventListener('beforeunload', () => {
+        if (_clientHeartbeatTimer) { clearInterval(_clientHeartbeatTimer); _clientHeartbeatTimer = null; }
+        _clearClientActive();
       });
     });
   </script>

@@ -133,7 +133,9 @@ const DemoGenesys = (() => {
     if (loading) {
       btn._origHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<span class="_gc-spinner"></span>${t('En cours…', 'Please wait…')}`;
+      const spinner = document.createElement('span');
+      spinner.className = '_gc-spinner';
+      btn.replaceChildren(spinner, document.createTextNode(t('En cours…', 'Please wait…')));
     } else {
       btn.disabled = false;
       if (btn._origHTML) btn.innerHTML = btn._origHTML;
@@ -220,6 +222,13 @@ const DemoGenesys = (() => {
     if (code) {
       // Validate state to prevent CSRF
       const expectedState = sessionStorage.getItem('_gc_oauth_state');
+      // Only handle the callback if Genesys initiated it. When _gc_oauth_state is
+      // absent the code belongs to another provider (e.g. Salesforce) on the same
+      // page — leave the URL untouched so that provider's handler can consume it.
+      if (!expectedState) {
+        _loadToken();
+        return;
+      }
       if (returnedState !== expectedState) {
         console.warn('[DemoGenesys] PKCE callback: state mismatch, ignoring');
         history.replaceState(null, '', window.location.pathname);

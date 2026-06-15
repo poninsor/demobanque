@@ -283,6 +283,32 @@
       margin-top: 2px;
     }
 
+    .conv-head .c-presence {
+      font-size: 12px;
+      color: var(--success-700);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .conv-head .c-presence::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+      flex-shrink: 0;
+    }
+
+    .conv-head .c-presence.offline {
+      color: var(--fg-muted);
+    }
+
+    .conv-head .c-presence.offline::before {
+      background: var(--fg-faint);
+    }
+
     .conv-body {
       padding: 24px;
       overflow-y: auto;
@@ -615,6 +641,50 @@
       height: 15px;
     }
 
+    /* ── Thread nav strip ─────────────────────────────────────────────────── */
+    .adv-thread-nav {
+      display: flex;
+      gap: 6px;
+      padding: 8px 16px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      scrollbar-width: none;
+      background: var(--bg-elev);
+    }
+
+    .adv-thread-nav::-webkit-scrollbar { display: none; }
+
+    .adv-thread-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1.5px solid var(--border);
+      background: var(--bg-elev);
+      color: var(--fg-muted);
+      transition: all 120ms;
+    }
+
+    .adv-thread-chip:hover { border-color: var(--brand); color: var(--fg); }
+
+    .adv-thread-chip.active {
+      background: var(--brand-50);
+      border-color: var(--brand);
+      color: var(--brand-700);
+    }
+
+    .adv-thread-chip-dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
     /* ── Mobile ───────────────────────────────────────────────────────────── */
     .mobile-back-btn {
       display: none;
@@ -735,6 +805,7 @@
             <div>
               <div class="c-name" id="conv-name">Sophie Martin</div>
               <div class="c-sub" id="conv-account-id">12345678</div>
+              <div class="c-presence offline" id="conv-client-status"><span class="i18n-fr">Hors ligne</span><span class="i18n-en">Offline</span></div>
             </div>
           </div>
           <div style="display:flex;gap:8px;">
@@ -744,6 +815,9 @@
                 data-lucide="refresh-cw"></i></button>
           </div>
         </div>
+
+        <!-- Thread navigation strip -->
+        <div id="thread-nav" class="adv-thread-nav" style="display:none;"></div>
 
         <div class="conv-body" id="conv-body"></div>
 
@@ -773,6 +847,7 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="salesforce.js"></script>
 
   <script>
     // ── Langue ──────────────────────────────────────────────────────────────
@@ -782,7 +857,8 @@
 
     // ── État ────────────────────────────────────────────────────────────────
     let selectedAccountId = null;
-    let lastSeenCount = {};   // { accountId: number } — suivi des messages vus
+    let selectedThreadId = null;
+    let lastSeenCount = {};   // { accountId+threadId: number } — suivi des messages vus
 
     // ── Utilitaires ─────────────────────────────────────────────────────────
     function getTime() {
@@ -799,12 +875,18 @@
       catch { return {}; }
     }
 
-    function getAccountMessages(accountId) {
-      const profile = getAllAccounts()[accountId];
-      if (!profile) return [];
-      if (profile.messages?.length) return profile.messages;
-      const pl = profile.language || 'fr';
-      return JSON.parse(JSON.stringify(DemoConfig.DEFAULT_MESSAGES[pl] || []));
+    function getAccountThreads(accountId) {
+      return DemoConfig.getThreadsByAccountId(accountId);
+    }
+
+    // Returns messages for the currently selected thread of an account.
+    function getActiveMessages(accountId) {
+      const threads = getAccountThreads(accountId);
+      if (!threads.length) return [];
+      const thread = selectedThreadId
+        ? threads.find(t => t.id === selectedThreadId) || threads[0]
+        : threads[0];
+      return thread ? thread.messages : [];
     }
 
     let _viewerBlobUrl = null;
@@ -944,13 +1026,19 @@
 
       ids.forEach(accountId => {
         const profile = accounts[accountId];
-        const msgs = getAccountMessages(accountId);
-        const last = msgs[msgs.length - 1];
+        const threads = getAccountThreads(accountId);
+        // Last message across all threads
+        let last = null;
+        threads.forEach(thr => {
+          const m = thr.messages[thr.messages.length - 1];
+          if (m && (!last || m.time > last.time)) last = m;
+        });
+        const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
         const initials = getInitials(profile);
         const name = `${profile.persona?.firstName || ''} ${profile.persona?.lastName || ''}`.trim() || accountId;
         const lastText = last?.fileName ? `📎 ${last.fileName}` : (last?.text || '');
-        const seenCount = lastSeenCount[accountId] ?? msgs.length; // initialise sans badge au 1er rendu
-        const unread = msgs.length > seenCount;
+        const seenCount = lastSeenCount[accountId] ?? totalMsgs;
+        const unread = totalMsgs > seenCount;
 
         const div = document.createElement('div');
         div.className = `thread${accountId === selectedAccountId ? ' active' : ''}`;
@@ -971,6 +1059,61 @@
       });
     }
 
+    // ── Thread nav strip ─────────────────────────────────────────────────────
+    function renderThreadNav(accountId) {
+      const threads = getAccountThreads(accountId);
+      const nav = document.getElementById('thread-nav');
+      nav.replaceChildren();
+      nav.style.display = threads.length > 1 ? '' : 'none';
+
+      threads.forEach(thread => {
+        const label = DemoConfig._motifLabel(thread.motif, _lang);
+        const color = DemoConfig._motifColor(thread.motif);
+        const chip = document.createElement('button');
+        chip.className = `adv-thread-chip${thread.id === selectedThreadId ? ' active' : ''}`;
+        chip.dataset.threadId = thread.id;
+        const dot = document.createElement('span');
+        dot.className = 'adv-thread-chip-dot';
+        dot.style.background = color;
+        const txt = document.createTextNode(label);
+        chip.append(dot, txt);
+        chip.addEventListener('click', () => selectThread(thread.id));
+        nav.appendChild(chip);
+      });
+    }
+
+    function selectThread(threadId) {
+      selectedThreadId = threadId;
+      if (!selectedAccountId) return;
+
+      // Update chip active state
+      document.querySelectorAll('.adv-thread-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.threadId === threadId);
+      });
+
+      // Update URL and client-link
+      const url = new URL(location.href);
+      url.searchParams.set('thread', threadId);
+      history.replaceState({}, '', url);
+      const clientLink = document.getElementById('client-link');
+      if (clientLink) clientLink.href = `messages.html?thread=${encodeURIComponent(threadId)}`;
+
+      // Render messages for this thread
+      const accounts = getAllAccounts();
+      const profile = accounts[selectedAccountId];
+      if (!profile) return;
+      const threads = getAccountThreads(selectedAccountId);
+      const thread = threads.find(t => t.id === threadId) || threads[0];
+      if (!thread) return;
+      const msgs = thread.messages;
+      const initials = getInitials(profile);
+      const profileLang = profile.language || 'fr';
+      const body = document.getElementById('conv-body');
+      body.innerHTML = `<div class="day-divider">${profileLang === 'en' ? 'Today' : "Aujourd'hui"}</div>`;
+      msgs.forEach(m => body.appendChild(renderMessage(m, initials)));
+      body.scrollTop = body.scrollHeight;
+    }
+
     // ── Heartbeat : signal advisor presence to messages.html ─────────────────
     let _heartbeatTimer = null;
 
@@ -982,6 +1125,23 @@
     function _clearAdvisorActive() {
       try { localStorage.removeItem('demobank_adv_active'); }
       catch (e) { /* noop */ }
+    }
+
+    function _clientIsPresent(accountId) {
+      try {
+        const d = JSON.parse(localStorage.getItem('demobank_client_active') || 'null');
+        return d && d.accountId === accountId && (Date.now() - d.ts < 30000);
+      } catch { return false; }
+    }
+
+    function _updateClientStatus() {
+      const el = document.getElementById('conv-client-status');
+      if (!el || !selectedAccountId) return;
+      const present = _clientIsPresent(selectedAccountId);
+      el.classList.toggle('offline', !present);
+      el.textContent = present
+        ? t('En ligne · client', 'Online · client')
+        : t('Hors ligne', 'Offline');
     }
 
     // ── Sélection d'une conversation ─────────────────────────────────────────
@@ -1000,7 +1160,7 @@
       document.getElementById('workspace').classList.remove('show-conversation');
     }
 
-    function selectAccount(accountId) {
+    function selectAccount(accountId, initialThreadId) {
       selectedAccountId = accountId;
 
       _writeAdvisorActive(accountId);
@@ -1009,17 +1169,18 @@
         if (selectedAccountId) _writeAdvisorActive(selectedAccountId);
       }, 15000);
 
-      // Mise à jour URL
+      // Update URL (keep thread param if provided)
       const url = new URL(location.href);
       url.searchParams.set('account', accountId);
+      if (initialThreadId) url.searchParams.set('thread', initialThreadId);
       history.pushState({}, '', url);
 
-      // Active state dans la liste
+      // Active state in account list
       document.querySelectorAll('.thread').forEach(t => {
         t.classList.toggle('active', t.dataset.account === accountId);
       });
 
-      // Effacer badge non-lu
+      // Clear unread badge
       const badge = document.getElementById(`unread-${accountId}`);
       if (badge) badge.style.display = 'none';
 
@@ -1027,51 +1188,47 @@
       const profile = accounts[accountId];
       if (!profile) return;
 
-      const msgs = getAccountMessages(accountId);
-      lastSeenCount[accountId] = msgs.length;
+      const threads = getAccountThreads(accountId);
+      const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
+      lastSeenCount[accountId] = totalMsgs;
 
-      // En-tête conversation
+      // Pick initial thread
+      selectedThreadId = (initialThreadId && threads.find(t => t.id === initialThreadId))
+        ? initialThreadId
+        : threads[0]?.id || null;
+
+      // Header
       const name = `${profile.persona?.firstName || ''} ${profile.persona?.lastName || ''}`.trim();
       const initials = getInitials(profile);
       document.getElementById('conv-av').textContent = initials;
       document.getElementById('conv-name').textContent = name;
       document.getElementById('conv-account-id').textContent = accountId;
+      _updateClientStatus();
 
-      // Placeholder du composer
       document.getElementById('compose-area').placeholder =
         t(`Répondre à ${profile.persona?.firstName || 'ce client'}…`,
           `Reply to ${profile.persona?.firstName || 'this client'}…`);
 
-      // Rendu des messages
-      const profileLang = profile.language || 'fr';
-      const body = document.getElementById('conv-body');
-      body.innerHTML = `<div class="day-divider">${profileLang === 'en' ? 'Today' : "Aujourd'hui"}</div>`;
-      msgs.forEach(m => body.appendChild(renderMessage(m, initials)));
-      body.scrollTop = body.scrollHeight;
+      // Thread nav
+      renderThreadNav(accountId);
 
-      // Afficher le panneau conversation
+      // Render active thread messages
+      if (selectedThreadId) selectThread(selectedThreadId);
+
+      // Show conversation panel
       document.getElementById('select-prompt').style.display = 'none';
       document.getElementById('active-conv').style.display = 'flex';
-
-      // Mobile : slide vers la conversation
       document.getElementById('workspace').classList.add('show-conversation');
     }
 
     // ── Rafraîchissement de la conversation ouverte ─────────────────────────
     function refreshConversation() {
       if (!selectedAccountId) return;
-      const accounts = getAllAccounts();
-      const profile = accounts[selectedAccountId];
-      if (!profile) return;
-      const msgs = getAccountMessages(selectedAccountId);
-      const initials = getInitials(profile);
-      const profileLang = profile.language || 'fr';
-
-      const body = document.getElementById('conv-body');
-      body.innerHTML = `<div class="day-divider">${profileLang === 'en' ? 'Today' : "Aujourd'hui"}</div>`;
-      msgs.forEach(m => body.appendChild(renderMessage(m, initials)));
-      body.scrollTop = body.scrollHeight;
-      lastSeenCount[selectedAccountId] = msgs.length;
+      renderThreadNav(selectedAccountId);
+      if (selectedThreadId) selectThread(selectedThreadId);
+      const threads = getAccountThreads(selectedAccountId);
+      const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
+      lastSeenCount[selectedAccountId] = totalMsgs;
     }
 
     function scrollToBottom() {
@@ -1082,7 +1239,7 @@
 
     // ── Envoi d'un message conseiller ────────────────────────────────────────
     function advisorSend() {
-      if (!selectedAccountId) return;
+      if (!selectedAccountId || !selectedThreadId) return;
       const area = document.getElementById('compose-area');
       const text = area.value.trim();
       if (!text) return;
@@ -1091,31 +1248,18 @@
       const profile = accounts[selectedAccountId];
       if (!profile) return;
 
-      // Initiales du conseiller depuis le profil du compte
       const advName = (profile.persona?.advisor || 'Conseiller').split('—')[0].trim();
       const initials = advName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
       const msg = { id: 'adv_' + Date.now(), from: 'them', initials, text, time: getTime() };
 
-      // Écriture dans localStorage
-      try {
-        const data = JSON.parse(localStorage.getItem('demobank_v1') || '{}');
-        const p = data.accounts[selectedAccountId];
-        if (!p) return;
-        if (!p.messages?.length) {
-          const pl = p.language || 'fr';
-          p.messages = JSON.parse(JSON.stringify(DemoConfig.DEFAULT_MESSAGES[pl] || []));
-        }
-        p.messages.push(msg);
-        data.accounts[selectedAccountId] = p;
-        localStorage.setItem('demobank_v1', JSON.stringify(data));
-        lastSeenCount[selectedAccountId] = p.messages.length;
-      } catch (e) {
-        console.error('[Advisor] advisorSend error:', e);
-        return;
-      }
+      DemoConfig.addMessageToThreadByAccountId(selectedAccountId, selectedThreadId, msg);
 
-      // Rendu immédiat (l'event storage ne se déclenche pas dans le même onglet)
+      const threads = getAccountThreads(selectedAccountId);
+      const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
+      lastSeenCount[selectedAccountId] = totalMsgs;
+
+      // Immediate render (storage event doesn't fire in the same tab)
       const body = document.getElementById('conv-body');
       body.appendChild(renderMessage(msg, getInitials(profile)));
       body.scrollTop = body.scrollHeight;
@@ -1123,6 +1267,14 @@
       area.value = '';
       area.style.height = 'auto';
       renderThreadList();
+
+      if (!_clientIsPresent(selectedAccountId)) {
+        setTimeout(() => DemoConfig.executeAdvisorAdditionalJS(selectedAccountId, {
+          message: msg,
+          messageText: msg.text,
+          threadId: selectedThreadId
+        }), 300);
+      }
     }
 
     function sendQuick(btn) {
@@ -1133,27 +1285,34 @@
     }
 
     // ── Synchronisation temps réel via l'API storage ─────────────────────────
-    // L'event 'storage' se déclenche dans les autres onglets quand localStorage change.
-    // Quand le client envoie un message dans messages.html → advisor.html est notifié ici.
     window.addEventListener('storage', (event) => {
+      if (event.key === 'demobank_client_active') {
+        _updateClientStatus();
+        return;
+      }
       if (event.key !== 'demobank_v1') return;
 
       renderThreadList();
 
-      if (!selectedAccountId) return;
-      const msgs = getAccountMessages(selectedAccountId);
+      if (!selectedAccountId || !selectedThreadId) return;
+      const threads = getAccountThreads(selectedAccountId);
+      const thread = threads.find(t => t.id === selectedThreadId) || threads[0];
+      if (!thread) return;
+      const msgs = thread.messages;
+      const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
       const seenCount = lastSeenCount[selectedAccountId] || 0;
-      if (msgs.length <= seenCount) return;
+      if (totalMsgs <= seenCount) return;
 
-      // Nouveaux messages client reçus
+      // New client messages received — append only the unseen ones
       const accounts = getAllAccounts();
       const profile = accounts[selectedAccountId];
       if (!profile) return;
       const customerInitials = getInitials(profile);
 
       const body = document.getElementById('conv-body');
-      msgs.slice(seenCount).forEach(m => body.appendChild(renderMessage(m, customerInitials)));
-      lastSeenCount[selectedAccountId] = msgs.length;
+      const prevThreadTotal = thread.messages.length - (totalMsgs - seenCount);
+      msgs.slice(Math.max(0, prevThreadTotal)).forEach(m => body.appendChild(renderMessage(m, customerInitials)));
+      lastSeenCount[selectedAccountId] = totalMsgs;
 
       const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
       if (atBottom) {
@@ -1180,10 +1339,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
-      // Initialiser lastSeenCount avec les comptes existants (sans badge au 1er chargement)
+      // Initialise lastSeenCount for all accounts (no unread badge on first load)
       const accounts = getAllAccounts();
       Object.keys(accounts).forEach(id => {
-        lastSeenCount[id] = getAccountMessages(id).length;
+        const threads = getAccountThreads(id);
+        lastSeenCount[id] = threads.reduce((n, t) => n + t.messages.length, 0);
       });
 
       // Charger le branding depuis le 1er compte disponible
@@ -1206,10 +1366,11 @@
 
       renderThreadList();
 
-      // Ouvrir directement la conversation si ?account= dans l'URL
+      // Open conversation directly if ?account= (and optionally ?thread=) in URL
       const params = new URLSearchParams(location.search);
       const preselect = params.get('account');
-      if (preselect && accounts[preselect]) selectAccount(preselect);
+      const preselectThread = params.get('thread');
+      if (preselect && accounts[preselect]) selectAccount(preselect, preselectThread || null);
 
       // Auto-resize textarea
       const area = document.getElementById('compose-area');
@@ -1234,6 +1395,8 @@
       document.getElementById('img-viewer-backdrop').addEventListener('click', closeViewer);
       document.getElementById('img-viewer-close').addEventListener('click', closeViewer);
       document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+
+      setInterval(_updateClientStatus, 30000);
 
       // Clear advisor presence signal only when the tab actually closes
       window.addEventListener('beforeunload', _clearAdvisorActive);

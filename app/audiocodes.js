@@ -194,7 +194,7 @@ const DemoAudioCodes = (() => {
   // We still attempt the restore (correct per SDK docs §4.11) but also show a browser
   // confirm so the user knows leaving the page will likely drop their call.
   function _saveCall(event) {
-    if (!_activeCall || !_activeCall.isEstablished || !_activeCall.isEstablished()) return;
+    if (!_activeCall || !_activeCall.isEstablished()) return;
     if (event && event.type === 'beforeunload') {
       // Trigger browser "Leave page?" dialog — message text is browser-controlled.
       event.preventDefault();
@@ -263,12 +263,8 @@ const DemoAudioCodes = (() => {
   // ── Public actions ────────────────────────────────────────────────────────
   function call(urlHeaders) {
     const p = DemoConfig.getProfile() || DemoConfig.DEFAULT_PROFILE;
-    if (!isEnabled()) {
-      const digits = ((p.genesys || {}).callNumber || '3262').replace(/\D/g, '');
-      window.location.href = 'tel:' + digits;
-      return;
-    }
-    const number = ((p.genesys || {}).internalCallNumber || (p.genesys || {}).callNumber || '').trim();
+    const gc = p.genesys || {};
+    const number = (gc.internalCallNumber || gc.callNumber || '').trim();
     if (!number) {
       console.warn('[DemoAudioCodes] No call number configured');
       return;
