@@ -333,12 +333,13 @@
                   vers l'API REST Salesforce.</span><span class="i18n-en">Low-level escape hatch to the Salesforce REST
                   API.</span></td></tr>
             <tr><td><code>Salesforce.shortenUrl(url)</code></td><td><span class="i18n-fr">Raccourcit une URL via
-                  <strong>is.gd</strong> (API publique, sans compte, redirection directe sans page intermédiaire,
-                  CORS activé). Retourne l'URL courte (ex. <code>https://is.gd/aBcDeF</code>), ou l'URL d'origine en
-                  cas d'erreur réseau. Utile pour les champs Salesforce à 80 caractères comme
-                  <code>SuppliedName</code>.</span><span class="i18n-en">Shortens a URL via <strong>is.gd</strong>
-                  (public API, no account, direct redirect with no intermediate page, CORS enabled). Returns the short
-                  URL (e.g. <code>https://is.gd/aBcDeF</code>), or the original URL on network error. Useful for
+                  <strong>TinyURL</strong> (API publique, sans compte). Les URL <code>localhost</code> sont retournées
+                  telles quelles (non résolvables par un service externe). Retourne l'URL courte (ex.
+                  <code>https://tinyurl.com/xxxxx</code>), ou l'URL d'origine en cas d'erreur. Utile pour les champs
+                  Salesforce à 80 caractères comme <code>SuppliedName</code>.</span><span
+                  class="i18n-en">Shortens a URL via <strong>TinyURL</strong> (public API, no account).
+                  <code>localhost</code> URLs are returned as-is (not resolvable by an external service). Returns the
+                  short URL (e.g. <code>https://tinyurl.com/xxxxx</code>), or the original URL on error. Useful for
                   80-char Salesforce fields like <code>SuppliedName</code>.</span></td></tr>
           </tbody>
         </table>
@@ -441,9 +442,9 @@ http://localhost:3000</code></pre>
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>// Create a Case to notify a new message from the customer when the advisor is offline.
-// shortenUrl() uses is.gd (no account, direct redirect). Localhost URLs are returned
-// as-is (external shorteners cannot resolve them), so the snippet adapts automatically:
-// - Production: short URL (~22 chars) fits in SuppliedName (80-char limit).
+// shortenUrl() uses TinyURL (no account). Localhost URLs are returned as-is
+// (external shorteners cannot resolve them), so the snippet adapts automatically:
+// - Production: short URL (~28 chars) fits in SuppliedName (80-char limit).
 // - Local dev: full URL in Description, customer name in SuppliedName.
 if (Salesforce) {
   const advisorUrl = `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`;

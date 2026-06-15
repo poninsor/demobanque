@@ -7,7 +7,7 @@ const DemoConfig = (() => {
   const GC_TOKEN_KEY = 'demobank_gc_token';
   const DEFAULT_CLIENT_ADDITIONAL_JS = [
     '// Create a Case to notify a new message from the customer when the advisor is offline.',
-    '// shortenUrl() uses is.gd (no account, direct redirect). Localhost URLs are returned',
+    '// shortenUrl() uses TinyURL (no account). Localhost URLs are returned',
     '// as-is (external shorteners cannot resolve them) so the snippet adapts automatically:',
     '// in production the short URL goes in SuppliedName; in local dev the full URL goes in',
     '// Description and the customer name goes in SuppliedName (avoids the 80-char limit).',

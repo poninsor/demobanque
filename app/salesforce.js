@@ -251,11 +251,10 @@ const DemoSalesforce = (() => {
   // ── URL shortener ─────────────────────────────────────────────────────────────
 
   /**
-   * Shortens a URL using the is.gd public API (no account, no API key, direct
-   * redirect without intermediate page, CORS enabled).
+   * Shortens a URL using the TinyURL public API (no account, no API key required).
    *
-   * API: GET https://is.gd/create.php?format=simple&url=<encoded_url>
-   * Response: plain text short URL, e.g. https://is.gd/aBcDeF (~22 chars).
+   * API: GET https://tinyurl.com/api-create.php?url=<encoded_url>
+   * Response: plain text short URL, e.g. https://tinyurl.com/xxxxx (~28 chars).
    *
    * Localhost URLs are returned as-is immediately: external shorteners cannot
    * resolve them (they are only reachable from the local machine), and is.gd
@@ -274,7 +273,7 @@ const DemoSalesforce = (() => {
     // Localhost URLs cannot be resolved by external shorteners — skip immediately.
     if (/^https?:\/\/localhost/i.test(url)) return url;
     try {
-      const res = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`);
+      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
       if (!res.ok) return url;
       const short = (await res.text()).trim();
       return short.startsWith('http') ? short : url;
