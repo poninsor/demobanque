@@ -248,40 +248,6 @@ const DemoSalesforce = (() => {
     return sfFetchJSON(`/query?q=${encodeURIComponent(soql)}`);
   }
 
-  // ── URL shortener ─────────────────────────────────────────────────────────────
-
-  /**
-   * Shortens a URL using the TinyURL public API (no account, no API key required).
-   *
-   * API: GET https://tinyurl.com/api-create.php?url=<encoded_url>
-   * Response: plain text short URL, e.g. https://tinyurl.com/xxxxx (~28 chars).
-   *
-   * Localhost URLs are returned as-is immediately: external shorteners cannot
-   * resolve them (they are only reachable from the local machine), and is.gd
-   * would block the request with a CORS error.
-   *
-   * Always falls back to the original URL on network error or unexpected response
-   * so the caller never has to handle failures — check the returned length instead:
-   *
-   *   const short = await Salesforce.shortenUrl(url);
-   *   const fitsInField = short.length <= 80; // Salesforce SuppliedName limit
-   *
-   * @param {string} url - The URL to shorten.
-   * @returns {Promise<string>} The shortened URL, or the original URL on failure.
-   */
-  async function shortenUrl(url) {
-    // Localhost URLs cannot be resolved by external shorteners — skip immediately.
-    if (/^https?:\/\/localhost/i.test(url)) return url;
-    try {
-      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-      if (!res.ok) return url;
-      const short = (await res.text()).trim();
-      return short.startsWith('http') ? short : url;
-    } catch {
-      return url;
-    }
-  }
-
   // ── Public API ───────────────────────────────────────────────────────────────
 
   return {
@@ -302,9 +268,6 @@ const DemoSalesforce = (() => {
 
     // Generic escape hatches
     create, get, update, query, sfFetch, sfFetchJSON,
-
-    // URL utilities
-    shortenUrl,
 
     /** True when the integration is enabled and a Consumer Key is configured. */
     isEnabled() {

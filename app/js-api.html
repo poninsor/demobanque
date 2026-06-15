@@ -332,15 +332,6 @@
             <tr><td><code>Salesforce.sfFetch(path, init)</code></td><td><span class="i18n-fr">Échappatoire bas niveau
                   vers l'API REST Salesforce.</span><span class="i18n-en">Low-level escape hatch to the Salesforce REST
                   API.</span></td></tr>
-            <tr><td><code>Salesforce.shortenUrl(url)</code></td><td><span class="i18n-fr">Raccourcit une URL via
-                  <strong>TinyURL</strong> (API publique, sans compte). Les URL <code>localhost</code> sont retournées
-                  telles quelles (non résolvables par un service externe). Retourne l'URL courte (ex.
-                  <code>https://tinyurl.com/xxxxx</code>), ou l'URL d'origine en cas d'erreur. Utile pour les champs
-                  Salesforce à 80 caractères comme <code>SuppliedName</code>.</span><span
-                  class="i18n-en">Shortens a URL via <strong>TinyURL</strong> (public API, no account).
-                  <code>localhost</code> URLs are returned as-is (not resolvable by an external service). Returns the
-                  short URL (e.g. <code>https://tinyurl.com/xxxxx</code>), or the original URL on error. Useful for
-                  80-char Salesforce fields like <code>SuppliedName</code>.</span></td></tr>
           </tbody>
         </table>
         <div class="callout">
@@ -442,21 +433,15 @@ http://localhost:3000</code></pre>
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>// Create a Case to notify a new message from the customer when the advisor is offline.
-// shortenUrl() uses TinyURL (no account). Localhost URLs are returned as-is
-// (external shorteners cannot resolve them), so the snippet adapts automatically:
-// - Production: short URL (~28 chars) fits in SuppliedName (80-char limit).
-// - Local dev: full URL in Description, customer name in SuppliedName.
+// SuppliedName carries the account+thread identifiers (fits within the 80-char limit).
 if (Salesforce) {
-  const advisorUrl = `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`;
-  const shortUrl = await Salesforce.shortenUrl(advisorUrl);
-  const fits = shortUrl.length <= 80;
   await Salesforce.createCase({
     Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,
-    Description: fits ? messageText : `${messageText}\n\nLien conseiller: ${advisorUrl}`,
+    Description: messageText,
     Origin: "Web",
     Status: "New",
     Priority: "Medium",
-    SuppliedName: fits ? shortUrl : `${persona.firstName} ${persona.lastName}`,
+    SuppliedName: `account=${accountId}&thread=${threadId}`,
     Routed__c: true,
     ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})
   });
@@ -481,7 +466,7 @@ if (Salesforce) {
     Origin: "Web",
     Status: "New",
     Priority: "Medium",
-    SuppliedName: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,
+    SuppliedName: `account=${accountId}&thread=${threadId}`,
     Routed__c: true,
     ...(contactId ? { ContactId: contactId } : {})
   });
