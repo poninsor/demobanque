@@ -206,6 +206,42 @@
       line-height: 1.5;
     }
 
+    /* ── Iframe storage warning overlay ──────────────────────────────────── */
+    #iframe-warning {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-elev);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    #iframe-warning.show { display: flex; }
+
+    #iframe-warning svg {
+      width: 48px;
+      height: 48px;
+      color: var(--fg-faint);
+    }
+
+    #iframe-warning h2 {
+      font-size: 18px;
+      margin: 0;
+    }
+
+    #iframe-warning p {
+      font-size: 14px;
+      color: var(--fg-muted);
+      max-width: 380px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
     /* ── Conversation panel ───────────────────────────────────────────────── */
     .adv-conv {
       display: flex;
@@ -846,10 +882,41 @@
     <span class="i18n-fr">Nouveau message</span><span class="i18n-en">New message</span>
   </div>
 
+  <!-- Iframe / third-party storage warning -->
+  <div id="iframe-warning">
+    <i data-lucide="lock"></i>
+    <h2><span class="i18n-fr">Stockage inaccessible</span><span class="i18n-en">Storage inaccessible</span></h2>
+    <p><span class="i18n-fr">Cette page est chargée dans un iframe Salesforce. Les navigateurs bloquent l'accès au
+        stockage local pour les pages tierces, ce qui empêche de lire les conversations.<br><br>Ouvre la page dans un
+        nouvel onglet pour accéder aux données.</span><span class="i18n-en">This page is loaded inside a Salesforce
+        iframe. Browsers block local storage access for third-party pages, preventing conversations from
+        loading.<br><br>Open the page in a new tab to access the data.</span></p>
+    <a id="iframe-open-btn" href="#" target="_blank" class="btn btn-primary">
+      <i data-lucide="external-link"></i>
+      <span class="i18n-fr">Ouvrir dans un nouvel onglet</span><span class="i18n-en">Open in a new tab</span>
+    </a>
+  </div>
+
   <script src="config.js"></script>
   <script src="salesforce.js"></script>
 
   <script>
+    // ── Iframe storage detection ─────────────────────────────────────────────
+    // When advisor.html is embedded in a Salesforce iframe, the browser isolates
+    // localStorage (third-party storage partitioning). Detect this and show an
+    // overlay prompting the user to open the page in a new tab instead.
+    (function () {
+      const inIframe = window !== window.top;
+      if (!inIframe) return;
+      const hasData = Object.keys(localStorage).some(k => k.startsWith('demobank_'));
+      if (hasData) return;
+      // In iframe with empty storage — show warning and wire up the open button
+      const overlay = document.getElementById('iframe-warning');
+      const btn = document.getElementById('iframe-open-btn');
+      btn.href = window.location.href;
+      overlay.classList.add('show');
+    })();
+
     // ── Langue ──────────────────────────────────────────────────────────────
     const _lang = DemoConfig.getGlobalLang();
     document.documentElement.lang = _lang;
