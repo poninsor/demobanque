@@ -21,6 +21,30 @@ const DemoConfig = (() => {
     '  });',
     '}'
   ].join('\n');
+  const DEFAULT_CREDIT_SIMULATION_JS = [
+    '// Create a Salesforce Opportunity when a loan simulation is submitted.',
+    'if (Salesforce) {',
+    '  const closeDate = new Date();',
+    '  closeDate.setDate(closeDate.getDate() + 7);',
+    '  await Salesforce.create("Opportunity", {',
+    '    Name: `${loanLabel} - ${projectNature || "Simulation"}`,',
+    '    ...(salesforce.contactId ? { AccountId: salesforce.contactId } : {}),',
+    '    Description: [',
+    '      `Type : ${loanLabel}`,',
+    '      `Nature : ${projectNature || "-"}`,',
+    '      `Montant : ${amount} €`,',
+    '      `Duree : ${months} mois`,',
+    '      `Taux indicatif : ${rate} % TAEG`,',
+    '      `Mensualite estimee : ${monthly} €`',
+    '    ].join("\\n"),',
+    '    Amount: amount,',
+    '    CloseDate: closeDate.toISOString().split("T")[0],',
+    '    StageName: "Qualification",',
+    '    NextStep: "Demande de devis"',
+    '  });',
+    '}'
+  ].join('\n');
+
   const DEFAULT_ADVISOR_ADDITIONAL_JS = [
     '// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.',
     '// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant',
@@ -97,6 +121,7 @@ const DemoConfig = (() => {
     },
     additionalJS: DEFAULT_CLIENT_ADDITIONAL_JS,
     advisorAdditionalJS: DEFAULT_ADVISOR_ADDITIONAL_JS,
+    creditSimulationJS: DEFAULT_CREDIT_SIMULATION_JS,
     language: null,
     tutoiement: true,
     messages: null
@@ -565,6 +590,20 @@ const DemoConfig = (() => {
   }
 
   /**
+   * Executes the `creditSimulationJS` snippet when a loan simulation is submitted.
+   * Injects loan-specific variables in addition to the standard context.
+   * @param {object} runtime - { loanType, loanLabel, projectNature, amount, months, rate, monthly, totalCost }
+   */
+  function executeCreditSimulationJS(runtime) {
+    const p = getProfile() || DEFAULT_PROFILE;
+    const code = p.creditSimulationJS || DEFAULT_CREDIT_SIMULATION_JS;
+    return runConfiguredJS(code, p, Object.assign({
+      role: 'client',
+      logLabel: 'creditSimulationJS'
+    }, runtime || {}));
+  }
+
+  /**
    * Returns the Genesys Cloud configuration object for the current account.
    * Falls back to DEFAULT_PROFILE.genesys if not logged in.
    * @returns {{ region: string, messengerSnippet: string, clientId: string,
@@ -742,7 +781,7 @@ const DemoConfig = (() => {
     getThreadsByAccountId, addMessageToThreadByAccountId,
     _motifLabel, _motifColor,
     getStorageUsageBytes, purgeMessageAttachments,
-    executeAdditionalJS, executeAdvisorAdditionalJS,
+    executeAdditionalJS, executeAdvisorAdditionalJS, executeCreditSimulationJS,
     getGenesys,
     getAudiocodes,
     getSalesforce,

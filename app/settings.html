@@ -663,6 +663,7 @@
           <a href="#genesys"><i data-lucide="cloud"></i>Genesys Cloud</a>
           <a href="#audiocodes"><i data-lucide="phone-call"></i>AudioCodes WebRTC</a>
           <a href="#salesforce"><i data-lucide="database"></i>Salesforce</a>
+          <a href="#automation"><i data-lucide="code-2"></i><span class="i18n-fr">Automatisation</span><span class="i18n-en">Automation</span></a>
 
         </nav>
 
@@ -826,6 +827,24 @@
                   </select>
                 </div>
               </div>
+
+              <div id="sf-contact-id-row" style="display:none; margin-top:4px;">
+                <div class="field">
+                  <label>Salesforce Contact ID <span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
+                        class="i18n-fr">— rattache les objets créés (Case, Opportunity…) à ce Contact</span><span
+                        class="i18n-en">— links created objects (Case, Opportunity…) to this Contact</span></span></label>
+                  <input id="sf-contact-id" style="font-family:var(--font-mono); font-size:13px;"
+                    placeholder="0035g00000XXXXXXAAA" autocomplete="off">
+                  <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
+                      class="i18n-fr">Accessible via <code>salesforce.contactId</code> dans le JavaScript
+                      personnalisé. Utilisé comme <code>ContactId</code> / <code>AccountId</code> pour rattacher
+                      automatiquement les Cases, Opportunities et Tasks créés à ce Contact Salesforce.</span><span
+                      class="i18n-en">Available as <code>salesforce.contactId</code> in custom JavaScript. Used as
+                      <code>ContactId</code> / <code>AccountId</code> to automatically link created Cases,
+                      Opportunities and Tasks to this Salesforce Contact.</span></div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -1085,63 +1104,6 @@
                 </div>
               </div>
 
-              <!-- Additional JS field -->
-              <div class="field" style="margin-top:8px;">
-                <div class="field-label-row">
-                  <label for="gc-additional-js"><span class="i18n-fr">JavaScript additionnel — envoi de message par le client</span><span
-                      class="i18n-en">Additional JavaScript — client message send</span></label>
-                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation du JavaScript personnalisé">i
-                    <span class="info-bubble">
-                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
-                      <div class="tip-line"><code>token</code>, <code>apiBaseUrl</code>, <code>apiUrl(path)</code>, <code>fetchGenesys(path, init)</code>, <code>fetchGenesysJSON(path, init)</code></div>
-                      <div class="tip-line"><code>profile</code>, <code>settings</code>, <code>persona</code>, <code>genesys</code>, <code>balances</code>, <code>products</code>, <code>audiocodes</code>, <code>salesforce</code></div>
-                      <div class="tip-line"><code>Salesforce.createTask/getTask/updateTask</code> (idem <code>Contact</code>, <code>Case</code>), <code>Salesforce.query(soql)</code></div>
-                      <div class="tip-line"><code>accountId</code>, <code>message</code>, <code>messageText</code>, <code>language</code>, <code>tutoiement</code>, <code>role</code></div>
-                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Clique sur l'icône <strong>(i)</strong> pour ouvrir la documentation complète et des exemples.</span><span class="i18n-en">Click the <strong>(i)</strong> icon to open the full documentation and examples.</span></div>
-                      <div class="tip-line"><span class="i18n-fr">Déclenché seulement si le conseiller n'est pas en ligne. Utilise <code>fetchGenesys</code> pour appeler une API Genesys Cloud avec le token OAuth en cache.</span><span class="i18n-en">Triggered only when the advisor is offline. Use <code>fetchGenesys</code> to call a Genesys Cloud API with the cached OAuth token.</span></div>
-                    </span>
-                  </a>
-                </div>
-                <textarea id="gc-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;"
-                  placeholder="// Code exécuté lors de l'envoi… / Code executed on each message send…">alert("création d'un workitem");</textarea>
-                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Ce code est
-                    exécuté quand le client envoie un message et que le conseiller n'est pas en ligne.</span><span class="i18n-en">This code runs when the client sends a message and the advisor is offline.</span></div>
-              </div>
-
-              <div class="field" style="margin-top:8px;">
-                <div class="field-label-row">
-                  <label for="gc-advisor-additional-js"><span class="i18n-fr">JavaScript additionnel — envoi de message par le conseiller</span><span
-                      class="i18n-en">Additional JavaScript — advisor message send</span></label>
-                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation du JavaScript personnalisé">i
-                    <span class="info-bubble">
-                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
-                      <div class="tip-line"><code>token</code>, <code>apiBaseUrl</code>, <code>apiUrl(path)</code>, <code>fetchGenesys(path, init)</code>, <code>fetchGenesysJSON(path, init)</code></div>
-                      <div class="tip-line"><code>profile</code>, <code>settings</code>, <code>persona</code>, <code>genesys</code>, <code>balances</code>, <code>products</code>, <code>audiocodes</code>, <code>salesforce</code></div>
-                      <div class="tip-line"><code>Salesforce.createTask/getTask/updateTask</code> (idem <code>Contact</code>, <code>Case</code>), <code>Salesforce.query(soql)</code></div>
-                      <div class="tip-line"><code>accountId</code>, <code>message</code>, <code>messageText</code>, <code>language</code>, <code>tutoiement</code>, <code>role</code></div>
-                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Clique sur l'icône <strong>(i)</strong> pour ouvrir la documentation complète et des exemples.</span><span class="i18n-en">Click the <strong>(i)</strong> icon to open the full documentation and examples.</span></div>
-                      <div class="tip-line"><span class="i18n-fr">Déclenché seulement si le client n'est pas en ligne. Exemple ci-dessous: envoi d'un SMS via <code>/api/v2/conversations/messages/agentless</code>.</span><span class="i18n-en">Triggered only when the client is offline. Example below: send an SMS via <code>/api/v2/conversations/messages/agentless</code>.</span></div>
-                    </span>
-                  </a>
-                </div>
-                <textarea id="gc-advisor-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:132px;"
-                  placeholder="// Code exécuté lors de l'envoi conseiller… / Code executed on advisor send…">// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.
-// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant
-// and is rejected with the Authorization Code + PKCE token used here. Use a Workflow instead.
-// await fetchGenesysJSON("/api/v2/flows/executions", {
-//   method: "POST",
-//   body: {
-//     flowId: "YOUR_WORKFLOW_ID",
-//     inputData: {
-//       "Flow.from": "+33644603451",
-//       "Flow.to": persona.phone,
-//       "Flow.message": `Bonjour ${persona.firstName}, votre conseiller vous a repondu dans la messagerie securisee.`
-//     }
-//   }
-// });</textarea>
-                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Ce code est
-                    exécuté quand le conseiller envoie un message et que le client n'est pas en ligne.</span><span class="i18n-en">This code runs when the advisor sends a message and the client is offline.</span></div>
-              </div>
             </div>
           </div>
 
@@ -1275,14 +1237,6 @@
                   <label><span class="i18n-fr">Version API</span><span class="i18n-en">API version</span></label>
                   <input id="sf-api-version" style="font-family:var(--font-mono); font-size:13px;" placeholder="v60.0">
                 </div>
-                <div class="field" style="grid-column:span 2;">
-                  <label>Contact ID <span style="font-weight:400;color:var(--fg-muted);font-size:11px;"><span
-                        class="i18n-fr">— persona rattaché à ce Contact Salesforce</span><span class="i18n-en">— persona
-                        linked to this Salesforce Contact</span></span></label>
-                  <input id="sf-contact-id" style="font-family:var(--font-mono); font-size:13px;"
-                    placeholder="0035g00000XXXXXXAAA" autocomplete="off">
-                  <div style="font-size:12px;color:var(--fg-muted);margin-top:4px;"><span class="i18n-fr">Disponible dans le JavaScript personnalisé via <code>salesforce.contactId</code> — utilisé comme <code>WhoId</code> pour rattacher les Tasks et Cases à ce Contact.</span><span class="i18n-en">Available in custom JavaScript as <code>salesforce.contactId</code> — used as <code>WhoId</code> to link Tasks and Cases to this Contact.</span></div>
-                </div>
                 <div style="grid-column:span 2; font-size:12px;color:var(--fg-muted);margin-top:4px;"><span
                     class="i18n-fr">Crée une Connected App (OAuth) avec <strong>PKCE requis</strong> et sans secret.
                     Ajoute l'URL de cette page comme <em>Callback URL</em>, et l'origine de l'app à l'allowlist
@@ -1316,6 +1270,73 @@
                   <code>Salesforce.query(soql)</code>. </span>
                 <a href="js-api.html"><span class="i18n-fr">Voir la documentation et des exemples →</span><span
                     class="i18n-en">See the documentation and examples →</span></a>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- AUTOMATISATION / CUSTOM JS -->
+          <div class="panel" id="automation">
+            <div class="panel-head">
+              <div class="panel-head-icon"><i data-lucide="code-2"></i></div>
+              <div class="panel-head-text">
+                <h3><span class="i18n-fr">Personnalisation & Automatisation</span><span class="i18n-en">Customisation & Automation</span></h3>
+                <div class="sub"><span class="i18n-fr">JavaScript exécuté automatiquement sur les événements clés de la démo. Accès complet à Genesys Cloud, Salesforce et au profil.</span><span class="i18n-en">JavaScript executed automatically on key demo events. Full access to Genesys Cloud, Salesforce and the profile.</span></div>
+              </div>
+              <a class="btn btn-secondary btn-sm" href="js-api.html" style="flex-shrink:0; align-self:center;"><i data-lucide="book-open"></i><span class="i18n-fr">Docs</span><span class="i18n-en">Docs</span></a>
+            </div>
+            <div class="panel-body">
+
+              <div class="field">
+                <div class="field-label-row">
+                  <label for="gc-additional-js"><span class="i18n-fr">Message client → conseiller absent</span><span class="i18n-en">Client message → advisor offline</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>fetchGenesys</code>, <code>fetchGenesysJSON</code>, <code>Salesforce</code></div>
+                      <div class="tip-line"><code>persona</code>, <code>salesforce</code>, <code>accountId</code>, <code>threadId</code>, <code>message</code>, <code>messageText</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Déclenché seulement si le conseiller n'est pas en ligne.</span><span class="i18n-en">Triggered only when the advisor is offline.</span></div>
+                    </span>
+                  </a>
+                </div>
+                <textarea id="gc-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;"
+                  placeholder="// Code exécuté lors de l'envoi… / Code executed on each message send…"></textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté quand le client envoie un message et que le conseiller n'est pas en ligne.</span><span class="i18n-en">Runs when the client sends a message and the advisor is offline.</span></div>
+              </div>
+
+              <div class="field">
+                <div class="field-label-row">
+                  <label for="gc-advisor-additional-js"><span class="i18n-fr">Message conseiller → client absent</span><span class="i18n-en">Advisor message → client offline</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>fetchGenesys</code>, <code>fetchGenesysJSON</code>, <code>Salesforce</code></div>
+                      <div class="tip-line"><code>persona</code>, <code>salesforce</code>, <code>accountId</code>, <code>threadId</code>, <code>message</code>, <code>messageText</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Déclenché seulement si le client n'est pas en ligne.</span><span class="i18n-en">Triggered only when the client is offline.</span></div>
+                    </span>
+                  </a>
+                </div>
+                <textarea id="gc-advisor-additional-js" style="font-family:var(--font-mono); font-size:13px; min-height:100px;"
+                  placeholder="// Code exécuté lors de l'envoi conseiller… / Code executed on advisor send…"></textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté quand le conseiller envoie un message et que le client n'est pas en ligne.</span><span class="i18n-en">Runs when the advisor sends a message and the client is offline.</span></div>
+              </div>
+
+              <div class="field">
+                <div class="field-label-row">
+                  <label for="credit-simulation-js"><span class="i18n-fr">Simulation de crédit → soumission</span><span class="i18n-en">Loan simulation → submission</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>fetchGenesys</code>, <code>fetchGenesysJSON</code>, <code>Salesforce</code></div>
+                      <div class="tip-line"><code>persona</code>, <code>salesforce</code>, <code>loanType</code>, <code>loanLabel</code>, <code>projectNature</code></div>
+                      <div class="tip-line"><code>amount</code>, <code>months</code>, <code>rate</code>, <code>monthly</code>, <code>totalCost</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Déclenché par le bouton « Soumettre ma simulation » dans la page Crédits.</span><span class="i18n-en">Triggered by the "Submit my simulation" button on the Loans page.</span></div>
+                    </span>
+                  </a>
+                </div>
+                <textarea id="credit-simulation-js" style="font-family:var(--font-mono); font-size:13px; min-height:100px;"
+                  placeholder="// Code exécuté lors de la soumission… / Code executed on simulation submit…"></textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté quand le client clique sur « Soumettre ma simulation » dans la page Crédits.</span><span class="i18n-en">Runs when the client clicks "Submit my simulation" on the Loans page.</span></div>
               </div>
 
             </div>
@@ -1663,6 +1684,7 @@
       document.getElementById('gc-internal-call-number').value = g.internalCallNumber || '';
       document.getElementById('gc-additional-js').value = p.additionalJS || DemoConfig.DEFAULT_PROFILE.additionalJS;
       document.getElementById('gc-advisor-additional-js').value = p.advisorAdditionalJS || DemoConfig.DEFAULT_PROFILE.advisorAdditionalJS;
+      document.getElementById('credit-simulation-js').value = p.creditSimulationJS || DemoConfig.DEFAULT_PROFILE.creditSimulationJS;
 
       // AudioCodes
       const ac = p.audiocodes || {};
@@ -1680,6 +1702,7 @@
       document.getElementById('sf-client').value = sf.clientId || '';
       document.getElementById('sf-api-version').value = sf.apiVersion || 'v60.0';
       document.getElementById('sf-contact-id').value = sf.contactId || '';
+      document.getElementById('sf-contact-id-row').style.display = sf.enabled ? '' : 'none';
 
       updatePreview();
     }
@@ -1767,6 +1790,7 @@
         },
         additionalJS: document.getElementById('gc-additional-js').value,
         advisorAdditionalJS: document.getElementById('gc-advisor-additional-js').value,
+        creditSimulationJS: document.getElementById('credit-simulation-js').value,
         audiocodes: {
           enabled: getToggle('ac-enabled'),
           domain: document.getElementById('ac-domain').value.trim(),
@@ -1831,6 +1855,16 @@
       document.getElementById('sf-client').addEventListener('input', () => {
         DemoSalesforce.clearToken();
         updateSalesforceOAuthStatus();
+      });
+
+      // Show/hide Contact ID field in Persona panel based on Salesforce toggle
+      document.getElementById('sf-enabled').addEventListener('click', () => {
+        // The toggle class is updated by the generic toggle handler first,
+        // so we read the NEW state after the click propagates.
+        requestAnimationFrame(() => {
+          const enabled = !document.getElementById('sf-enabled').classList.contains('off');
+          document.getElementById('sf-contact-id-row').style.display = enabled ? '' : 'none';
+        });
       });
 
       // Save / Reset buttons

@@ -24,7 +24,7 @@
     .kv { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; font-size: 14px; }
     .kv .k { color: var(--fg-muted); }
     .kv .v { font-variant-numeric: tabular-nums; font-weight: 600; }
-    .offer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+    .offer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 24px; }
     .offer { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 18px; padding: 22px; cursor: pointer; transition: all 220ms; position: relative; }
     .offer:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .offer .icon { width: 44px; height: 44px; border-radius: 12px; background: var(--brand-50); color: var(--brand-700); display: flex; align-items: center; justify-content: center; }
@@ -45,7 +45,7 @@
       .row-2col { grid-template-columns: 1fr; gap: 16px; }
       .credit-hero { padding: 22px; }
       .credit-hero .amt { font-size: 36px; }
-      .offer-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+      .offer-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
       .timeline li { grid-template-columns: 90px 1fr; gap: 8px; }
       .sim-modal { padding: 22px !important; }
     }
@@ -160,6 +160,13 @@
           <div class="rate"><span class="v">3,90&nbsp;%</span><span class="u"><span class="i18n-fr">TAEG fixe à partir de</span><span class="i18n-en">Fixed APR from</span></span></div>
           <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;" onclick="openSimulator('projet')"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
         </div>
+        <div class="offer">
+          <div class="icon"><i data-lucide="building-2"></i></div>
+          <h4><span class="i18n-fr">Prêt immobilier</span><span class="i18n-en">Home loan</span></h4>
+          <div class="desc"><span class="i18n-fr">Résidence principale ou investissement · jusqu'à 500 000 €.</span><span class="i18n-en">Primary residence or investment · up to €500,000.</span></div>
+          <div class="rate"><span class="v">3,45&nbsp;%</span><span class="u"><span class="i18n-fr">TAEG fixe à partir de</span><span class="i18n-en">Fixed APR from</span></span></div>
+          <button class="btn btn-secondary btn-sm" style="margin-top:14px; width:100%;" onclick="openSimulator('immo')"><span class="i18n-fr">Simuler</span><span class="i18n-en">Simulate</span></button>
+        </div>
       </div>
 
       <div class="panel" style="margin-top:32px;">
@@ -196,6 +203,10 @@
         <div class="field">
           <label id="sim-duration-label"></label>
           <select id="sim-months" onchange="updateSimResult()"></select>
+        </div>
+        <div class="field">
+          <label id="sim-nature-label"></label>
+          <input type="text" id="sim-nature" style="width:100%;" id="sim-nature">
         </div>
       </div>
       <div class="sim-result">
@@ -235,20 +246,29 @@
   <script src="shell.js"></script>
   <script src="config.js"></script>
   <script src="genesys.js"></script>
+  <script src="salesforce.js"></script>
   <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
 
     /* ── Loan simulator ─────────────────────────────────────────────────── */
     const SIM_OFFERS = {
-      auto:    { icon: 'car',   rate: 3.20, min: 5000,  max: 30000, def: 10000 },
-      travaux: { icon: 'home',  rate: 2.90, min: 5000,  max: 75000, def: 20000 },
-      projet:  { icon: 'plane', rate: 3.90, min: 1000,  max: 75000, def: 15000 },
+      auto:    { icon: 'car',          rate: 3.20, min: 5000,   max: 30000,  def: 10000 },
+      travaux: { icon: 'home',         rate: 2.90, min: 5000,   max: 75000,  def: 20000 },
+      projet:  { icon: 'plane',        rate: 3.90, min: 1000,   max: 75000,  def: 15000 },
+      immo:    { icon: 'building-2',   rate: 3.45, min: 50000,  max: 500000, def: 200000 },
     };
     const SIM_LABELS = {
-      auto:    ['Crédit auto',    'Car loan'],
-      travaux: ['Prêt travaux',   'Home improvement loan'],
-      projet:  ['Crédit projet',  'Personal loan'],
+      auto:    ['Crédit auto',       'Car loan'],
+      travaux: ['Prêt travaux',      'Home improvement loan'],
+      projet:  ['Crédit projet',     'Personal loan'],
+      immo:    ['Prêt immobilier',   'Home loan'],
+    };
+    const SIM_NATURE_PLACEHOLDER = {
+      auto:    ['Marque et modèle du véhicule', 'Vehicle make and model'],
+      travaux: ['Ex. : rénovation cuisine, isolation toiture…', 'E.g. kitchen renovation, roof insulation…'],
+      projet:  ['Ex. : voyage, mariage, équipement…', 'E.g. travel, wedding, equipment…'],
+      immo:    ['Ex. : résidence principale, investissement locatif…', 'E.g. primary residence, rental investment…'],
     };
     let currentOffer = 'auto';
 
@@ -264,6 +284,10 @@
       document.getElementById('sim-duration-label').textContent = isFr ? 'Durée' : 'Duration';
       document.getElementById('sim-monthly-label').textContent = isFr ? 'Mensualité estimée' : 'Estimated monthly payment';
       document.getElementById('sim-submit-label').textContent = isFr ? 'Soumettre ma simulation' : 'Submit my simulation';
+      document.getElementById('sim-nature-label').textContent = isFr ? 'Nature du projet' : 'Project description';
+      const naturePlaceholder = SIM_NATURE_PLACEHOLDER[type];
+      document.getElementById('sim-nature').placeholder = isFr ? naturePlaceholder[0] : naturePlaceholder[1];
+      document.getElementById('sim-nature').value = '';
 
       // Icon
       const wrap = document.getElementById('sim-icon-wrap');
@@ -323,11 +347,15 @@
     }
 
     function submitSimulation() {
-      const amount  = parseFloat(document.getElementById('sim-amount').value);
-      const months  = parseInt(document.getElementById('sim-months').value);
-      const rate    = SIM_OFFERS[currentOffer].rate;
-      const r       = rate / 100 / 12;
-      const monthly = r === 0 ? amount / months : amount * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+      const amount        = parseFloat(document.getElementById('sim-amount').value);
+      const months        = parseInt(document.getElementById('sim-months').value);
+      const projectNature = document.getElementById('sim-nature').value.trim();
+      const rate          = SIM_OFFERS[currentOffer].rate;
+      const r             = rate / 100 / 12;
+      const monthly       = r === 0 ? amount / months : amount * r * Math.pow(1 + r, months) / (Math.pow(1 + r, months) - 1);
+      const isFr          = (document.documentElement.lang || 'fr') !== 'en';
+      const loanLabel     = isFr ? SIM_LABELS[currentOffer][0] : SIM_LABELS[currentOffer][1];
+
       DemoGenesys.loanSimulation({
         offerType: currentOffer,
         amount,
@@ -336,6 +364,18 @@
         monthly:   parseFloat(monthly.toFixed(2)),
         totalCost: parseFloat((monthly * months).toFixed(2)),
       });
+
+      DemoConfig.executeCreditSimulationJS({
+        loanType:      currentOffer,
+        loanLabel,
+        projectNature,
+        amount,
+        months,
+        rate,
+        monthly:   parseFloat(monthly.toFixed(2)),
+        totalCost: parseFloat((monthly * months).toFixed(2)),
+      });
+
       closeSimulator();
     }
 

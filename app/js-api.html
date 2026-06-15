@@ -263,8 +263,15 @@
                   queueId…).</span><span class="i18n-en">Genesys Cloud configuration (region, clientId, queueId…).</span>
               </td></tr>
             <tr><td><code>salesforce</code></td><td><span class="i18n-fr">Configuration Salesforce (loginUrl, clientId,
-                  apiVersion).</span><span class="i18n-en">Salesforce configuration (loginUrl, clientId,
-                  apiVersion).</span></td></tr>
+                  apiVersion, <strong>contactId</strong>). <code>salesforce.contactId</code> est l'ID du Contact
+                  Salesforce rattaché au persona — configuré dans le panneau <em>Persona</em> des Paramètres (visible
+                  si Salesforce est activé). Utilisé comme <code>ContactId</code> / <code>AccountId</code> pour lier
+                  automatiquement les Cases, Opportunities et Tasks créés à ce Contact.</span><span
+                  class="i18n-en">Salesforce configuration (loginUrl, clientId, apiVersion,
+                  <strong>contactId</strong>). <code>salesforce.contactId</code> is the Salesforce Contact ID linked
+                  to the persona — configured in the <em>Persona</em> Settings panel (visible when Salesforce is
+                  enabled). Used as <code>ContactId</code> / <code>AccountId</code> to automatically link created
+                  Cases, Opportunities and Tasks to this Contact.</span></td></tr>
             <tr><td><code>balances</code> / <code>products</code> / <code>audiocodes</code></td><td><span
                   class="i18n-fr">Soldes, produits souscrits, config AudioCodes.</span><span class="i18n-en">Balances,
                   subscribed products, AudioCodes config.</span></td></tr>
@@ -276,7 +283,23 @@
                   <code>thr_1234_abc</code>) — use it in <code>ExternalID__c</code> to link directly to the thread in
                   the advisor view.</span></td></tr>
             <tr><td><code>message</code> / <code>messageText</code></td><td><span class="i18n-fr">Message envoyé (objet)
-                  et son texte.</span><span class="i18n-en">Sent message (object) and its text.</span></td></tr>
+                  et son texte — disponibles dans les snippets messagerie.</span><span class="i18n-en">Sent message
+                  (object) and its text — available in messaging snippets.</span></td></tr>
+            <tr><td><code>loanType</code> / <code>loanLabel</code></td><td><span class="i18n-fr">Type de crédit
+                  (<code>auto</code>, <code>travaux</code>, <code>projet</code>, <code>immo</code>) et son libellé
+                  affiché — disponibles dans le snippet simulation de crédit.</span><span class="i18n-en">Loan type key
+                  (<code>auto</code>, <code>travaux</code>, <code>projet</code>, <code>immo</code>) and its display
+                  label — available in the credit simulation snippet.</span></td></tr>
+            <tr><td><code>projectNature</code></td><td><span class="i18n-fr">Nature du projet saisie par le client
+                  dans la fenêtre de simulation — disponible dans le snippet simulation de crédit.</span><span
+                  class="i18n-en">Project description entered by the client in the simulation window — available in
+                  the credit simulation snippet.</span></td></tr>
+            <tr><td><code>amount</code> / <code>months</code> / <code>rate</code></td><td><span
+                  class="i18n-fr">Montant (€), durée (mois) et taux annuel (%) de la simulation.</span><span
+                  class="i18n-en">Amount (€), duration (months) and annual rate (%) of the simulation.</span></td></tr>
+            <tr><td><code>monthly</code> / <code>totalCost</code></td><td><span class="i18n-fr">Mensualité estimée et
+                  coût total de la simulation.</span><span class="i18n-en">Estimated monthly payment and total cost of
+                  the simulation.</span></td></tr>
             <tr><td><code>language</code> / <code>tutoiement</code> / <code>role</code></td><td><span class="i18n-fr">Langue
                   active, ton informel, rôle (<code>client</code> ou <code>advisor</code>).</span><span
                   class="i18n-en">Active language, informal tone, role (<code>client</code> or
@@ -512,6 +535,42 @@ await fetchGenesysJSON("/api/v2/flows/executions", {
     }
   }
 });</code></pre>
+        </div>
+
+        <h3><span class="i18n-fr">4. Créer une Opportunity Salesforce lors d'une simulation de crédit</span><span
+            class="i18n-en">4. Create a Salesforce Opportunity on a loan simulation</span></h3>
+        <p style="font-size:13px; color:var(--fg-muted);"><span class="i18n-fr">À placer dans le champ <strong>Simulation
+              de crédit → soumission</strong> des Paramètres. <code>loanLabel</code>, <code>projectNature</code>,
+            <code>amount</code>, <code>months</code> et <code>monthly</code> sont injectés automatiquement.
+            <code>salesforce.contactId</code> est configuré dans le panneau Persona (visible si Salesforce est
+            activé).</span><span class="i18n-en">Place this in the <strong>Loan simulation → submission</strong>
+            Settings field. <code>loanLabel</code>, <code>projectNature</code>, <code>amount</code>,
+            <code>months</code> and <code>monthly</code> are injected automatically. <code>salesforce.contactId</code>
+            is configured in the Persona panel (visible when Salesforce is enabled).</span></p>
+        <div class="code-block">
+          <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
+              class="i18n-en">Copy</span></button>
+          <pre><code>// Create a Salesforce Opportunity when a loan simulation is submitted.
+if (Salesforce) {
+  const closeDate = new Date();
+  closeDate.setDate(closeDate.getDate() + 7);
+  await Salesforce.create("Opportunity", {
+    Name: `${loanLabel} - ${projectNature || "Simulation"}`,
+    ...(salesforce.contactId ? { AccountId: salesforce.contactId } : {}),
+    Description: [
+      `Type : ${loanLabel}`,
+      `Nature : ${projectNature || "-"}`,
+      `Montant : ${amount} €`,
+      `Duree : ${months} mois`,
+      `Taux indicatif : ${rate} % TAEG`,
+      `Mensualite estimee : ${monthly} €`
+    ].join("\n"),
+    Amount: amount,
+    CloseDate: closeDate.toISOString().split("T")[0],
+    StageName: "Qualification",
+    NextStep: "Demande de devis"
+  });
+}</code></pre>
         </div>
 
       </div>

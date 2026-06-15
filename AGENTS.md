@@ -400,10 +400,15 @@ Same shape as the Genesys flow in `genesys.js`. The token-exchange POST to
 
 ```js
 salesforce: {
-  enabled: false,                          // master toggle
+  enabled: false,                           // master toggle
   loginUrl: 'https://login.salesforce.com', // or https://test.salesforce.com (sandbox)
-  clientId: '',                            // Connected App Consumer Key
-  apiVersion: 'v60.0'                      // REST API version
+  clientId: '',                             // Connected App Consumer Key
+  apiVersion: 'v60.0',                      // REST API version
+  contactId: ''                             // Salesforce Contact ID linked to the persona;
+                                            // configured in the Persona panel (shown only when
+                                            // enabled=true); injected as salesforce.contactId
+                                            // in all custom JS snippets; used as ContactId /
+                                            // AccountId when creating Cases, Opportunities, Tasks
 }
 ```
 
@@ -523,30 +528,42 @@ Clicking empty space inside `#threads-panel` (anywhere that is not a `.thread` e
 - A `storage` event listener on `window` detects `demobank_client_active` changes in real time
 - A 30 s `setInterval` is a safety net for crash scenarios where no `storage` event fires
 
-### Additional JavaScript hooks (`additionalJS` / `advisorAdditionalJS`)
+### Custom JavaScript hooks — Personnalisation & Automatisation
 
-Two configurable JavaScript snippets exist in `settings.html`:
+Three configurable JavaScript snippets are grouped in the **Personnalisation & Automatisation**
+panel in `settings.html` (panel id `#automation`). All are stored in the profile and executed
+via `DemoConfig.runConfiguredJS()` through dedicated executor functions.
 
-- `additionalJS` — triggered by `messages.html` only when the client sends a message and the advisor is **not** present
-- `advisorAdditionalJS` — triggered by `advisor.html` only when the advisor sends a message and the client is **not** present
+| Profile key | Executor | Trigger |
+|---|---|---|
+| `additionalJS` | `executeAdditionalJS(runtime)` | `messages.html` — client sends a message, advisor **not** present |
+| `advisorAdditionalJS` | `executeAdvisorAdditionalJS(accountId, runtime)` | `advisor.html` — advisor sends a message, client **not** present |
+| `creditSimulationJS` | `executeCreditSimulationJS(runtime)` | `credits.html` — client clicks "Soumettre ma simulation" |
 
-Both snippets execute through `DemoConfig` with an injected runtime context. The following variables are available directly in the snippet:
+All three snippets execute through `DemoConfig.runConfiguredJS()` with a shared injected
+runtime context. Variables available in every snippet:
 
-- `token` — cached Genesys OAuth token for the current profile's `clientId`, or `null`
-- `apiBaseUrl` — API base URL derived from `genesys.region`, e.g. `https://api.mypurecloud.ie`
-- `apiUrl(path)` — helper that expands a relative API path to a full URL
-- `fetchGenesys(path, init)` — helper around `fetch()` that injects the `Authorization: Bearer` header and JSON-serialises plain-object bodies
-- `fetchGenesysJSON(path, init)` — same helper, but throws on non-2xx and parses the JSON response
+- `token`, `apiBaseUrl`, `apiUrl(path)`, `fetchGenesys(path, init)`, `fetchGenesysJSON(path, init)`
 - `profile` / `settings` — full profile object
 - `persona`, `genesys`, `balances`, `products`, `audiocodes`, `salesforce`
-- `Salesforce` — the `DemoSalesforce` object (or `null` if `salesforce.js` is not loaded on the page)
-- `accountId`, `message`, `messageText`, `language`, `tutoiement`, `role`
+- `salesforce.contactId` — Salesforce Contact ID linked to the persona; configured in the
+  Persona panel (visible when Salesforce is enabled); used as `ContactId` / `AccountId` when
+  creating Cases, Opportunities, Tasks
+- `Salesforce` — the `DemoSalesforce` object (or `null` if `salesforce.js` is not loaded)
+- `accountId`, `threadId`, `language`, `tutoiement`, `role`
+
+Additional variables injected per snippet:
+
+- **`additionalJS`** / **`advisorAdditionalJS`**: `message`, `messageText`
+- **`creditSimulationJS`**: `loanType`, `loanLabel`, `projectNature`, `amount`, `months`,
+  `rate`, `monthly`, `totalCost`
 
 Rules:
 - Keep snippet examples ASCII-only unless the surrounding file already requires otherwise
-- Do not add any new `new Function(...)` execution path outside `messengerSnippet`, `additionalJS`, and `advisorAdditionalJS`
-- `advisor.html` still does not load `shell.js`, but advisor-side snippets must work with `config.js` only
-- Snippets must stay non-blocking from the page UX perspective: log errors, do not crash the send flow
+- Do not add any new `new Function(...)` execution path outside `messengerSnippet`,
+  `additionalJS`, `advisorAdditionalJS`, and `creditSimulationJS`
+- `advisor.html` does not load `shell.js`; advisor-side snippets must work with `config.js` only
+- Snippets must stay non-blocking from the page UX perspective: log errors, do not crash the flow
 
 ---
 
@@ -602,7 +619,7 @@ Text is set via `createTextNode` (not `innerHTML`). Supports `\n` for line break
 | Anti-pattern | Why |
 |---|---|
 | `innerHTML` with dynamic data | XSS |
-| `new Function(code)()` for anything other than `messengerSnippet`, `additionalJS`, or `advisorAdditionalJS` | arbitrary code execution |
+| `new Function(code)()` for anything other than `messengerSnippet`, `additionalJS`, `advisorAdditionalJS`, or `creditSimulationJS` | arbitrary code execution |
 | `response_type=token` | Implicit Grant is deprecated and disabled |
 | `{ noRedirect: false }` in auto-called `fetchToken` | triggers redirect loops on callback pages |
 | `p.persona.firstName` without guard | TypeError if profile is incomplete |
