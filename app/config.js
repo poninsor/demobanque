@@ -50,17 +50,17 @@ const DemoConfig = (() => {
     '// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.',
     '// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant',
     '// and is rejected with the Authorization Code + PKCE token used here. Use a Workflow instead.',
-    '// await fetchGenesysJSON("/api/v2/flows/executions", {',
-    '//   method: "POST",',
-    '//   body: {',
-    '//     flowId: "YOUR_WORKFLOW_ID",',
-    '//     inputData: {',
-    '//       "Flow.from": "+33644603451",',
-    '//       "Flow.to": persona.phone,',
-    '//       "Flow.message": `Bonjour ${persona.firstName}, votre conseiller vous a repondu dans la messagerie securisee.`',
-    '//     }',
-    '//   }',
-    '// });'
+    ' await fetchGenesysJSON("/api/v2/flows/executions", {',
+    '   method: "POST",',
+    '   body: {',
+    '     flowId: "YOUR_WORKFLOW_ID",',
+    '     inputData: {',
+    '       "Flow.from": "+33644603451",',
+    '       "Flow.to": persona.phone,',
+    '       "Flow.message": `Bonjour ${persona.firstName}, votre conseiller vous a repondu dans la messagerie securisee.`',
+    '     }',
+    '   }',
+    ' });'
   ].join('\n');
 
   const DEFAULT_MESSAGES = {
@@ -658,6 +658,7 @@ const DemoConfig = (() => {
     { key: 'banque-distance', fr: 'Banque à distance',      en: 'Digital banking', color: '#3b82f6' },
     { key: 'compte',          fr: 'Compte bancaire',        en: 'Bank account',    color: '#64748b' },
     { key: 'paiement',        fr: 'Moyen de paiement',      en: 'Payment method',  color: '#ec4899' },
+    { key: 'justificatif',    fr: 'Transmission de justificatif', en: 'Document upload', color: '#0d9488' },
     { key: 'autre',           fr: 'Autre',                  en: 'Other',           color: '#94a3b8' },
   ];
 

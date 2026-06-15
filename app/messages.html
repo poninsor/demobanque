@@ -104,6 +104,15 @@
       color: var(--fg-faint);
     }
 
+    .thread-new-dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: var(--brand);
+      margin-top: 4px;
+      align-self: flex-start;
+      flex-shrink: 0;
+    }
+
     .thread .unread {
       background: var(--brand);
       color: white;
@@ -889,6 +898,7 @@
     let advisorName = 'Camille Lefebvre';
     let advisorInitials = 'CL';
     let _activeThreadId = null;
+    let _seenThreadCount = {}; // { threadId: msgCount } — nb messages vus par thread
 
     function getTime() {
       const n = new Date();
@@ -1068,12 +1078,20 @@
         prev.textContent = preview;
         mid.append(name, prev);
 
+        const seenCount = _seenThreadCount[thread.id] ?? thread.messages.length;
+        const hasUnread = !isActive && thread.messages.length > seenCount;
+
         const right = document.createElement('div');
-        right.style.textAlign = 'right';
+        right.style.cssText = 'text-align:right; display:flex; flex-direction:column; align-items:flex-end;';
         const when = document.createElement('div');
         when.className = 'when';
         when.textContent = last?.time || thread.createdAt || '';
         right.appendChild(when);
+        if (hasUnread) {
+          const dot = document.createElement('div');
+          dot.className = 'thread-new-dot';
+          right.appendChild(dot);
+        }
 
         div.append(av, mid, right);
         div.addEventListener('click', () => selectThread(thread.id));
@@ -1097,6 +1115,8 @@
 
     function selectThread(threadId, pushState = true) {
       _activeThreadId = threadId;
+      const t = DemoConfig.getThread(threadId);
+      if (t) _seenThreadCount[threadId] = t.messages.length;
       renderThreadList();
       loadMessages();
 
@@ -1377,6 +1397,9 @@
       const card = document.getElementById('profile-card');
       card.addEventListener('click', e => { if (!e.target.closest('.logout-btn button')) card.classList.toggle('open'); });
       document.addEventListener('click', e => { if (!card.contains(e.target)) card.classList.remove('open'); });
+
+      // Initialise seen counts — no unread dots on existing messages at load time
+      DemoConfig.getThreads().forEach(t => { _seenThreadCount[t.id] = t.messages.length; });
 
       // Initialise thread list and open thread from URL or first available
       renderThreadList();

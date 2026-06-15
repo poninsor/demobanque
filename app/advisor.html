@@ -721,6 +721,14 @@
       flex-shrink: 0;
     }
 
+    .adv-thread-chip-unread {
+      width: 7px; height: 7px;
+      border-radius: 999px;
+      background: var(--brand);
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+
     /* ── Mobile ───────────────────────────────────────────────────────────── */
     .mobile-back-btn {
       display: none;
@@ -925,7 +933,8 @@
     // ── État ────────────────────────────────────────────────────────────────
     let selectedAccountId = null;
     let selectedThreadId = null;
-    let lastSeenCount = {};   // { accountId+threadId: number } — suivi des messages vus
+    let lastSeenCount = {};       // { accountId: totalMsgCount } — unread badge on account list
+    let lastSeenThreadCount = {}; // { accountId: { threadId: msgCount } } — unread dot on thread chips
 
     // ── Utilitaires ─────────────────────────────────────────────────────────
     function getTime() {
@@ -1142,30 +1151,46 @@
       nav.replaceChildren();
       nav.style.display = threads.length > 1 ? '' : 'none';
 
+      const seenByThread = lastSeenThreadCount[accountId] || {};
+
       threads.forEach(thread => {
         const label = DemoConfig._motifLabel(thread.motif, _lang);
         const color = DemoConfig._motifColor(thread.motif);
+        const seenCount = seenByThread[thread.id] ?? thread.messages.length;
+        const hasUnread = thread.messages.length > seenCount && thread.id !== selectedThreadId;
+
         const chip = document.createElement('button');
         chip.className = `adv-thread-chip${thread.id === selectedThreadId ? ' active' : ''}`;
         chip.dataset.threadId = thread.id;
-        const dot = document.createElement('span');
-        dot.className = 'adv-thread-chip-dot';
-        dot.style.background = color;
+
         const txt = document.createTextNode(label);
-        chip.append(dot, txt);
+        chip.appendChild(txt);
+
+        if (hasUnread) {
+          const badge = document.createElement('span');
+          badge.className = 'adv-thread-chip-unread';
+          chip.appendChild(badge);
+        }
+
         chip.addEventListener('click', () => selectThread(thread.id));
         nav.appendChild(chip);
       });
+    }
+
+    function _markThreadSeen(accountId, threadId) {
+      if (!lastSeenThreadCount[accountId]) lastSeenThreadCount[accountId] = {};
+      const threads = getAccountThreads(accountId);
+      const thread = threads.find(t => t.id === threadId);
+      if (thread) lastSeenThreadCount[accountId][threadId] = thread.messages.length;
     }
 
     function selectThread(threadId) {
       selectedThreadId = threadId;
       if (!selectedAccountId) return;
 
-      // Update chip active state
-      document.querySelectorAll('.adv-thread-chip').forEach(c => {
-        c.classList.toggle('active', c.dataset.threadId === threadId);
-      });
+      // Mark thread as seen and refresh nav (clears unread dot)
+      _markThreadSeen(selectedAccountId, threadId);
+      renderThreadNav(selectedAccountId);
 
       // Update URL and client-link
       const url = new URL(location.href);
@@ -1267,6 +1292,12 @@
       const threads = getAccountThreads(accountId);
       const totalMsgs = threads.reduce((n, t) => n + t.messages.length, 0);
       lastSeenCount[accountId] = totalMsgs;
+
+      // Initialise per-thread seen counts (no unread dots on first open)
+      if (!lastSeenThreadCount[accountId]) {
+        lastSeenThreadCount[accountId] = {};
+        threads.forEach(t => { lastSeenThreadCount[accountId][t.id] = t.messages.length; });
+      }
 
       // Pick initial thread
       selectedThreadId = (initialThreadId && threads.find(t => t.id === initialThreadId))
@@ -1379,6 +1410,9 @@
       const seenCount = lastSeenCount[selectedAccountId] || 0;
       if (totalMsgs <= seenCount) return;
 
+      // Refresh thread nav to show unread dots on threads with new messages
+      renderThreadNav(selectedAccountId);
+
       // New client messages received — append only the unseen ones
       const accounts = getAllAccounts();
       const profile = accounts[selectedAccountId];
@@ -1420,6 +1454,8 @@
       Object.keys(accounts).forEach(id => {
         const threads = getAccountThreads(id);
         lastSeenCount[id] = threads.reduce((n, t) => n + t.messages.length, 0);
+        lastSeenThreadCount[id] = {};
+        threads.forEach(t => { lastSeenThreadCount[id][t.id] = t.messages.length; });
       });
 
       // Charger le branding depuis le 1er compte disponible
