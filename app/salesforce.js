@@ -293,6 +293,33 @@ const DemoSalesforce = (() => {
     },
 
     /**
+     * Silently validates the cached Salesforce token against the REST API.
+     * Never redirects. If the token is rejected (401), clears it and returns false.
+     * Call on settings page open to detect expired or revoked tokens early.
+     * Only runs when the Salesforce integration is enabled.
+     * @returns {Promise<boolean>} true if valid, false if absent, disabled or rejected.
+     */
+    async validateToken() {
+      if (!_config().enabled) return false;
+      if (!_sfToken || !_sfInstanceUrl || Date.now() >= _sfTokenExpiry) return false;
+      try {
+        const res = await fetch(
+          `${_sfInstanceUrl}/services/data/${_apiVersion(_config())}/limits`,
+          { headers: { 'Authorization': `Bearer ${_sfToken}` } }
+        );
+        if (res.status === 401) {
+          _sfToken = null; _sfInstanceUrl = ''; _sfTokenExpiry = 0;
+          try { localStorage.removeItem(SF_TOKEN_KEY); } catch (e) { }
+          console.log('[DemoSalesforce] validateToken: token rejected (401), cleared');
+          return false;
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
+    /**
      * Redirect to Salesforce authorization (Authorization Code + PKCE).
      * @param {{ loginUrl: string, clientId: string }} sf
      * @param {string} redirectUri  Full URL of the page to return to after auth

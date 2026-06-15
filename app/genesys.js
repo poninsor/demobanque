@@ -576,6 +576,32 @@ const DemoGenesys = (() => {
     },
 
     /**
+     * Silently validates the cached token against the Genesys Cloud API.
+     * Never redirects. If the token is rejected (401), clears it and returns false.
+     * Call on settings page open to detect expired or revoked tokens early.
+     * @returns {Promise<boolean>} true if valid, false if absent or rejected.
+     */
+    async validateToken() {
+      if (!_gcToken || Date.now() >= _gcTokenExpiry) return false;
+      const gc = ((DemoConfig.getProfile() || {}).genesys) || {};
+      const domain = regionDomain(gc.region);
+      try {
+        const res = await fetch(`https://api.${domain}/api/v2/users/me`, {
+          headers: { 'Authorization': `Bearer ${_gcToken}` }
+        });
+        if (res.status === 401) {
+          _gcToken = null; _gcTokenExpiry = 0;
+          try { localStorage.removeItem(GC_TOKEN_KEY); } catch (e) { }
+          console.log('[DemoGenesys] validateToken: token rejected (401), cleared');
+          return false;
+        }
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
+    /**
      * Redirect to Genesys Cloud authorization (Authorization Code + PKCE).
      * @param {{ region: string, clientId: string }} gc
      * @param {string} redirectUri  Full URL of the page to return to after auth

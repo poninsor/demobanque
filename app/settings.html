@@ -1842,6 +1842,15 @@
       loadProfile();
       updateOAuthStatus();
       updateSalesforceOAuthStatus();
+
+      // Silently validate cached tokens on page open and refresh status if stale.
+      // Runs in background — never blocks the UI.
+      (async () => {
+        const gcValid = await DemoGenesys.validateToken();
+        if (!gcValid) updateOAuthStatus();
+        const sfValid = await DemoSalesforce.validateToken();
+        if (!sfValid) updateSalesforceOAuthStatus();
+      })();
       syncI18nInputs();
       new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
