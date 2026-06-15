@@ -543,6 +543,15 @@ const DemoConfig = (() => {
       role: runtime.role || 'client',
       isClientMessage: !!runtime.isClientMessage,
       isAdvisorMessage: !!runtime.isAdvisorMessage,
+      // Loan simulation variables (injected by executeCreditSimulationJS)
+      loanType: runtime.loanType || null,
+      loanLabel: runtime.loanLabel || null,
+      projectNature: runtime.projectNature || null,
+      amount: runtime.amount || null,
+      months: runtime.months || null,
+      rate: runtime.rate || null,
+      monthly: runtime.monthly || null,
+      totalCost: runtime.totalCost || null,
       console
     };
 
