@@ -251,22 +251,30 @@ const DemoSalesforce = (() => {
   // ── URL shortener ─────────────────────────────────────────────────────────────
 
   /**
-   * Shortens a URL using the TinyURL public API.
+   * Shortens a URL using the is.gd public API (no account, no API key, direct
+   * redirect without intermediate page, CORS enabled).
    *
-   * No account or API key required. The service is free and returns a short URL
-   * as plain text. Falls back to the original URL on network error or unexpected
-   * response so the caller never has to handle failures.
+   * API: GET https://is.gd/create.php?format=simple&url=<encoded_url>
+   * Response: plain text short URL, e.g. https://is.gd/aBcDeF (~22 chars).
    *
-   * Useful when a URL must fit in a Salesforce field with a short character limit
-   * (e.g. SuppliedName, max 80 chars).
+   * Localhost URLs are returned as-is immediately: external shorteners cannot
+   * resolve them (they are only reachable from the local machine), and is.gd
+   * would block the request with a CORS error.
+   *
+   * Always falls back to the original URL on network error or unexpected response
+   * so the caller never has to handle failures — check the returned length instead:
+   *
+   *   const short = await Salesforce.shortenUrl(url);
+   *   const fitsInField = short.length <= 80; // Salesforce SuppliedName limit
    *
    * @param {string} url - The URL to shorten.
-   * @returns {Promise<string>} The shortened URL (e.g. https://tinyurl.com/xxxxx),
-   *   or the original URL if the request fails.
+   * @returns {Promise<string>} The shortened URL, or the original URL on failure.
    */
   async function shortenUrl(url) {
+    // Localhost URLs cannot be resolved by external shorteners — skip immediately.
+    if (/^https?:\/\/localhost/i.test(url)) return url;
     try {
-      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+      const res = await fetch(`https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`);
       if (!res.ok) return url;
       const short = (await res.text()).trim();
       return short.startsWith('http') ? short : url;
