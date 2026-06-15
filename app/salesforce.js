@@ -248,6 +248,33 @@ const DemoSalesforce = (() => {
     return sfFetchJSON(`/query?q=${encodeURIComponent(soql)}`);
   }
 
+  // ── URL shortener ─────────────────────────────────────────────────────────────
+
+  /**
+   * Shortens a URL using the TinyURL public API.
+   *
+   * No account or API key required. The service is free and returns a short URL
+   * as plain text. Falls back to the original URL on network error or unexpected
+   * response so the caller never has to handle failures.
+   *
+   * Useful when a URL must fit in a Salesforce field with a short character limit
+   * (e.g. SuppliedName, max 80 chars).
+   *
+   * @param {string} url - The URL to shorten.
+   * @returns {Promise<string>} The shortened URL (e.g. https://tinyurl.com/xxxxx),
+   *   or the original URL if the request fails.
+   */
+  async function shortenUrl(url) {
+    try {
+      const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+      if (!res.ok) return url;
+      const short = (await res.text()).trim();
+      return short.startsWith('http') ? short : url;
+    } catch {
+      return url;
+    }
+  }
+
   // ── Public API ───────────────────────────────────────────────────────────────
 
   return {
@@ -268,6 +295,9 @@ const DemoSalesforce = (() => {
 
     // Generic escape hatches
     create, get, update, query, sfFetch, sfFetchJSON,
+
+    // URL utilities
+    shortenUrl,
 
     /** True when the integration is enabled and a Consumer Key is configured. */
     isEnabled() {

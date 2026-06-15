@@ -5,7 +5,25 @@ const DemoConfig = (() => {
   const STORAGE_KEY = 'demobank_v1';
   const LANG_KEY = 'demobank_lang';
   const GC_TOKEN_KEY = 'demobank_gc_token';
-  const DEFAULT_CLIENT_ADDITIONAL_JS = 'alert("création d\\\'un workitem");';
+  const DEFAULT_CLIENT_ADDITIONAL_JS = [
+    '// Create a Case to notify a new message from the customer when the advisor is offline.',
+    '// Salesforce.shortenUrl() uses TinyURL (public API, no account) to fit the URL',
+    '// within SuppliedName\'s 80-char limit. Falls back to the original URL on error.',
+    'if (Salesforce) {',
+    '  const advisorUrl = `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`;',
+    '  const shortUrl = await Salesforce.shortenUrl(advisorUrl);',
+    '  await Salesforce.createCase({',
+    '    Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,',
+    '    Description: messageText,',
+    '    Origin: "Web",',
+    '    Status: "New",',
+    '    Priority: "Medium",',
+    '    SuppliedName: shortUrl,',
+    '    Routed__c: true,',
+    '    ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})',
+    '  });',
+    '}'
+  ].join('\n');
   const DEFAULT_ADVISOR_ADDITIONAL_JS = [
     '// Execute a Workflow: notify the customer by SMS when the advisor replies while the customer is offline.',
     '// Note: the agentless API (/api/v2/conversations/messages/agentless) requires a Client Credentials grant',

@@ -332,6 +332,12 @@
             <tr><td><code>Salesforce.sfFetch(path, init)</code></td><td><span class="i18n-fr">Échappatoire bas niveau
                   vers l'API REST Salesforce.</span><span class="i18n-en">Low-level escape hatch to the Salesforce REST
                   API.</span></td></tr>
+            <tr><td><code>Salesforce.shortenUrl(url)</code></td><td><span class="i18n-fr">Raccourcit une URL via
+                  TinyURL (API publique, sans compte). Retourne l'URL courte, ou l'URL d'origine en cas d'erreur
+                  réseau. Utile pour les champs Salesforce à 80 caractères comme
+                  <code>SuppliedName</code>.</span><span class="i18n-en">Shortens a URL via TinyURL (public API, no
+                  account). Returns the short URL, or the original URL on network error. Useful for 80-char Salesforce
+                  fields like <code>SuppliedName</code>.</span></td></tr>
           </tbody>
         </table>
         <div class="callout">
@@ -433,14 +439,18 @@ http://localhost:3000</code></pre>
           <button class="copy-btn" type="button"><i data-lucide="copy"></i><span class="i18n-fr">Copier</span><span
               class="i18n-en">Copy</span></button>
           <pre><code>// Create a Case to notify a new message from the customer when the advisor is offline.
+// Salesforce.shortenUrl() uses TinyURL (public API, no account) to fit the URL
+// within SuppliedName's 80-char limit. Falls back to the original URL on error.
 if (Salesforce) {
+  const advisorUrl = `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`;
+  const shortUrl = await Salesforce.shortenUrl(advisorUrl);
   await Salesforce.createCase({
     Subject: `Message securise - ${persona.firstName} ${persona.lastName}`,
     Description: messageText,
     Origin: "Web",
     Status: "New",
     Priority: "Medium",
-    SuppliedName: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,
+    SuppliedName: shortUrl,
     Routed__c: true,
     ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})
   });
