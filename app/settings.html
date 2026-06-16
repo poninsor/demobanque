@@ -1862,11 +1862,12 @@
       updateOAuthStatus();
       updateSalesforceOAuthStatus();
 
-      // Validate cached tokens on page open; auto-renew via OAuth redirect if invalid.
-      // GC is checked first; if it redirects, SF is checked on the next load.
+      // Validate cached tokens on page open; auto-renew via OAuth redirect if a stored
+      // token exists but is expired or rejected (401). Never redirects when no token has
+      // ever been stored — avoids redirect loops on first use or after a cancelled OAuth.
       (async () => {
         const gc = DemoConfig.getGenesys();
-        if (gc.clientId) {
+        if (gc.clientId && localStorage.getItem('demobank_gc_token')) {
           const gcValid = await DemoGenesys.validateToken();
           if (!gcValid) {
             updateOAuthStatus();
@@ -1880,7 +1881,7 @@
         }
 
         const sf = DemoConfig.getSalesforce();
-        if (sf.enabled && sf.clientId) {
+        if (sf.enabled && sf.clientId && localStorage.getItem('demobank_sf_token')) {
           const sfValid = await DemoSalesforce.validateToken();
           if (!sfValid) {
             updateSalesforceOAuthStatus();
