@@ -1339,6 +1339,23 @@
                 <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté quand le client clique sur « Soumettre ma simulation » dans la page Crédits.</span><span class="i18n-en">Runs when the client clicks "Submit my simulation" on the Loans page.</span></div>
               </div>
 
+              <div class="field">
+                <div class="field-label-row">
+                  <label for="card-order-js"><span class="i18n-fr">Commander une carte → confirmation</span><span class="i18n-en">Order a card → confirmation</span></label>
+                  <a class="info-tip" href="js-api.html" aria-label="Ouvrir la documentation">i
+                    <span class="info-bubble">
+                      <div class="tip-title"><span class="i18n-fr">Variables disponibles</span><span class="i18n-en">Available variables</span></div>
+                      <div class="tip-line"><code>token</code>, <code>fetchGenesys</code>, <code>fetchGenesysJSON</code>, <code>Salesforce</code></div>
+                      <div class="tip-line"><code>persona</code>, <code>salesforce</code>, <code>cardType</code>, <code>cardLabel</code></div>
+                      <div class="tip-line" style="margin-top:6px;"><span class="i18n-fr">Déclenché par le bouton « Confirmer » de la modale de commande de carte.</span><span class="i18n-en">Triggered by the "Confirm" button in the card order modal.</span></div>
+                    </span>
+                  </a>
+                </div>
+                <textarea id="card-order-js" style="font-family:var(--font-mono); font-size:13px; min-height:80px;"
+                  placeholder="// Code exécuté lors de la commande… / Code executed on card order…"></textarea>
+                <div style="font-size:12px; color:var(--fg-muted); margin-top:4px;"><span class="i18n-fr">Exécuté quand le client confirme la commande d'une carte dans la page Cartes.</span><span class="i18n-en">Runs when the client confirms a card order on the Cards page.</span></div>
+              </div>
+
             </div>
           </div>
 
@@ -1685,6 +1702,7 @@
       document.getElementById('gc-additional-js').value = p.additionalJS || DemoConfig.DEFAULT_PROFILE.additionalJS;
       document.getElementById('gc-advisor-additional-js').value = p.advisorAdditionalJS || DemoConfig.DEFAULT_PROFILE.advisorAdditionalJS;
       document.getElementById('credit-simulation-js').value = p.creditSimulationJS || DemoConfig.DEFAULT_PROFILE.creditSimulationJS;
+      document.getElementById('card-order-js').value = p.cardOrderJS || DemoConfig.DEFAULT_PROFILE.cardOrderJS;
 
       // AudioCodes
       const ac = p.audiocodes || {};
@@ -1791,6 +1809,7 @@
         additionalJS: document.getElementById('gc-additional-js').value,
         advisorAdditionalJS: document.getElementById('gc-advisor-additional-js').value,
         creditSimulationJS: document.getElementById('credit-simulation-js').value,
+        cardOrderJS: document.getElementById('card-order-js').value,
         audiocodes: {
           enabled: getToggle('ac-enabled'),
           domain: document.getElementById('ac-domain').value.trim(),

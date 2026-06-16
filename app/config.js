@@ -14,7 +14,7 @@ const DemoConfig = (() => {
     '    Origin: "Web",',
     '    Status: "New",',
     '    Priority: "Medium",',
-    '    SuppliedName: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,',
+    '    ExternalID: `${location.origin}/app/advisor.html?account=${accountId}&thread=${threadId}`,',
     '    Routed__c: true,',
     '    RecordTypeId: "012ao000005PUMbAAO",',
     '    ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})',
@@ -42,6 +42,22 @@ const DemoConfig = (() => {
     '    CloseDate: closeDate.toISOString().split("T")[0],',
     '    StageName: "Qualification",',
     '    NextStep: "Demande de devis"',
+    '  });',
+    '}'
+  ].join('\n');
+
+  const DEFAULT_CARD_ORDER_JS = [
+    '// Create a Salesforce Case when the customer orders a new card.',
+    'if (Salesforce) {',
+    '  await Salesforce.create("Case", {',
+    '    Subject: `Commande de carte - ${cardLabel} - ${persona.firstName} ${persona.lastName}`,',
+    '    Description: `Type de carte : ${cardLabel}`,',
+    '    Origin: "Web",',
+    '    Status: "New",',
+    '    Priority: "Medium",',
+    '    Routed__c: true,',
+    '    RecordTypeId: "012ao000005Pw9BAAS",',
+    '    ...(salesforce.contactId ? { ContactId: salesforce.contactId } : {})',
     '  });',
     '}'
   ].join('\n');
@@ -123,6 +139,7 @@ const DemoConfig = (() => {
     additionalJS: DEFAULT_CLIENT_ADDITIONAL_JS,
     advisorAdditionalJS: DEFAULT_ADVISOR_ADDITIONAL_JS,
     creditSimulationJS: DEFAULT_CREDIT_SIMULATION_JS,
+    cardOrderJS: DEFAULT_CARD_ORDER_JS,
     language: null,
     tutoiement: true,
     messages: null
@@ -553,6 +570,9 @@ const DemoConfig = (() => {
       rate: runtime.rate || null,
       monthly: runtime.monthly || null,
       totalCost: runtime.totalCost || null,
+      // Card order variables (injected by executeCardOrderJS)
+      cardType: runtime.cardType || null,
+      cardLabel: runtime.cardLabel || null,
       console
     };
 
@@ -610,6 +630,19 @@ const DemoConfig = (() => {
     return runConfiguredJS(code, p, Object.assign({
       role: 'client',
       logLabel: 'creditSimulationJS'
+    }, runtime || {}));
+  }
+
+  /**
+   * Executes the `cardOrderJS` snippet when the customer orders a new card.
+   * @param {object} runtime - { cardType, cardLabel }
+   */
+  function executeCardOrderJS(runtime) {
+    const p = getProfile() || DEFAULT_PROFILE;
+    const code = p.cardOrderJS || DEFAULT_CARD_ORDER_JS;
+    return runConfiguredJS(code, p, Object.assign({
+      role: 'client',
+      logLabel: 'cardOrderJS'
     }, runtime || {}));
   }
 
@@ -792,7 +825,7 @@ const DemoConfig = (() => {
     getThreadsByAccountId, addMessageToThreadByAccountId,
     _motifLabel, _motifColor,
     getStorageUsageBytes, purgeMessageAttachments,
-    executeAdditionalJS, executeAdvisorAdditionalJS, executeCreditSimulationJS,
+    executeAdditionalJS, executeAdvisorAdditionalJS, executeCreditSimulationJS, executeCardOrderJS,
     getGenesys,
     getAudiocodes,
     getSalesforce,

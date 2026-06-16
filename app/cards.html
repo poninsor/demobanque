@@ -49,6 +49,17 @@
       .progress-bar { max-width: none; flex: 1; min-width: 120px; }
       .row .v[style*="min-width"] { min-width: auto !important; }
     }
+    .card-order-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }
+    .card-order-overlay.open { display:flex; }
+    .card-order-modal { background:var(--bg); border-radius:20px; padding:28px 24px; width:340px; max-width:calc(100vw - 32px); box-shadow:var(--shadow-lg); }
+    .card-order-modal h2 { font-size:18px; margin:0 0 6px; }
+    .card-order-modal p { font-size:13px; color:var(--fg-muted); margin:0 0 18px; }
+    .card-order-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+    .card-order-opt { border:2px solid var(--border); border-radius:14px; padding:14px; cursor:pointer; transition:border-color 140ms; }
+    .card-order-opt.selected { border-color:var(--brand); }
+    .card-order-opt .preview { height:52px; border-radius:10px; margin-bottom:10px; }
+    .card-order-opt .label { font-size:13px; font-weight:600; }
+    .card-order-actions { display:flex; gap:10px; justify-content:flex-end; }
   </style>
 </head>
 <body>
@@ -87,7 +98,7 @@
           <h1><span class="i18n-fr">Tes cartes</span><span class="i18n-en">Your cards</span></h1>
           <div class="sub" id="cards-sub"><span class="i18n-fr">2 cartes actives · gère tes plafonds, oppose ou commande une nouvelle carte.</span><span class="i18n-en">2 active cards · manage limits, block or order a new card.</span></div>
         </div>
-        <button class="btn btn-primary" onclick="alert(document.documentElement.lang==='en'?'Order a card':'Commander une carte')"><i data-lucide="plus"></i><span class="i18n-fr">Commander une carte</span><span class="i18n-en">Order a card</span></button>
+        <button class="btn btn-primary" onclick="openCardOrderModal()"><i data-lucide="plus"></i><span class="i18n-fr">Commander une carte</span><span class="i18n-en">Order a card</span></button>
       </div>
       <div class="cards-row">
         <div>
@@ -186,8 +197,30 @@
     </div>
   </div>
 
+  <div class="card-order-overlay" id="card-order-overlay" onclick="if(event.target===this)closeCardOrderModal()">
+    <div class="card-order-modal">
+      <h2><span class="i18n-fr">Commander une carte</span><span class="i18n-en">Order a card</span></h2>
+      <p><span class="i18n-fr">Sélectionne le type de carte à commander.</span><span class="i18n-en">Select the card type to order.</span></p>
+      <div class="card-order-choices">
+        <div class="card-order-opt" id="opt-premier" onclick="selectOrderCardType('premier')">
+          <div class="preview" style="background:linear-gradient(135deg,var(--brand-400),var(--brand-700));"></div>
+          <div class="label">Visa Premier</div>
+        </div>
+        <div class="card-order-opt" id="opt-classic" onclick="selectOrderCardType('classic')">
+          <div class="preview" style="background:linear-gradient(135deg,#1c1d22,#0d0e12);"></div>
+          <div class="label">Visa Classic</div>
+        </div>
+      </div>
+      <div class="card-order-actions">
+        <button class="btn btn-secondary" onclick="closeCardOrderModal()"><span class="i18n-fr">Annuler</span><span class="i18n-en">Cancel</span></button>
+        <button class="btn btn-primary" id="confirm-card-order-btn" onclick="confirmCardOrder()" disabled><span class="i18n-fr">Confirmer</span><span class="i18n-en">Confirm</span></button>
+      </div>
+    </div>
+  </div>
+
   <script src="shell.js"></script>
   <script src="config.js"></script>
+  <script src="salesforce.js"></script>
   <script src="audiocodes.js"></script>
   <script>
     if (!DemoConfig.requireAuth()) throw '';
@@ -209,6 +242,34 @@
       const idx = type === 'premier' ? 0 : 1;
       document.querySelectorAll('.card-thumb')[idx].classList.add('active');
       lucide.createIcons();
+    }
+
+    let _selectedCardType = null;
+
+    function openCardOrderModal() {
+      _selectedCardType = null;
+      document.querySelectorAll('.card-order-opt').forEach(o => o.classList.remove('selected'));
+      document.getElementById('confirm-card-order-btn').disabled = true;
+      document.getElementById('card-order-overlay').classList.add('open');
+      lucide.createIcons();
+    }
+
+    function closeCardOrderModal() {
+      document.getElementById('card-order-overlay').classList.remove('open');
+    }
+
+    function selectOrderCardType(type) {
+      _selectedCardType = type;
+      document.querySelectorAll('.card-order-opt').forEach(o => o.classList.remove('selected'));
+      document.getElementById('opt-' + type).classList.add('selected');
+      document.getElementById('confirm-card-order-btn').disabled = false;
+    }
+
+    async function confirmCardOrder() {
+      if (!_selectedCardType) return;
+      const labels = { premier: 'Visa Premier', classic: 'Visa Classic' };
+      closeCardOrderModal();
+      await DemoConfig.executeCardOrderJS({ cardType: _selectedCardType, cardLabel: labels[_selectedCardType] });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
