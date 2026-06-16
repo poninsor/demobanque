@@ -1862,13 +1862,37 @@
       updateOAuthStatus();
       updateSalesforceOAuthStatus();
 
-      // Silently validate cached tokens on page open and refresh status if stale.
-      // Runs in background — never blocks the UI.
+      // Validate cached tokens on page open; auto-renew via OAuth redirect if invalid.
+      // GC is checked first; if it redirects, SF is checked on the next load.
       (async () => {
-        const gcValid = await DemoGenesys.validateToken();
-        if (!gcValid) updateOAuthStatus();
-        const sfValid = await DemoSalesforce.validateToken();
-        if (!sfValid) updateSalesforceOAuthStatus();
+        const gc = DemoConfig.getGenesys();
+        if (gc.clientId) {
+          const gcValid = await DemoGenesys.validateToken();
+          if (!gcValid) {
+            updateOAuthStatus();
+            sessionStorage.setItem('_gc_pending', 'testConnection');
+            await DemoGenesys.redirectForAuth(
+              { region: gc.region, clientId: gc.clientId },
+              window.location.origin + window.location.pathname
+            );
+            return;
+          }
+        }
+
+        const sf = DemoConfig.getSalesforce();
+        if (sf.enabled && sf.clientId) {
+          const sfValid = await DemoSalesforce.validateToken();
+          if (!sfValid) {
+            updateSalesforceOAuthStatus();
+            DemoConfig.deepUpdateProfile('salesforce', sf);
+            sessionStorage.setItem('_sf_pending', 'testConnection');
+            await DemoSalesforce.redirectForAuth(
+              sf,
+              window.location.origin + window.location.pathname
+            );
+            return;
+          }
+        }
       })();
       syncI18nInputs();
       new MutationObserver(syncI18nInputs).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
